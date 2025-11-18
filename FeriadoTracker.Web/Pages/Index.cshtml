@@ -1,0 +1,148 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Contagem Regressiva";
+
+    var temFeriado = Model.ProximoFeriado != null;
+    var dataIso = Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "";
+    var nomeFeriado = Model.ProximoFeriado?.Nome ?? "";
+    var dataFormatada = Model.ProximoFeriado?.Data.ToString("dd 'de' MMMM 'de' yyyy");
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .countdown-box {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        padding: 20px 15px;
+        min-width: 90px;
+        border: 1px solid #e9ecef;
+        transition: transform 0.2s;
+    }
+
+        .countdown-box:hover {
+            transform: translateY(-5px);
+        }
+
+    .countdown-number {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: #0d6efd;
+        line-height: 1;
+        font-variant-numeric: tabular-nums; 
+    }
+
+    .countdown-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #6c757d;
+        margin-top: 5px;
+        font-weight: 600;
+    }
+</style>
+
+<script src="//unpkg.com/alpinejs" defer></script>
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+
+    @if (temFeriado)
+    {
+        <div class="card shadow-lg border-0 text-center position-relative overflow-hidden"
+             style="max-width: 700px; width: 100%; border-radius: 20px;"
+             x-data="timer('@dataIso')"
+             x-init="iniciar()">
+
+            <div class="card-body p-5">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill">
+                    PRÓXIMO FERIADO
+                </span>
+
+                <h1 class="display-4 fw-bold text-dark mb-2">@nomeFeriado</h1>
+                <p class="text-muted mb-5 fs-5">@dataFormatada</p>
+
+                <div class="row justify-content-center g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="countdown-box">
+                            <div class="countdown-number" x-text="dias">00</div>
+                            <div class="countdown-label">Dias</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="countdown-box">
+                            <div class="countdown-number" x-text="horas">00</div>
+                            <div class="countdown-label">Horas</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="countdown-box">
+                            <div class="countdown-number" x-text="mins">00</div>
+                            <div class="countdown-label">Min</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="countdown-box">
+                            <div class="countdown-number" x-text="segs">00</div>
+                            <div class="countdown-label">Seg</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="isHoje"
+                 style="display: none;"
+                 x-transition.opacity.duration.500ms
+                 class="position-absolute top-0 start-0 w-100 h-100 bg-white d-flex flex-column align-items-center justify-content-center z-3">
+                <h1 class="text-primary display-1 fw-bold mb-0">É HOJE! 🚀</h1>
+                <p class="lead text-muted">Aproveite o feriado de @nomeFeriado.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center p-5 bg-white rounded shadow-sm">
+            <h3 class="text-secondary">Nenhum feriado encontrado 😢</h3>
+            <p class="text-muted">Verifique se o banco de dados foi populado corretamente.</p>
+        </div>
+    }
+</div>
+
+<script>
+    function timer(targetDateIso) {
+        return {
+            target: new Date(targetDateIso).getTime(),
+            dias: '00', horas: '00', mins: '00', segs: '00',
+            isHoje: false,
+
+            iniciar() {
+                this.tick();
+                setInterval(() => this.tick(), 1000);
+            },
+
+            tick() {
+                const now = new Date().getTime();
+                const distance = this.target - now;
+
+                if (distance < 0) {
+                    this.isHoje = true;
+                    return;
+                }
+
+                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+                this.dias = d.toString().padStart(2, '0');
+                this.horas = h.toString().padStart(2, '0');
+                this.mins = m.toString().padStart(2, '0');
+                this.segs = s.toString().padStart(2, '0');
+            }
+        }
+    }
+</script>

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Contagem Regressiva";
 
     var temFeriado = Model.ProximoFeriado != null;
-    var dataIso = Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "";
+    var dataIso = Model.ProximoFeriado?.Data.ToString("s") ?? "";
     var nomeFeriado = Model.ProximoFeriado?.Nome ?? "";
     var dataFormatada = Model.ProximoFeriado?.Data.ToString("dd 'de' MMMM 'de' yyyy");
 }
@@ -115,7 +115,7 @@
 <script>
     function timer(targetDateIso) {
         return {
-            target: new Date(targetDateIso).getTime(),
+            target: new Date(targetDateIso.replace(/-/g, '/')).getTime(),
             dias: '00', horas: '00', mins: '00', segs: '00',
             isHoje: false,
 

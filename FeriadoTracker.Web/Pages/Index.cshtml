@@ -64,6 +64,10 @@
                 </span>
 
                 <h1 class="display-4 fw-bold text-dark mb-2">@nomeFeriado</h1>
+
+                <div class="alert alert-warning">
+                    O C# enviou esta data: <strong>@dataIso</strong>
+                </div>
                 <p class="text-muted mb-5 fs-5">@dataFormatada</p>
 
                 <div class="row justify-content-center g-3 mb-4">
@@ -115,7 +119,7 @@
 <script>
     function timer(targetDateIso) {
         return {
-            target: new Date(targetDateIso.replace(/-/g, '/')).getTime(),
+            target: new Date(targetDateIso).getTime(),
             dias: '00', horas: '00', mins: '00', segs: '00',
             isHoje: false,
 
@@ -125,11 +129,22 @@
             },
 
             tick() {
-                const now = new Date().getTime();
-                const distance = this.target - now;
+                const now = new Date();
+                const targetDate = new Date(this.target);
+
+                const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+
+                if (nowMidnight.getTime() === targetMidnight.getTime()) {
+                    this.isHoje = true;
+                    return;
+                }
+
+                const nowTime = now.getTime();
+                const distance = this.target - nowTime;
 
                 if (distance < 0) {
-                    this.isHoje = true;
+                    this.isHoje = false;
                     return;
                 }
 

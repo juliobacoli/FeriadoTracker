@@ -3,6 +3,7 @@ using System;
 using FeriadoTracker.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FeriadoTracker.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251119021209_InitialSeed")]
+    partial class InitialSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -44,69 +47,62 @@ namespace FeriadoTracker.Web.Migrations
                         new
                         {
                             Id = 1,
-                            Data = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Nome = "Natal",
-                            Tipo = "Nacional"
-                        },
-                        new
-                        {
-                            Id = 2,
                             Data = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Confraternização Universal",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = 2,
                             Data = new DateTime(2026, 4, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Sexta-feira Santa",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 4,
+                            Id = 3,
                             Data = new DateTime(2026, 4, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Tiradentes",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 5,
+                            Id = 4,
                             Data = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Dia do Trabalho",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 6,
+                            Id = 5,
                             Data = new DateTime(2026, 9, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Independência do Brasil",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 7,
+                            Id = 6,
                             Data = new DateTime(2026, 10, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Nossa Senhora Aparecida",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 8,
+                            Id = 7,
                             Data = new DateTime(2026, 11, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Finados",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 9,
+                            Id = 8,
                             Data = new DateTime(2026, 11, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Proclamação da República",
                             Tipo = "Nacional"
                         },
                         new
                         {
-                            Id = 10,
+                            Id = 9,
                             Data = new DateTime(2026, 12, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Natal",
                             Tipo = "Nacional"

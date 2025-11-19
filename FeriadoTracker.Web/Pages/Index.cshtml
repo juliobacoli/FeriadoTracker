@@ -1,8 +1,7 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Contagem Regressiva";
-
+    ViewData["Title"] = "Próximo Feriado";
     var temFeriado = Model.ProximoFeriado != null;
     var dataIso = Model.ProximoFeriado?.Data.ToString("s") ?? "";
     var nomeFeriado = Model.ProximoFeriado?.Nome ?? "";
@@ -10,115 +9,145 @@
 }
 
 <style>
-    body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
+    /* Centraliza tudo na tela */
+    .main-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); /* Fundo colorido se quiser, ou remova */
     }
 
-    .countdown-box {
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        padding: 20px 15px;
-        min-width: 90px;
-        border: 1px solid #e9ecef;
+    /* Estilo do Cartão de Vidro */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        padding: 3rem;
+        width: 100%;
+        max-width: 800px;
+        text-align: center;
+    }
+
+    /* Estilo dos Quadrados de Tempo */
+    .countdown-item {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        padding: 20px 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         transition: transform 0.2s;
     }
 
-        .countdown-box:hover {
+        .countdown-item:hover {
             transform: translateY(-5px);
+            border-color: #0d6efd;
         }
 
-    .countdown-number {
-        font-size: 2.8rem;
+    .number {
+        font-size: 3rem;
         font-weight: 800;
-        color: #0d6efd;
+        color: #0d6efd; /* Azul */
         line-height: 1;
-        font-variant-numeric: tabular-nums; 
+        font-family: sans-serif;
     }
 
-    .countdown-label {
-        font-size: 0.75rem;
+    .label {
+        font-size: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 2px;
         color: #6c757d;
-        margin-top: 5px;
-        font-weight: 600;
+        font-weight: bold;
+        margin-top: 8px;
+        font-family: sans-serif;
+    }
+
+    /* Títulos */
+    h1.titulo-feriado {
+        font-family: sans-serif;
+        font-weight: 900;
+        color: #212529;
     }
 </style>
 
 <script src="//unpkg.com/alpinejs" defer></script>
 
-<div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+@if (temFeriado)
+{
+    <div class="main-container">
 
-    @if (temFeriado)
-    {
-        <div class="card shadow-lg border-0 text-center position-relative overflow-hidden"
-             style="max-width: 700px; width: 100%; border-radius: 20px;"
-             x-data="timer('@dataIso')"
-             x-init="iniciar()">
+        <div class="glass-card" x-data="timer('@dataIso')" x-init="iniciar()">
 
-            <div class="card-body p-5">
-                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill">
-                    PRÓXIMO FERIADO
+            <div class="mb-3">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill text-uppercase fw-bold"
+                      style="letter-spacing: 1px; font-family: sans-serif; font-size: 0.75rem;">
+                    Próximo Feriado
                 </span>
+            </div>
 
-                <h1 class="display-4 fw-bold text-dark mb-2">@nomeFeriado</h1>
+            <h1 class="display-3 mb-2 titulo-feriado">@nomeFeriado</h1>
+            <p class="text-muted fs-5 mb-5">@dataFormatada</p>
 
-                <p class="text-muted mb-5 fs-5">@dataFormatada</p>
+            <div class="row g-3 justify-content-center">
 
-                <div class="row justify-content-center g-3 mb-4">
-                    <div class="col-6 col-md-3">
-                        <div class="countdown-box">
-                            <div class="countdown-number" x-text="dias">00</div>
-                            <div class="countdown-label">Dias</div>
-                        </div>
+                <div class="col-6 col-md-3">
+                    <div class="countdown-item">
+                        <div class="number" x-text="dias">00</div>
+                        <div class="label">Dias</div>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="countdown-box">
-                            <div class="countdown-number" x-text="horas">00</div>
-                            <div class="countdown-label">Horas</div>
-                        </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="countdown-item">
+                        <div class="number" x-text="horas">00</div>
+                        <div class="label">Horas</div>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="countdown-box">
-                            <div class="countdown-number" x-text="mins">00</div>
-                            <div class="countdown-label">Min</div>
-                        </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="countdown-item">
+                        <div class="number" x-text="mins">00</div>
+                        <div class="label">Min</div>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="countdown-box">
-                            <div class="countdown-number" x-text="segs">00</div>
-                            <div class="countdown-label">Seg</div>
-                        </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="countdown-item">
+                        <div class="number" x-text="segs">00</div>
+                        <div class="label">Seg</div>
                     </div>
                 </div>
             </div>
 
-            <div x-show="isHoje"
-                 style="display: none;"
-                 x-transition.opacity.duration.500ms
-                 class="position-absolute top-0 start-0 w-100 h-100 bg-white d-flex flex-column align-items-center justify-content-center z-3">
-                <h1 class="text-primary display-1 fw-bold mb-0">É HOJE! 🚀</h1>
-                <p class="lead text-muted">Aproveite o feriado de @nomeFeriado.</p>
-            </div>
+            <template x-if="isHoje">
+                <div class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex flex-column align-items-center justify-content-center"
+                     style="z-index: 9999;">
+                    <h1 class="display-1 fw-bold text-primary">É HOJE! 🎉</h1>
+                    <p class="lead text-muted">Aproveite o feriado de <span x-text="'@nomeFeriado'"></span>.</p>
+                    <button class="btn btn-outline-primary mt-4 rounded-pill px-4" @@click="isHoje = false">
+                        Ver contador zerado
+                    </button>
+                </div>
+            </template>
+
         </div>
-    }
-    else
-    {
-        <div class="text-center p-5 bg-white rounded shadow-sm">
-            <h3 class="text-secondary">Nenhum feriado encontrado 😢</h3>
-            <p class="text-muted">Verifique se o banco de dados foi populado corretamente.</p>
+    </div>
+}
+else
+{
+    <div class="main-container">
+        <div class="glass-card">
+            <h2>Nenhum feriado encontrado 😢</h2>
+            <p>Verifique o banco de dados.</p>
         </div>
-    }
-</div>
+    </div>
+}
 
 <script>
     function timer(targetDateIso) {
         return {
             target: new Date(targetDateIso).getTime(),
-            dias: '00', horas: '00', mins: '00', segs: '00',
-            isHoje: false,
+            dias: '00', horas: '00', mins: '00', segs: '00', isHoje: false,
 
             iniciar() {
                 this.tick();
@@ -129,21 +158,18 @@
                 const now = new Date();
                 const targetDate = new Date(this.target);
 
-                const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+                // Lógica correta de comparação de dia
+                const nowSimple = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const targetSimple = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
 
-                if (nowMidnight.getTime() === targetMidnight.getTime()) {
+                if (nowSimple.getTime() === targetSimple.getTime()) {
                     this.isHoje = true;
                     return;
                 }
 
-                const nowTime = now.getTime();
-                const distance = this.target - nowTime;
+                const distance = this.target - now.getTime();
 
-                if (distance < 0) {
-                    this.isHoje = false;
-                    return;
-                }
+                if (distance < 0) { this.isHoje = false; return; }
 
                 const d = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

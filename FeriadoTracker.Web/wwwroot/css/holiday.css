@@ -1,0 +1,62 @@
+﻿* ===== Layout principal da página de feriado ===== */
+
+.main-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+}
+
+/* Cartão "de vidro" no centro */
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+
+/* Caixinhas do contador */
+.countdown-item {
+    background: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 16px;
+    padding: 20px 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+    .countdown-item:hover {
+        transform: translateY(-5px);
+        border-color: #0d6efd;
+    }
+
+/* Número grande (dias, horas, etc.) */
+.number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #0d6efd;
+    line-height: 1;
+    font-family: sans-serif;
+}
+
+/* Texto pequeno embaixo (DIA / HORAS / MIN / SEG) */
+.label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #6c757d;
+    font-weight: bold;
+    margin-top: 8px;
+    font-family: sans-serif;
+}
+
+/* Título do feriado */
+h1.titulo-feriado {
+    font-family: sans-serif;
+    font-weight: 900;
+    color: #212529;
+}

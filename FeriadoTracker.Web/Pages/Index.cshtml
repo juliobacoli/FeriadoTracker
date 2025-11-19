@@ -1,186 +1,72 @@
 ﻿@page
-@model IndexModel
-@{
-    ViewData["Title"] = "Próximo Feriado";
-    var temFeriado = Model.ProximoFeriado != null;
-    var dataIso = Model.ProximoFeriado?.Data.ToString("s") ?? "";
-    var nomeFeriado = Model.ProximoFeriado?.Nome ?? "";
-    var dataFormatada = Model.ProximoFeriado?.Data.ToString("dd 'de' MMMM 'de' yyyy");
-}
+@model FeriadoTracker.Web.Pages.IndexModel
 
-<style>
-    /* Centraliza tudo na tela */
-    .main-container {
-        min-height: 80vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); /* Fundo colorido se quiser, ou remova */
-    }
+<div class="page-wrapper">
+    <div class="holiday-card">
+        <div class="holiday-header">
+            <div class="holiday-subtitle">Próximo feriado</div>
+            <h1 class="holiday-title">@Model.ProximoFeriado?.Nome</h1>
 
-    /* Estilo do Cartão de Vidro */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 24px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        padding: 3rem;
-        width: 100%;
-        max-width: 800px;
-        text-align: center;
-    }
-
-    /* Estilo dos Quadrados de Tempo */
-    .countdown-item {
-        background: #fff;
-        border: 1px solid #eee;
-        border-radius: 16px;
-        padding: 20px 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        transition: transform 0.2s;
-    }
-
-        .countdown-item:hover {
-            transform: translateY(-5px);
-            border-color: #0d6efd;
-        }
-
-    .number {
-        font-size: 3rem;
-        font-weight: 800;
-        color: #0d6efd; /* Azul */
-        line-height: 1;
-        font-family: sans-serif;
-    }
-
-    .label {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        color: #6c757d;
-        font-weight: bold;
-        margin-top: 8px;
-        font-family: sans-serif;
-    }
-
-    /* Títulos */
-    h1.titulo-feriado {
-        font-family: sans-serif;
-        font-weight: 900;
-        color: #212529;
-    }
-</style>
-
-<script src="//unpkg.com/alpinejs" defer></script>
-
-@if (temFeriado)
-{
-    <div class="main-container">
-
-        <div class="glass-card" x-data="timer('@dataIso')" x-init="iniciar()">
-
-            <div class="mb-3">
-                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill text-uppercase fw-bold"
-                      style="letter-spacing: 1px; font-family: sans-serif; font-size: 0.75rem;">
-                    Próximo Feriado
-                </span>
-            </div>
-
-            <h1 class="display-3 mb-2 titulo-feriado">@nomeFeriado</h1>
-            <p class="text-muted fs-5 mb-5">@dataFormatada</p>
-
-            <div class="row g-3 justify-content-center">
-
-                <div class="col-6 col-md-3">
-                    <div class="countdown-item">
-                        <div class="number" x-text="dias">00</div>
-                        <div class="label">Dias</div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <div class="countdown-item">
-                        <div class="number" x-text="horas">00</div>
-                        <div class="label">Horas</div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <div class="countdown-item">
-                        <div class="number" x-text="mins">00</div>
-                        <div class="label">Min</div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <div class="countdown-item">
-                        <div class="number" x-text="segs">00</div>
-                        <div class="label">Seg</div>
-                    </div>
-                </div>
-            </div>
-
-            <template x-if="isHoje">
-                <div class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex flex-column align-items-center justify-content-center"
-                     style="z-index: 9999;">
-                    <h1 class="display-1 fw-bold text-primary">É HOJE! 🎉</h1>
-                    <p class="lead text-muted">Aproveite o feriado de <span x-text="'@nomeFeriado'"></span>.</p>
-                    <button class="btn btn-outline-primary mt-4 rounded-pill px-4" @@click="isHoje = false">
-                        Ver contador zerado
-                    </button>
-                </div>
-            </template>
-
-        </div>
-    </div>
-}
-else
-{
-    <div class="main-container">
-        <div class="glass-card">
-            <h2>Nenhum feriado encontrado 😢</h2>
-            <p>Verifique o banco de dados.</p>
-        </div>
-    </div>
-}
-
-<script>
-    function timer(targetDateIso) {
-        return {
-            target: new Date(targetDateIso).getTime(),
-            dias: '00', horas: '00', mins: '00', segs: '00', isHoje: false,
-
-            iniciar() {
-                this.tick();
-                setInterval(() => this.tick(), 1000);
-            },
-
-            tick() {
-                const now = new Date();
-                const targetDate = new Date(this.target);
-
-                // Lógica correta de comparação de dia
-                const nowSimple = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                const targetSimple = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-
-                if (nowSimple.getTime() === targetSimple.getTime()) {
-                    this.isHoje = true;
-                    return;
-                }
-
-                const distance = this.target - now.getTime();
-
-                if (distance < 0) { this.isHoje = false; return; }
-
-                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((distance % (1000 * 60)) / 1000);
-
-                this.dias = d.toString().padStart(2, '0');
-                this.horas = h.toString().padStart(2, '0');
-                this.mins = m.toString().padStart(2, '0');
-                this.segs = s.toString().padStart(2, '0');
+            @if (Model.ProximoFeriado is not null)
+            {
+                <p class="holiday-date">
+                    @Model.ProximoFeriado.Data.ToString("dd 'de' MMMM 'de' yyyy")
+                </p>
             }
+            else
+            {
+                <p class="holiday-date">Nenhum feriado encontrado.</p>
+            }
+        </div>
+
+        <div class="countdown-grid">
+            <div class="countdown-box">
+                <div id="days" class="countdown-number">--</div>
+                <div class="countdown-label">Dias</div>
+            </div>
+            <div class="countdown-box">
+                <div id="hours" class="countdown-number">--</div>
+                <div class="countdown-label">Horas</div>
+            </div>
+            <div class="countdown-box">
+                <div id="minutes" class="countdown-number">--</div>
+                <div class="countdown-label">Min</div>
+            </div>
+            <div class="countdown-box">
+                <div id="seconds" class="countdown-number">--</div>
+                <div class="countdown-label">Seg</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/holiday.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script>
+        const targetDate = new Date("@Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss")");
+
+        function updateCountdown() {
+            const now = new Date();
+            const diff = targetDate - now;
+
+            if (diff <= 0) return;
+
+            const totalSeconds = Math.floor(diff / 1000);
+            const days = Math.floor(totalSeconds / 86400);
+            const hours = Math.floor((totalSeconds % 86400) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
         }
-    }
-</script>
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    </script>
+}

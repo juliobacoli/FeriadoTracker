@@ -1,5 +1,4 @@
-﻿
-.main-container {
+﻿.main-container {
     min-height: 80vh;
     display: flex;
     align-items: center;
@@ -7,7 +6,6 @@
     background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
 }
 
-/* Cartão "de vidro" no centro */
 .glass-card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 24px;
@@ -32,7 +30,6 @@
         border-color: #0d6efd;
     }
 
-/* Número grande (dias, horas, etc.) */
 .number {
     font-size: 3rem;
     font-weight: 800;
@@ -41,7 +38,6 @@
     font-family: sans-serif;
 }
 
-/* Texto pequeno embaixo (DIA / HORAS / MIN / SEG) */
 .label {
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -72,13 +68,11 @@ h1.titulo-feriado {
     font-size: 1.1rem; 
 }
 
-/* Números do contador */
 .countdown-number {
     font-size: 2.8rem; 
     font-weight: 900;
 }
 
-/* Labels DIAS / HORAS / MIN / SEG */
 .countdown-label {
     font-size: 0.9rem; 
     letter-spacing: 0.22em;
@@ -86,4 +80,50 @@ h1.titulo-feriado {
 
 .countdown-grid {
     margin-top: 2.5rem; 
+}
+
+.holiday-card {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.holiday-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.holiday-subtitle {
+    font-size: 1.05rem;
+    letter-spacing: 0.22em;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+}
+
+.holiday-title {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #111827;
+    margin-bottom: 0.35rem;
+}
+
+.holiday-date {
+    font-size: 1.1rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+}
+
+.countdown-box {
+    padding: 1.75rem 2.25rem;
+}
+
+.countdown-number {
+    font-size: 2.8rem;
+    font-weight: 900;
+}
+
+.countdown-label {
+    font-size: 0.9rem;
+    letter-spacing: 0.22em;
+    font-weight: 600;
 }

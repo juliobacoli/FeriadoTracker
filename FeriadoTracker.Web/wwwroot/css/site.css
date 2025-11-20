@@ -1,142 +1,43 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
-}
-
-body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
-}
-
-.countdown-box {
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    padding: 15px;
-    min-width: 80px;
-    text-align: center;
-    border: 1px solid #e9ecef;
-}
-
-.countdown-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #0d6efd; 
-    line-height: 1.2;
-}
-
-.countdown-label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #6c757d;
-}
-
-.page-wrapper {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-}
-
-.holiday-card {
-    background: #ffffff;
-    border-radius: 24px;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-    max-width: 720px;
-    width: 100%;
-    padding: 2.5rem 2rem;
-    text-align: center;
-}
-
-.holiday-subtitle {
-    font-size: 0.9rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-}
-
-.holiday-title {
-    font-size: 2.4rem;
-    font-weight: 800;
-    color: #111827;
-    margin-bottom: 0.25rem;
-}
-
-.holiday-date {
-    font-size: 0.95rem;
-    color: #6b7280;
-    margin-bottom: 2rem;
-}
-
-.countdown-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-}
-
-@media (min-width: 640px) {
-    .countdown-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+    html {
+        font-size: 16px;
     }
 }
 
-.countdown-box {
-    background-color: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-    padding: 1.25rem 0.75rem;
-    min-width: 80px;
-    text-align: center;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+body {
+    font-family: 'Work Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-.countdown-number {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #2563eb;
-    line-height: 1.1;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-.countdown-label {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: #6b7280;
+.form-floating > .form-control::placeholder,
+.form-floating > .form-control-plaintext::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control:focus::placeholder,
+.form-floating > .form-control-plaintext:focus::placeholder {
+    text-align: start;
 }
 
 .page-center {
-    min-height: 100vh;
+    min-height: calc(100vh - 1px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -152,7 +53,7 @@ body {
 
 .metric-grid {
     display: grid;
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr;
     gap: 1rem;
 }
 

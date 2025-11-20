@@ -1,5 +1,4 @@
-﻿* ===== Layout principal da página de feriado ===== */
-
+﻿
 .main-container {
     min-height: 80vh;
     display: flex;
@@ -19,7 +18,6 @@
     text-align: center;
 }
 
-/* Caixinhas do contador */
 .countdown-item {
     background: #ffffff;
     border: 1px solid #eeeeee;
@@ -54,9 +52,38 @@
     font-family: sans-serif;
 }
 
-/* Título do feriado */
 h1.titulo-feriado {
     font-family: sans-serif;
     font-weight: 900;
     color: #212529;
+}
+
+.holiday-subtitle {
+    font-size: 1.05rem; 
+    letter-spacing: 0.20em;
+}
+
+.holiday-title {
+    font-size: 3rem; 
+    font-weight: 900;
+}
+
+.holiday-date {
+    font-size: 1.1rem; 
+}
+
+/* Números do contador */
+.countdown-number {
+    font-size: 2.8rem; 
+    font-weight: 900;
+}
+
+/* Labels DIAS / HORAS / MIN / SEG */
+.countdown-label {
+    font-size: 0.9rem; 
+    letter-spacing: 0.22em;
+}
+
+.countdown-grid {
+    margin-top: 2.5rem; 
 }

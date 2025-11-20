@@ -1,10 +1,10 @@
 ﻿@page
 @model FeriadoTracker.Web.Pages.IndexModel
 
-<div class="page-wrapper">
-    <div class="holiday-card">
+<div class="page-wrapper page-center">
+    <div class="holiday-card card">
         <div class="holiday-header">
-            <div class="holiday-subtitle">Próximo feriado</div>
+            <div class="holiday-subtitle">Próximo feriado Nacional</div>
             <h1 class="holiday-title">@Model.ProximoFeriado?.Nome</h1>
 
             @if (Model.ProximoFeriado is not null)
@@ -19,22 +19,22 @@
             }
         </div>
 
-        <div class="countdown-grid">
-            <div class="countdown-box">
-                <div id="days" class="countdown-number">--</div>
-                <div class="countdown-label">Dias</div>
+        <div class="countdown-grid metric-grid">
+            <div class="countdown-box metric-box">
+                <div id="days" class="countdown-number metric-number">--</div>
+                <div class="countdown-label metric-label">Dias</div>
             </div>
-            <div class="countdown-box">
-                <div id="hours" class="countdown-number">--</div>
-                <div class="countdown-label">Horas</div>
+            <div class="countdown-box metric-box">
+                <div id="hours" class="countdown-number metric-number">--</div>
+                <div class="countdown-label metric-label">Horas</div>
             </div>
-            <div class="countdown-box">
-                <div id="minutes" class="countdown-number">--</div>
-                <div class="countdown-label">Min</div>
+            <div class="countdown-box metric-box">
+                <div id="minutes" class="countdown-number metric-number">--</div>
+                <div class="countdown-label metric-label">Min</div>
             </div>
-            <div class="countdown-box">
-                <div id="seconds" class="countdown-number">--</div>
-                <div class="countdown-label">Seg</div>
+            <div class="countdown-box metric-box">
+                <div id="seconds" class="countdown-number metric-number">--</div>
+                <div class="countdown-label metric-label">Seg</div>
             </div>
         </div>
     </div>

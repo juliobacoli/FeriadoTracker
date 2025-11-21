@@ -25,10 +25,10 @@
     transition: transform 0.2s, border-color 0.2s;
 }
 
-    .countdown-item:hover {
-        transform: translateY(-5px);
-        border-color: #0d6efd;
-    }
+.countdown-item:hover {
+    transform: translateY(-5px);
+    border-color: #0d6efd;
+}
 
 .number {
     font-size: 3rem;
@@ -162,15 +162,15 @@ h1.titulo-feriado {
     transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out, background-color 0.18s ease-out;
 }
 
-    .countdown-box:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.35);
-        background-color: #f9fafb;
-    }
+.countdown-box:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.35);
+    background-color: #f9fafb;
+}
 
-        .countdown-box:hover .countdown-number {
-            transform: scale(1.04);
-        }
+.countdown-box:hover .countdown-number {
+    transform: scale(1.04);
+}
 
 .countdown-number {
     transition: transform 0.18s ease-out;

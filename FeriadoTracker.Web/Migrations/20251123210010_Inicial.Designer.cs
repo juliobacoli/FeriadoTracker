@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FeriadoTracker.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251123202108_AtualizaSeedFeriados")]
-    partial class AtualizaSeedFeriados
+    [Migration("20251123210010_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

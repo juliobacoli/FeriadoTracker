@@ -19,8 +19,9 @@ public class AppDbContext : DbContext
             new Feriado { Id = 6, Nome = "Independência do Brasil", Data = new DateTime(2026, 09, 07), Tipo = "Nacional" },
             new Feriado { Id = 7, Nome = "Nossa Senhora Aparecida", Data = new DateTime(2026, 10, 12), Tipo = "Nacional" },
             new Feriado { Id = 8, Nome = "Finados", Data = new DateTime(2026, 11, 02), Tipo = "Nacional" },
-            new Feriado { Id = 9, Nome = "Proclamação da República", Data = new DateTime(2026, 11, 15), Tipo = "Nacional" },
-            new Feriado { Id = 10, Nome = "Natal", Data = new DateTime(2026, 12, 25), Tipo = "Nacional" }
+            new Feriado { Id = 9, Nome = "Dia Nacional da Consciência Negra", Data = new DateTime(2026, 11, 20), Tipo = "Nacional" },
+            new Feriado { Id = 10, Nome = "Proclamação da República", Data = new DateTime(2026, 11, 15), Tipo = "Nacional" },
+            new Feriado { Id = 11, Nome = "Natal", Data = new DateTime(2026, 12, 25), Tipo = "Nacional" }
         );
     }
 }

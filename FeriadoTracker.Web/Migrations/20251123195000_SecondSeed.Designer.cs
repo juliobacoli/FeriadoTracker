@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FeriadoTracker.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251119024340_SecondSeed")]
+    [Migration("20251123195000_SecondSeed")]
     partial class SecondSeed
     {
         /// <inheritdoc />

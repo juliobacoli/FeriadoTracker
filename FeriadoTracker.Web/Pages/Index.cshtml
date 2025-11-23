@@ -45,6 +45,48 @@
 }
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        function startConfetti() {
+            const duration = 4000;
+            const animationEnd = Date.now() + duration;
+
+            const defaults = {
+                startVelocity: 22,
+                spread: 360,
+                ticks: 90,
+                zIndex: 999,
+                scalar: 1.0
+            };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 40 * (timeLeft / duration);
+
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: -0.1 }
+                });
+
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: -0.1 }
+                });
+
+            }, 180);
+        }
+    </script>
     <script>
         const targetDateString = "@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")";
         const targetDate = targetDateString ? new Date(targetDateString) : null;
@@ -79,6 +121,7 @@
                     holidayCard.classList.add('holiday-today');
                 }
 
+                startConfetti();
 
                 if (countdownInterval !== null) {
                     clearInterval(countdownInterval);
@@ -103,4 +146,5 @@
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 1000);
     </script>
+
 }

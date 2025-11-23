@@ -74,6 +74,12 @@
                     subtitleEl.textContent = 'HOJE É FERIADO NACIONAL';
                 }
 
+                const holidayCard = document.querySelector('.holiday-card');
+                if (holidayCard) {
+                    holidayCard.classList.add('holiday-today');
+                }
+
+
                 if (countdownInterval !== null) {
                     clearInterval(countdownInterval);
                     countdownInterval = null;

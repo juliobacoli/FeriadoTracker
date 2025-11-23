@@ -175,3 +175,54 @@ h1.titulo-feriado {
 .countdown-number {
     transition: transform 0.18s ease-out;
 }
+
+.holiday-today .countdown-number {
+    animation: countdown-pulse-once 0.6s ease-out, countdown-breathe 2.4s 0.7s ease-in-out infinite;
+}
+
+@keyframes countdown-pulse-once {
+    0% {
+        transform: scale(1) translateY(0);
+    }
+
+    35% {
+        transform: scale(1.18) translateY(-4px);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes countdown-breathe {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 0.85;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.holiday-today .countdown-box:nth-child(1) .countdown-number {
+    animation-delay: 0s, 0.7s; 
+}
+
+.holiday-today .countdown-box:nth-child(2) .countdown-number {
+    animation-delay: 0.12s, 0.82s;
+}
+
+.holiday-today .countdown-box:nth-child(3) .countdown-number {
+    animation-delay: 0.24s, 0.94s;
+}
+
+.holiday-today .countdown-box:nth-child(4) .countdown-number {
+    animation-delay: 0.36s, 1.06s;
+}

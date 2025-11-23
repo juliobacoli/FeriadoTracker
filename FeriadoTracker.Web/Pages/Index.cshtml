@@ -46,13 +46,41 @@
 
 @section Scripts {
     <script>
-        const targetDate = new Date("@Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss")");
+        const targetDateString = "@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")";
+        const targetDate = targetDateString ? new Date(targetDateString) : null;
+        let countdownInterval = null;
 
         function updateCountdown() {
+            if (!targetDate || isNaN(targetDate)) {
+                return;
+            }
+
             const now = new Date();
             const diff = targetDate - now;
 
-            if (diff <= 0) return;
+            if (diff <= 0) {
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+
+                const dateEl = document.querySelector('.holiday-date');
+                if (dateEl) {
+                    dateEl.textContent = 'Hoje é feriado! Aproveite!';
+                }
+
+                const subtitleEl = document.querySelector('.holiday-subtitle');
+                if (subtitleEl) {
+                    subtitleEl.textContent = 'HOJE É FERIADO NACIONAL';
+                }
+
+                if (countdownInterval !== null) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+
+                return;
+            }
 
             const totalSeconds = Math.floor(diff / 1000);
             const days = Math.floor(totalSeconds / 86400);
@@ -67,6 +95,6 @@
         }
 
         updateCountdown();
-        setInterval(updateCountdown, 1000);
+        countdownInterval = setInterval(updateCountdown, 1000);
     </script>
 }

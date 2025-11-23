@@ -1,8 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
-COPY *.csproj ./
-RUN dotnet restore
+COPY FeriadoTracker.Web.csproj ./
+RUN dotnet restore FeriadoTracker.Web.csproj
 
 COPY . ./
 RUN dotnet publish -c Release -o out

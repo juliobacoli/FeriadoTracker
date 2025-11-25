@@ -1,4 +1,6 @@
 ﻿@page
+@using System.Globalization
+
 @model FeriadoTracker.Web.Pages.IndexModel
 
 <div class="page-wrapper page-center">
@@ -10,7 +12,7 @@
             @if (Model.ProximoFeriado is not null)
             {
                 <p class="holiday-date">
-                    @Model.ProximoFeriado.Data.ToString("dd 'de' MMMM 'de' yyyy")
+                     @Model.ProximoFeriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))
                 </p>
             }
             else

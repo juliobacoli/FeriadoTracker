@@ -4,43 +4,56 @@
 @model FeriadoTracker.Web.Pages.IndexModel
 
 <div class="page-wrapper page-center">
-    <div class="holiday-card card">
-        <div class="holiday-header">
-            <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
-            <h1 class="holiday-title">@Model.ProximoFeriado?.Nome</h1>
+    <div class="holiday-wrapper">
+        <div class="holiday-card card">
+            <div class="holiday-header">
+                <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
+                <h1 class="holiday-title">@Model.ProximoFeriado?.Nome</h1>
 
-            @if (Model.ProximoFeriado is not null)
-            {
-                <p class="holiday-date">
-                     @Model.ProximoFeriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))
-                </p>
-            }
-            else
-            {
-                <p class="holiday-date">Nenhum feriado encontrado.</p>
-            }
+                @if (Model.ProximoFeriado is not null)
+                {
+                    <p class="holiday-date">
+                        @Model.ProximoFeriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))
+                    </p>
+                }
+                else
+                {
+                    <p class="holiday-date">Nenhum feriado encontrado.</p>
+                }
+            </div>
+
+            <div class="countdown-grid metric-grid">
+                <div class="countdown-box metric-box">
+                    <div id="days" class="countdown-number metric-number">--</div>
+                    <div class="countdown-label metric-label">Dias</div>
+                </div>
+                <div class="countdown-box metric-box">
+                    <div id="hours" class="countdown-number metric-number">--</div>
+                    <div class="countdown-label metric-label">Horas</div>
+                </div>
+                <div class="countdown-box metric-box">
+                    <div id="minutes" class="countdown-number metric-number">--</div>
+                    <div class="countdown-label metric-label">Min</div>
+                </div>
+                <div class="countdown-box metric-box">
+                    <div id="seconds" class="countdown-number metric-number">--</div>
+                    <div class="countdown-label metric-label">Seg</div>
+                </div>
+            </div>
         </div>
 
-        <div class="countdown-grid metric-grid">
-            <div class="countdown-box metric-box">
-                <div id="days" class="countdown-number metric-number">--</div>
-                <div class="countdown-label metric-label">Dias</div>
-            </div>
-            <div class="countdown-box metric-box">
-                <div id="hours" class="countdown-number metric-number">--</div>
-                <div class="countdown-label metric-label">Horas</div>
-            </div>
-            <div class="countdown-box metric-box">
-                <div id="minutes" class="countdown-number metric-number">--</div>
-                <div class="countdown-label metric-label">Min</div>
-            </div>
-            <div class="countdown-box metric-box">
-                <div id="seconds" class="countdown-number metric-number">--</div>
-                <div class="countdown-label metric-label">Seg</div>
-            </div>
+        <div class="creator-card">
+            <a href="https://www.linkedin.com/in/julio-bacoli" target="_blank" class="creator-link">
+                <svg class="linkedin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path fill="#0A66C2" d="M4.98 3.5C4.98 4.88 3.88 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.98H4.5V24H.5zM8.98 8.98h3.79v2.05h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.63 4.77 6.05V24h-4v-6.78c0-1.62-.03-3.7-2.27-3.7-2.27 0-2.62 1.77-2.62 3.58V24h-4V8.98z" />
+                </svg>
+                <span>Desenvolvido por <b>Julio Bacoli</b></span>
+            </a>
         </div>
+
     </div>
 </div>
+
 
 @section Styles {
     <link rel="stylesheet" href="~/css/holiday.css" asp-append-version="true" />

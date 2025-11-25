@@ -226,3 +226,41 @@ h1.titulo-feriado {
 .holiday-today .countdown-box:nth-child(4) .countdown-number {
     animation-delay: 0.36s, 1.06s;
 }
+
+.creator-card {
+    margin: 20px auto 0 auto;
+    width: fit-content;
+    padding: 10px 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.88;
+    align-self: flex-end;
+    margin-right: 40px;
+    transition: all 0.25s ease;
+}
+
+.creator-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 14px rgba(33, 150, 243, 0.35);
+}
+
+.creator-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.linkedin-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}

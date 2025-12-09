@@ -32,19 +32,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Redirect feriadosbr.online -> www.feriadosbr.online
-app.Use(async (context, next) =>
-{
-    var host = context.Request.Host.Host;
-    if (host.Equals("feriadosbr.online", StringComparison.OrdinalIgnoreCase))
-    {
-        var newUrl = $"{context.Request.Scheme}://www.feriadosbr.online{context.Request.Path}{context.Request.QueryString}";
-        context.Response.Redirect(newUrl, permanent: true);
-        return;
-    }
-    await next();
-});
-
 app.UseRouting();
 
 app.UseAuthorization();

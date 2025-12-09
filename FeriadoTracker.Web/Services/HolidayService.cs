@@ -21,4 +21,14 @@ public class HolidayService
             .OrderBy(f => f.Data)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<List<Feriado>> GetProximosFeriadosAsync()
+    {
+        var hoje = DateTime.Today;
+
+        return await _context.Feriados
+            .Where(f => f.Data >= hoje)
+            .OrderBy(f => f.Data)
+            .ToListAsync();
+    }
 }

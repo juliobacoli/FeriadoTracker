@@ -42,6 +42,36 @@
             </div>
         </div>
 
+        <!-- NOVA SEÇÃO: TIMELINE DE PRÓXIMOS FERIADOS -->
+        @if (Model.ProximosFeriados is not null && Model.ProximosFeriados.Any())
+        {
+            <div class="holiday-timeline-wrapper card">
+                <h2 class="holiday-timeline-title">Linha do tempo dos próximos feriados</h2>
+
+                <div class="holiday-timeline">
+                    @foreach (var feriado in Model.ProximosFeriados)
+                    {
+                        var isNext = Model.ProximoFeriado is not null
+                        && feriado.Data == Model.ProximoFeriado.Data
+                        && feriado.Nome == Model.ProximoFeriado.Nome;
+
+                        <div class="holiday-timeline-item @(isNext ? "is-next" : "")">
+                            <div class="holiday-timeline-dot"></div>
+
+                            <div class="holiday-timeline-content">
+                                <span class="holiday-timeline-date">
+                                    @feriado.Data.ToString("dd/MM/yyyy")
+                                </span>
+                                <span class="holiday-timeline-name">
+                                    @feriado.Nome
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
         <div class="creator-card">
             <a href="https://www.linkedin.com/in/julio-bacoli" target="_blank" class="creator-link">
                 <svg class="linkedin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

@@ -33,16 +33,15 @@
                 </div>
                 <div class="countdown-box metric-box">
                     <div id="minutes" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Min</div>
+                    <div class="countdown-label metric-label">Minutos</div>
                 </div>
                 <div class="countdown-box metric-box">
                     <div id="seconds" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Seg</div>
+                    <div class="countdown-label metric-label">Segundos</div>
                 </div>
             </div>
         </div>
 
-        <!-- NOVA SEÇÃO: TIMELINE DE PRÓXIMOS FERIADOS -->
         @if (Model.ProximosFeriados is not null && Model.ProximosFeriados.Any())
         {
             <div class="holiday-timeline-wrapper card">

@@ -59,7 +59,11 @@
 
                             <div class="holiday-timeline-content">
                                 <span class="holiday-timeline-date">
-                                    @feriado.Data.ToString("dd/MM/yyyy")
+                                    @{
+                                        var diaSemana = feriado.Data.ToString("dddd", new CultureInfo("pt-BR"));
+                                        diaSemana = char.ToUpper(diaSemana[0]) + diaSemana.Substring(1);
+                                    }
+                                    @feriado.Data.ToString("dd/MM/yyyy") - @diaSemana
                                 </span>
                                 <span class="holiday-timeline-name">
                                     @feriado.Nome

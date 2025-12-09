@@ -1,9 +1,49 @@
-﻿.main-container {
+:root {
+    --bg-gradient-start: #e0c3fc;
+    --bg-gradient-end: #8ec5fc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f9fafb;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --text-creator: #333;
+    --accent-primary: #2563eb;
+    --accent-secondary: #3b82f6;
+    --accent-timeline: #1d4ed8;
+    --accent-next: #f97316;
+    --border-color: #d1d5db;
+    --shadow-card: rgba(15, 23, 42, 0.16);
+    --shadow-box: rgba(15, 23, 42, 0.12);
+    --timeline-gradient-start: #3b82f6;
+    --timeline-gradient-end: #1d4ed8;
+}
+
+html.dark {
+    --bg-gradient-start: #1e1b4b;
+    --bg-gradient-end: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --text-creator: #e2e8f0;
+    --accent-primary: #60a5fa;
+    --accent-secondary: #3b82f6;
+    --accent-timeline: #93c5fd;
+    --accent-next: #fb923c;
+    --border-color: #475569;
+    --shadow-card: rgba(0, 0, 0, 0.3);
+    --shadow-box: rgba(0, 0, 0, 0.2);
+    --timeline-gradient-start: #60a5fa;
+    --timeline-gradient-end: #3b82f6;
+}
+
+.main-container {
     min-height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
 }
 
 .glass-card {
@@ -71,7 +111,7 @@ h1.titulo-feriado {
 .countdown-number {
     font-size: 2.8rem;
     font-weight: 900;
-    color: #2563eb;
+    color: var(--accent-primary);
 }
 
 .countdown-label {
@@ -97,20 +137,20 @@ h1.titulo-feriado {
     font-size: 1.05rem;
     letter-spacing: 0.22em;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--text-secondary);
     margin-bottom: 0.75rem;
 }
 
 .holiday-title {
     font-size: 3rem;
     font-weight: 900;
-    color: #111827;
+    color: var(--text-primary);
     margin-bottom: 0.35rem;
 }
 
 .holiday-date {
     font-size: 1.1rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     margin-top: 0.25rem;
 }
 
@@ -131,14 +171,14 @@ h1.titulo-feriado {
 
 .holiday-card {
     border-radius: 32px;
-    box-shadow: 0 28px 60px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(148, 163, 184, 0.10);
-    background-color: #ffffff;
+    box-shadow: 0 28px 60px var(--shadow-card), 0 0 0 1px rgba(148, 163, 184, 0.10);
+    background-color: var(--bg-card);
 }
 
 .countdown-box {
     border-radius: 20px;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(209, 213, 219, 0.60);
-    background-color: #ffffff;
+    box-shadow: 0 18px 40px var(--shadow-box), 0 0 0 1px var(--border-color);
+    background-color: var(--bg-card);
 }
 
 .holiday-card {
@@ -164,8 +204,8 @@ h1.titulo-feriado {
 
     .countdown-box:hover {
         transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.35);
-        background-color: #f9fafb;
+        box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18), 0 0 0 1px var(--accent-secondary);
+        background-color: var(--bg-card-hover);
     }
 
         .countdown-box:hover .countdown-number {
@@ -231,12 +271,12 @@ h1.titulo-feriado {
     margin: 20px auto 0 auto;
     width: fit-content;
     padding: 10px 18px;
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 14px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: var(--text-creator);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -274,6 +314,7 @@ h1.titulo-feriado {
     margin-bottom: 1.5rem;
     font-size: 1.2rem;
     font-weight: 700;
+    color: var(--text-primary);
 }
 
 .holiday-timeline {
@@ -289,7 +330,7 @@ h1.titulo-feriado {
         top: 0;
         bottom: 0;
         width: 2px;
-        background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+        background: linear-gradient(to bottom, var(--timeline-gradient-start), var(--timeline-gradient-end));
         transform-origin: top;
         transform: scaleY(0);
         opacity: 0;
@@ -329,8 +370,8 @@ h1.titulo-feriado {
     width: 12px;
     height: 12px;
     border-radius: 999px;
-    background: #ffffff;
-    border: 2px solid #3b82f6;
+    background: var(--bg-card);
+    border: 2px solid var(--accent-secondary);
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -343,12 +384,13 @@ h1.titulo-feriado {
 .holiday-timeline-date {
     font-weight: 600;
     font-size: 0.9rem;
-    color: #1d4ed8;
+    color: var(--accent-timeline);
     margin-bottom: 2px;
 }
 
 .holiday-timeline-name {
     font-size: 0.95rem;
+    color: var(--text-primary);
 }
 
 .holiday-timeline-item:hover .holiday-timeline-dot {
@@ -358,12 +400,12 @@ h1.titulo-feriado {
 
 .holiday-timeline-item.is-next .holiday-timeline-dot {
     animation: holidayDotPulse 1.5s ease-out infinite;
-    border-color: #f97316;
+    border-color: var(--accent-next);
     box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
 }
 
 .holiday-timeline-item.is-next .holiday-timeline-date {
-    color: #f97316;
+    color: var(--accent-next);
 }
 
 @keyframes holidayLineGrow {
@@ -405,6 +447,56 @@ h1.titulo-feriado {
         transform: scale(1);
         box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
     }
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-box);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(20deg);
+    box-shadow: 0 6px 20px var(--shadow-card);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--accent-primary);
+    stroke: var(--accent-primary);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover svg {
+    transform: rotate(20deg);
+}
+
+.sun-icon {
+    display: none;
+}
+
+html.dark .sun-icon {
+    display: block;
+}
+
+html.dark .moon-icon {
+    display: none;
 }
 
 @media (max-width: 480px) {

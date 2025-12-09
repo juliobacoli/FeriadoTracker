@@ -117,6 +117,7 @@ h1.titulo-feriado {
 .countdown-label {
     font-size: 0.9rem;
     letter-spacing: 0.22em;
+    color: var(--text-secondary);
 }
 
 .countdown-grid {
@@ -167,6 +168,7 @@ h1.titulo-feriado {
     font-size: 0.9rem;
     letter-spacing: 0.22em;
     font-weight: 600;
+    color: var(--text-secondary);
 }
 
 .holiday-card {

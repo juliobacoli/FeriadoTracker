@@ -38,7 +38,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Append("Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
+        "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.clarity.ms; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://www.clarity.ms;");
     context.Response.Headers.Append("Permissions-Policy",
         "camera=(), microphone=(), geolocation=(), payment=()");
 

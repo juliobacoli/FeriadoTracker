@@ -54,7 +54,10 @@
                         && feriado.Data == Model.ProximoFeriado.Data
                         && feriado.Nome == Model.ProximoFeriado.Nome;
 
-                        <div class="holiday-timeline-item @(isNext ? "is-next" : "")">
+                        <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
+                             data-target-date="@feriado.Data.ToString("yyyy-MM-ddTHH:mm:ss")"
+                             data-target-name="@feriado.Nome"
+                             data-target-formatted="@feriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))">
                             <div class="holiday-timeline-dot"></div>
 
                             <div class="holiday-timeline-content">
@@ -136,38 +139,35 @@
         }
     </script>
     <script>
-        const targetDateString = "@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")";
-        const targetDate = targetDateString ? new Date(targetDateString) : null;
+        const initialDateString = "@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")";
+        let activeDate = initialDateString ? new Date(initialDateString) : null;
         let countdownInterval = null;
 
         function updateCountdown() {
-            if (!targetDate || isNaN(targetDate)) {
+            if (!activeDate || isNaN(activeDate)) {
                 return;
             }
 
             const now = new Date();
-            const diff = targetDate - now;
+            const diff = activeDate - now;
+
+            // Elementos para atualização
+            const daysEl = document.getElementById('days');
+            const hoursEl = document.getElementById('hours');
+            const minsEl = document.getElementById('minutes');
+            const secsEl = document.getElementById('seconds');
+            const holidayCard = document.querySelector('.holiday-card');
+            const dateEl = document.querySelector('.holiday-date');
+            const subtitleEl = document.querySelector('.holiday-subtitle');
 
             if (diff <= 0) {
-                document.getElementById('days').textContent = '00';
-                document.getElementById('hours').textContent = '00';
-                document.getElementById('minutes').textContent = '00';
-                document.getElementById('seconds').textContent = '00';
+                daysEl.textContent = '00';
+                hoursEl.textContent = '00';
+                minsEl.textContent = '00';
+                secsEl.textContent = '00';
 
-                const dateEl = document.querySelector('.holiday-date');
-                if (dateEl) {
-                    dateEl.textContent = 'Hoje é feriado! Aproveite!';
-                }
-
-                const subtitleEl = document.querySelector('.holiday-subtitle');
-                if (subtitleEl) {
-                    subtitleEl.textContent = 'HOJE É FERIADO NACIONAL';
-                }
-
-                const holidayCard = document.querySelector('.holiday-card');
-                if (holidayCard) {
-                    holidayCard.classList.add('holiday-today');
-                }
+                if (dateEl) dateEl.textContent = 'Hoje é feriado! Aproveite!';
+                if (holidayCard) holidayCard.classList.add('holiday-today');
 
                 startConfetti();
 
@@ -175,9 +175,11 @@
                     clearInterval(countdownInterval);
                     countdownInterval = null;
                 }
-
                 return;
             }
+
+            // Remove estado de hoje se mudar para um feriado futuro
+            if (holidayCard) holidayCard.classList.remove('holiday-today');
 
             const totalSeconds = Math.floor(diff / 1000);
             const days = Math.floor(totalSeconds / 86400);
@@ -185,11 +187,40 @@
             const minutes = Math.floor((totalSeconds % 3600) / 60);
             const seconds = totalSeconds % 60;
 
-            document.getElementById('days').textContent = String(days).padStart(2, '0');
-            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            daysEl.textContent = String(days).padStart(2, '0');
+            hoursEl.textContent = String(hours).padStart(2, '0');
+            minsEl.textContent = String(minutes).padStart(2, '0');
+            secsEl.textContent = String(seconds).padStart(2, '0');
         }
+
+        // Event listener para cliques na timeline
+        document.querySelectorAll('.holiday-timeline-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const newDateStr = this.getAttribute('data-target-date');
+                const newName = this.getAttribute('data-target-name');
+                const newFormatted = this.getAttribute('data-target-formatted');
+                const isNext = this.classList.contains('is-next');
+
+                // Atualiza o estado global
+                activeDate = new Date(newDateStr);
+
+                // Atualiza UI principal
+                document.querySelector('.holiday-title').textContent = newName;
+                document.querySelector('.holiday-date').textContent = newFormatted;
+                document.querySelector('.holiday-subtitle').textContent = 
+                    isNext ? 'PRÓXIMO FERIADO NACIONAL' : 'FERIADO SELECIONADO';
+
+                // Gerencia classes de seleção
+                document.querySelectorAll('.holiday-timeline-item').forEach(i => i.classList.remove('is-selected'));
+                this.classList.add('is-selected');
+
+                // Reinicia o intervalo se necessário e atualiza na hora
+                if (countdownInterval === null) {
+                    countdownInterval = setInterval(updateCountdown, 1000);
+                }
+                updateCountdown();
+            });
+        });
 
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 1000);

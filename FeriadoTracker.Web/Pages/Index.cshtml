@@ -4,7 +4,7 @@
 @model FeriadoTracker.Web.Pages.IndexModel
 
 <div class="page-wrapper page-center">
-    <div class="holiday-wrapper">
+    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">
         <div class="holiday-card card">
             <div class="holiday-header">
                 <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
@@ -97,133 +97,6 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        function startConfetti() {
-            const duration = 4000;
-            const animationEnd = Date.now() + duration;
-
-            const defaults = {
-                startVelocity: 22,
-                spread: 360,
-                ticks: 90,
-                zIndex: 999,
-                scalar: 1.0
-            };
-
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
-
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
-                const particleCount = 40 * (timeLeft / duration);
-
-                confetti({
-                    ...defaults,
-                    particleCount,
-                    origin: { x: randomInRange(0.1, 0.3), y: -0.1 }
-                });
-
-                confetti({
-                    ...defaults,
-                    particleCount,
-                    origin: { x: randomInRange(0.7, 0.9), y: -0.1 }
-                });
-
-            }, 180);
-        }
-    </script>
-    <script>
-        const initialDateString = "@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")";
-        let activeDate = initialDateString ? new Date(initialDateString) : null;
-        let countdownInterval = null;
-
-        function updateCountdown() {
-            if (!activeDate || isNaN(activeDate)) {
-                return;
-            }
-
-            const now = new Date();
-            const diff = activeDate - now;
-
-            // Elementos para atualização
-            const daysEl = document.getElementById('days');
-            const hoursEl = document.getElementById('hours');
-            const minsEl = document.getElementById('minutes');
-            const secsEl = document.getElementById('seconds');
-            const holidayCard = document.querySelector('.holiday-card');
-            const dateEl = document.querySelector('.holiday-date');
-            const subtitleEl = document.querySelector('.holiday-subtitle');
-
-            if (diff <= 0) {
-                daysEl.textContent = '00';
-                hoursEl.textContent = '00';
-                minsEl.textContent = '00';
-                secsEl.textContent = '00';
-
-                if (dateEl) dateEl.textContent = 'Hoje é feriado! Aproveite!';
-                if (holidayCard) holidayCard.classList.add('holiday-today');
-
-                startConfetti();
-
-                if (countdownInterval !== null) {
-                    clearInterval(countdownInterval);
-                    countdownInterval = null;
-                }
-                return;
-            }
-
-            // Remove estado de hoje se mudar para um feriado futuro
-            if (holidayCard) holidayCard.classList.remove('holiday-today');
-
-            const totalSeconds = Math.floor(diff / 1000);
-            const days = Math.floor(totalSeconds / 86400);
-            const hours = Math.floor((totalSeconds % 86400) / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-
-            daysEl.textContent = String(days).padStart(2, '0');
-            hoursEl.textContent = String(hours).padStart(2, '0');
-            minsEl.textContent = String(minutes).padStart(2, '0');
-            secsEl.textContent = String(seconds).padStart(2, '0');
-        }
-
-        // Event listener para cliques na timeline
-        document.querySelectorAll('.holiday-timeline-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const newDateStr = this.getAttribute('data-target-date');
-                const newName = this.getAttribute('data-target-name');
-                const newFormatted = this.getAttribute('data-target-formatted');
-                const isNext = this.classList.contains('is-next');
-
-                // Atualiza o estado global
-                activeDate = new Date(newDateStr);
-
-                // Atualiza UI principal
-                document.querySelector('.holiday-title').textContent = newName;
-                document.querySelector('.holiday-date').textContent = newFormatted;
-                document.querySelector('.holiday-subtitle').textContent = 
-                    isNext ? 'PRÓXIMO FERIADO NACIONAL' : 'FERIADO SELECIONADO';
-
-                // Gerencia classes de seleção
-                document.querySelectorAll('.holiday-timeline-item').forEach(i => i.classList.remove('is-selected'));
-                this.classList.add('is-selected');
-
-                // Reinicia o intervalo se necessário e atualiza na hora
-                if (countdownInterval === null) {
-                    countdownInterval = setInterval(updateCountdown, 1000);
-                }
-                updateCountdown();
-            });
-        });
-
-        updateCountdown();
-        countdownInterval = setInterval(updateCountdown, 1000);
-    </script>
-
+    <script src="~/js/holiday-countdown.js" asp-append-version="true"></script>
 }
+

@@ -4,7 +4,7 @@
 @model FeriadoTracker.Web.Pages.IndexModel
 
 <div class="page-wrapper page-center">
-    <div class="holiday-wrapper">
+    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">
         <div class="holiday-card card">
             <div class="holiday-header">
                 <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
@@ -54,7 +54,10 @@
                         && feriado.Data == Model.ProximoFeriado.Data
                         && feriado.Nome == Model.ProximoFeriado.Nome;
 
-                        <div class="holiday-timeline-item @(isNext ? "is-next" : "")">
+                        <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
+                             data-target-date="@feriado.Data.ToString("yyyy-MM-ddTHH:mm:ss")"
+                             data-target-name="@feriado.Nome"
+                             data-target-formatted="@feriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))">
                             <div class="holiday-timeline-dot"></div>
 
                             <div class="holiday-timeline-content">
@@ -94,105 +97,6 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        function startConfetti() {
-            const duration = 4000;
-            const animationEnd = Date.now() + duration;
-
-            const defaults = {
-                startVelocity: 22,
-                spread: 360,
-                ticks: 90,
-                zIndex: 999,
-                scalar: 1.0
-            };
-
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
-
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
-                const particleCount = 40 * (timeLeft / duration);
-
-                confetti({
-                    ...defaults,
-                    particleCount,
-                    origin: { x: randomInRange(0.1, 0.3), y: -0.1 }
-                });
-
-                confetti({
-                    ...defaults,
-                    particleCount,
-                    origin: { x: randomInRange(0.7, 0.9), y: -0.1 }
-                });
-
-            }, 180);
-        }
-    </script>
-    <script>
-        const targetDateString = "@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")";
-        const targetDate = targetDateString ? new Date(targetDateString) : null;
-        let countdownInterval = null;
-
-        function updateCountdown() {
-            if (!targetDate || isNaN(targetDate)) {
-                return;
-            }
-
-            const now = new Date();
-            const diff = targetDate - now;
-
-            if (diff <= 0) {
-                document.getElementById('days').textContent = '00';
-                document.getElementById('hours').textContent = '00';
-                document.getElementById('minutes').textContent = '00';
-                document.getElementById('seconds').textContent = '00';
-
-                const dateEl = document.querySelector('.holiday-date');
-                if (dateEl) {
-                    dateEl.textContent = 'Hoje é feriado! Aproveite!';
-                }
-
-                const subtitleEl = document.querySelector('.holiday-subtitle');
-                if (subtitleEl) {
-                    subtitleEl.textContent = 'HOJE É FERIADO NACIONAL';
-                }
-
-                const holidayCard = document.querySelector('.holiday-card');
-                if (holidayCard) {
-                    holidayCard.classList.add('holiday-today');
-                }
-
-                startConfetti();
-
-                if (countdownInterval !== null) {
-                    clearInterval(countdownInterval);
-                    countdownInterval = null;
-                }
-
-                return;
-            }
-
-            const totalSeconds = Math.floor(diff / 1000);
-            const days = Math.floor(totalSeconds / 86400);
-            const hours = Math.floor((totalSeconds % 86400) / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-
-            document.getElementById('days').textContent = String(days).padStart(2, '0');
-            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-        }
-
-        updateCountdown();
-        countdownInterval = setInterval(updateCountdown, 1000);
-    </script>
-
+    <script src="~/js/holiday-countdown.js" asp-append-version="true"></script>
 }
+

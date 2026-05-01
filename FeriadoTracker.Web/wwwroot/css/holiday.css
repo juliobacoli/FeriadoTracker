@@ -530,13 +530,6 @@ h1.titulo-feriado {
     100% { transform: translateY(0) rotate(-8deg) scale(1); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .confetti-toggle,
-    .confetti-toggle:hover {
-        animation: none;
-        transform: none;
-    }
-}
 
 .theme-toggle {
     position: fixed;

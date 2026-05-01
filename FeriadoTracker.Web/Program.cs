@@ -41,11 +41,12 @@ app.Use(async (context, next) =>
         "camera=(), microphone=(), geolocation=(), payment=()");
     context.Response.Headers.Append("Content-Security-Policy",
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' https://www.clarity.ms https://cdn.jsdelivr.net; " +
+        "script-src 'self' 'unsafe-inline' https://*.clarity.ms https://cdn.jsdelivr.net; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "font-src 'self' https://fonts.gstatic.com; " +
-        "img-src 'self' data:; " +
-        "connect-src 'self' https://www.clarity.ms; " +
+        "img-src 'self' data: https://*.clarity.ms; " +
+        "connect-src 'self' https://*.clarity.ms; " +
+        "worker-src 'self' blob:; " +
         "frame-src 'none'; " +
         "object-src 'none'; " +
         "base-uri 'self'");

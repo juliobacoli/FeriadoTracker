@@ -27,7 +27,8 @@ function startConfetti() {
         spread: 360,
         ticks: 90,
         zIndex: 999,
-        scalar: 1.0
+        scalar: 1.0,
+        useWorker: false
     };
 
     function randomInRange(min, max) {
@@ -71,8 +72,28 @@ document.addEventListener('DOMContentLoaded', function () {
         card: document.querySelector('.holiday-card'),
         title: document.querySelector('.holiday-title'),
         subtitle: document.querySelector('.holiday-subtitle'),
-        date: document.querySelector('.holiday-date')
+        date: document.querySelector('.holiday-date'),
+        confettiBtn: document.getElementById('confettiToggle')
     };
+
+    let confettiCooldown = false;
+
+    if (elements.confettiBtn) {
+        elements.confettiBtn.addEventListener('click', function () {
+            if (confettiCooldown) return;
+
+            confettiCooldown = true;
+            elements.confettiBtn.disabled = true;
+            elements.confettiBtn.classList.add('is-clicked');
+
+            startConfetti();
+
+            setTimeout(function () {
+                confettiCooldown = false;
+                elements.confettiBtn.disabled = false;
+            }, 3000);
+        });
+    }
 
     const initialDateString = wrapper.getAttribute('data-initial-date');
     let activeDate = initialDateString ? new Date(initialDateString) : null;
@@ -99,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (elements.date) elements.date.textContent = 'Hoje é feriado! Aproveite!';
             if (elements.card) elements.card.classList.add('holiday-today');
+            if (elements.confettiBtn) elements.confettiBtn.hidden = false;
 
             startConfetti();
 
@@ -110,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (elements.card) elements.card.classList.remove('holiday-today');
+        if (elements.confettiBtn) elements.confettiBtn.hidden = true;
 
         const days = Math.floor(diff / MS.DAY);
         const hours = Math.floor((diff % MS.DAY) / MS.HOUR);
@@ -137,6 +160,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (elements.date) elements.date.textContent = newFormatted;
             if (elements.subtitle) {
                 elements.subtitle.textContent = isNext ? 'PRÓXIMO FERIADO NACIONAL' : 'FERIADO SELECIONADO';
+            }
+
+            if (elements.confettiBtn) {
+                elements.confettiBtn.hidden = true;
+                elements.confettiBtn.classList.remove('is-clicked');
             }
 
             document.querySelectorAll('.holiday-timeline-item').forEach(i => i.classList.remove('is-selected'));

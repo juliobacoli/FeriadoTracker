@@ -472,6 +472,72 @@ h1.titulo-feriado {
     }
 }
 
+.confetti-toggle {
+    position: fixed;
+    top: 82px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--accent-next);
+    box-shadow: 0 4px 12px var(--shadow-box);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 0;
+    transition: all 0.3s ease;
+    animation: confettiPulse 1.8s ease-out infinite, confettiBounce 1.4s ease-in-out infinite;
+}
+
+.confetti-toggle[hidden] {
+    display: none;
+}
+
+.confetti-toggle.is-clicked {
+    animation: none;
+}
+
+.confetti-toggle:hover {
+    animation: none;
+    transform: scale(1.1) rotate(-12deg);
+    box-shadow: 0 6px 20px var(--shadow-card);
+}
+
+.confetti-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    animation: none;
+    transform: none;
+}
+
+.confetti-emoji {
+    font-size: 26px;
+    line-height: 1;
+}
+
+@keyframes confettiPulse {
+    0%   { box-shadow: 0 4px 12px var(--shadow-box), 0 0 0 0 rgba(249, 115, 22, 0.7); }
+    50%  { box-shadow: 0 4px 12px var(--shadow-box), 0 0 0 16px rgba(249, 115, 22, 0); }
+    100% { box-shadow: 0 4px 12px var(--shadow-box), 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
+@keyframes confettiBounce {
+    0%   { transform: translateY(0) rotate(-8deg) scale(1); }
+    50%  { transform: translateY(-6px) rotate(8deg) scale(1.06); }
+    100% { transform: translateY(0) rotate(-8deg) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confetti-toggle,
+    .confetti-toggle:hover {
+        animation: none;
+        transform: none;
+    }
+}
+
 .theme-toggle {
     position: fixed;
     top: 20px;

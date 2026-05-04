@@ -14,7 +14,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=feriados.db"));
 
-builder.Services.AddScoped<HolidayService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IHolidayService, HolidayService>();
 
 var app = builder.Build();
 

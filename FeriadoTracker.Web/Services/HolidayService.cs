@@ -1,22 +1,15 @@
-﻿using FeriadoTracker.Web.Data;
+using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FeriadoTracker.Web.Services;
 
-public class HolidayService
+public class HolidayService(AppDbContext context, TimeProvider timeProvider) : IHolidayService
 {
-    private readonly AppDbContext _context;
-
-    public HolidayService(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Feriado?> GetProximoFeriadoAsync()
     {
-        var hoje = DateTime.Today;
-        return await _context.Feriados
+        var hoje = timeProvider.GetLocalNow().Date;
+        return await context.Feriados
             .Where(f => f.Data >= hoje)
             .OrderBy(f => f.Data)
             .FirstOrDefaultAsync();
@@ -24,9 +17,9 @@ public class HolidayService
 
     public async Task<List<Feriado>> GetProximosFeriadosAsync()
     {
-        var hoje = DateTime.Today;
+        var hoje = timeProvider.GetLocalNow().Date;
 
-        return await _context.Feriados
+        return await context.Feriados
             .Where(f => f.Data >= hoje)
             .OrderBy(f => f.Data)
             .ToListAsync();

@@ -5,7 +5,10 @@
       "Bash(dotnet ef database update:*)",
       "Bash(git checkout *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(dotnet sln *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet test *)"
     ],
     "deny": [],
     "ask": []

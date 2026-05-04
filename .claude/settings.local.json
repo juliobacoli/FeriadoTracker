@@ -9,10 +9,13 @@
       "Bash(dotnet sln *)",
       "Bash(dotnet add *)",
       "Bash(dotnet test *)",
-      "Read(//mnt/c/Projetos/**)",
+      "Bash(git commit *)",
+      "Bash(git stash *)",
       "Bash(dotnet build *)",
       "PowerShell(dotnet build *)",
-      "PowerShell(dotnet test *)"
+      "PowerShell(dotnet test *)",
+      "PowerShell(git push *)",
+      "PowerShell(git merge *)"
     ],
     "deny": [],
     "ask": []

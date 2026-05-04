@@ -16,14 +16,18 @@ function isValidDate(date) {
 export function createCountdown({ elements, onZero }) {
     let activeDate = null;
     let intervalId = null;
+    const originalTitle = document.title;
 
     function render() {
+        const holidayName = elements.title ? elements.title.textContent.trim() : '';
+
         if (!isValidDate(activeDate)) {
             if (elements.date) elements.date.textContent = "Informação indisponível";
             if (elements.title) elements.title.textContent = "Data não encontrada";
             ['days', 'hours', 'minutes', 'seconds'].forEach(key => {
                 if (elements[key]) elements[key].textContent = '00';
             });
+            document.title = originalTitle;
             return;
         }
 
@@ -35,6 +39,7 @@ export function createCountdown({ elements, onZero }) {
             });
             if (elements.date) elements.date.textContent = 'Hoje é feriado! Aproveite!';
             if (elements.card) elements.card.classList.add('holiday-today');
+            document.title = holidayName ? `🎉 Hoje é ${holidayName}!` : originalTitle;
 
             if (typeof onZero === 'function') onZero();
             stop();
@@ -52,6 +57,10 @@ export function createCountdown({ elements, onZero }) {
         if (elements.hours) elements.hours.textContent = formatNumber(hours);
         if (elements.minutes) elements.minutes.textContent = formatNumber(minutes);
         if (elements.seconds) elements.seconds.textContent = formatNumber(seconds);
+
+        document.title = holidayName
+            ? (days > 0 ? `⏳ ${days}d — ${holidayName}` : `⏳ Hoje — ${holidayName}`)
+            : originalTitle;
     }
 
     function start() {

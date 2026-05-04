@@ -98,15 +98,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const initialDateString = wrapper.getAttribute('data-initial-date');
     let activeDate = initialDateString ? new Date(initialDateString) : null;
     let countdownInterval = null;
+    const originalTitle = document.title;
 
     function updateCountdown() {
+        const holidayName = elements.title ? elements.title.textContent.trim() : '';
+
         if (!isValidDate(activeDate)) {
             if (elements.date) elements.date.textContent = "Informação indisponível";
             if (elements.title) elements.title.textContent = "Data não encontrada";
-            
+
             ['days', 'hours', 'minutes', 'seconds'].forEach(key => {
                 if (elements[key]) elements[key].textContent = '00';
             });
+            document.title = originalTitle;
             return;
         }
 
@@ -121,6 +125,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (elements.date) elements.date.textContent = 'Hoje é feriado! Aproveite!';
             if (elements.card) elements.card.classList.add('holiday-today');
             if (elements.confettiBtn) elements.confettiBtn.hidden = false;
+
+            document.title = holidayName ? `🎉 Hoje é ${holidayName}!` : originalTitle;
 
             startConfetti();
 
@@ -143,6 +149,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (elements.hours) elements.hours.textContent = formatNumber(hours);
         if (elements.minutes) elements.minutes.textContent = formatNumber(minutes);
         if (elements.seconds) elements.seconds.textContent = formatNumber(seconds);
+
+        if (days > 0) {
+            document.title = holidayName ? `⏳ ${days}d — ${holidayName}` : originalTitle;
+        } else {
+            document.title = holidayName ? `⏳ Hoje — ${holidayName}` : originalTitle;
+        }
     }
 
 

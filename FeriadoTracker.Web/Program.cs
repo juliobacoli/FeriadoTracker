@@ -12,7 +12,7 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=feriados.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IHolidayService, HolidayService>();
@@ -34,19 +34,27 @@ if (!app.Environment.IsDevelopment())
 // Headers de segurança
 app.Use(async (context, next) =>
 {
+    var nonceBytes = new byte[16];
+    System.Security.Cryptography.RandomNumberGenerator.Fill(nonceBytes);
+    var nonce = Convert.ToBase64String(nonceBytes);
+    context.Items["csp-nonce"] = nonce;
+
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Append("Permissions-Policy",
         "camera=(), microphone=(), geolocation=(), payment=()");
+    var connectSrc = app.Environment.IsDevelopment()
+        ? "connect-src 'self' https://*.clarity.ms ws://localhost:* wss://localhost:* http://localhost:*; "
+        : "connect-src 'self' https://*.clarity.ms; ";
+
     context.Response.Headers.Append("Content-Security-Policy",
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' https://*.clarity.ms https://cdn.jsdelivr.net; " +
+        $"script-src 'self' 'nonce-{nonce}' https://*.clarity.ms; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "font-src 'self' https://fonts.gstatic.com; " +
         "img-src 'self' data: https://*.clarity.ms; " +
-        "connect-src 'self' https://*.clarity.ms; " +
+        connectSrc +
         "worker-src 'self' blob:; " +
         "frame-src 'none'; " +
         "object-src 'none'; " +

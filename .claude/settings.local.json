@@ -8,7 +8,11 @@
       "Bash(git commit -m ' *)",
       "Bash(dotnet sln *)",
       "Bash(dotnet add *)",
-      "Bash(dotnet test *)"
+      "Bash(dotnet test *)",
+      "Read(//mnt/c/Projetos/**)",
+      "Bash(dotnet build *)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(dotnet test *)"
     ],
     "deny": [],
     "ask": []

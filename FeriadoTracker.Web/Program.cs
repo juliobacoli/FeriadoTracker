@@ -11,8 +11,10 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.Services.AddRazorPages();
 
+var dbPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "feriados.db");
+Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IHolidayService, HolidayService>();
@@ -22,7 +24,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate(); 
+    db.Database.Migrate();
 }
 
 if (!app.Environment.IsDevelopment())

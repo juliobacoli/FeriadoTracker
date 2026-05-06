@@ -1,3 +1,5 @@
+import { showToast } from './toast.js';
+
 const VAPID_ENDPOINT = '/api/push/vapid-public-key';
 const SUBSCRIBE_ENDPOINT = '/api/push/subscribe';
 const UNSUBSCRIBE_ENDPOINT = '/api/push/unsubscribe';
@@ -108,12 +110,18 @@ export async function setupPushButton(button) {
             const sub = await getCurrentSubscription();
             if (sub) {
                 await unsubscribe();
+                showToast('Notificações desativadas.', 'info');
             } else {
                 await subscribe();
+                showToast('Notificações ativadas! Avisaremos antes do próximo feriado.', 'success');
             }
             await refresh();
         } catch (err) {
             console.error('Push toggle falhou', err);
+            const msg = err && err.message === 'Permissão negada'
+                ? 'Permissão negada pelo navegador.'
+                : 'Não foi possível alterar a inscrição. Tente novamente.';
+            showToast(msg, 'error');
         } finally {
             button.disabled = false;
         }

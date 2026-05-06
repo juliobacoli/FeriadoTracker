@@ -8,23 +8,12 @@ namespace FeriadoTracker.Web.Controllers;
 
 [ApiController]
 [Route("api/push")]
-public class PushController : ControllerBase
+public class PushController(AppDbContext db, TimeProvider time, IConfiguration config) : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly TimeProvider _time;
-    private readonly IConfiguration _config;
-
-    public PushController(AppDbContext db, TimeProvider time, IConfiguration config)
-    {
-        _db = db;
-        _time = time;
-        _config = config;
-    }
-
     [HttpGet("vapid-public-key")]
     public IActionResult GetVapidPublicKey()
     {
-        var key = _config["WebPush:VapidPublicKey"];
+        var key = config["WebPush:VapidPublicKey"];
         if (string.IsNullOrEmpty(key))
         {
             return NotFound();
@@ -42,7 +31,7 @@ public class PushController : ControllerBase
             return BadRequest(new { error = "Campos obrigatórios ausentes." });
         }
 
-        var existing = await _db.PushSubscriptions
+        var existing = await db.PushSubscriptions
             .FirstOrDefaultAsync(s => s.Endpoint == dto.Endpoint, ct);
 
         if (existing is not null)
@@ -52,16 +41,16 @@ public class PushController : ControllerBase
         }
         else
         {
-            _db.PushSubscriptions.Add(new PushSubscription
+            db.PushSubscriptions.Add(new PushSubscription
             {
                 Endpoint = dto.Endpoint,
                 P256dh = dto.P256dh,
                 Auth = dto.Auth,
-                CreatedAt = _time.GetUtcNow().UtcDateTime
+                CreatedAt = time.GetUtcNow().UtcDateTime
             });
         }
 
-        await _db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(ct);
         return Ok();
     }
 
@@ -73,13 +62,13 @@ public class PushController : ControllerBase
             return BadRequest();
         }
 
-        var sub = await _db.PushSubscriptions
+        var sub = await db.PushSubscriptions
             .FirstOrDefaultAsync(s => s.Endpoint == dto.Endpoint, ct);
 
         if (sub is not null)
         {
-            _db.PushSubscriptions.Remove(sub);
-            await _db.SaveChangesAsync(ct);
+            db.PushSubscriptions.Remove(sub);
+            await db.SaveChangesAsync(ct);
         }
 
         return NoContent();

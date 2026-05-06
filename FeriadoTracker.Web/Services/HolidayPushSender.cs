@@ -9,55 +9,42 @@ using WebPushException = WebPush.WebPushException;
 
 namespace FeriadoTracker.Web.Services;
 
-public class HolidayPushSender : IHolidayPushSender
+public class HolidayPushSender(
+    AppDbContext db,
+    IConfiguration config,
+    TimeProvider time,
+    ILogger<HolidayPushSender> logger) : IHolidayPushSender
 {
-    private readonly AppDbContext _db;
-    private readonly IConfiguration _config;
-    private readonly TimeProvider _time;
-    private readonly ILogger<HolidayPushSender> _logger;
-
-    public HolidayPushSender(
-        AppDbContext db,
-        IConfiguration config,
-        TimeProvider time,
-        ILogger<HolidayPushSender> logger)
-    {
-        _db = db;
-        _config = config;
-        _time = time;
-        _logger = logger;
-    }
-
     public async Task<PushSendResult> SendDailyAsync(CancellationToken ct = default)
     {
-        var publicKey = _config["WebPush:VapidPublicKey"];
-        var privateKey = _config["WebPush:VapidPrivateKey"];
-        var subject = _config["WebPush:Subject"];
-        var daysAhead = int.TryParse(_config["WebPush:DaysAhead"], out var d) ? d : 3;
+        var publicKey = config["WebPush:VapidPublicKey"];
+        var privateKey = config["WebPush:VapidPrivateKey"];
+        var subject = config["WebPush:Subject"];
+        var daysAhead = int.TryParse(config["WebPush:DaysAhead"], out var d) ? d : 3;
 
         if (string.IsNullOrWhiteSpace(publicKey)
             || string.IsNullOrWhiteSpace(privateKey)
             || string.IsNullOrWhiteSpace(subject))
         {
-            _logger.LogWarning("VAPID não configurado. Envio pulado.");
+            logger.LogWarning("VAPID não configurado. Envio pulado.");
             return new PushSendResult(0, 0, 0);
         }
 
-        var today = _time.GetLocalNow().Date;
+        var today = time.GetLocalNow().Date;
         var until = today.AddDays(daysAhead);
         var todayDateOnly = DateOnly.FromDateTime(today);
 
-        var feriados = await _db.Feriados
+        var feriados = await db.Feriados
             .Where(f => f.Data >= today && f.Data <= until)
             .ToListAsync(ct);
 
         if (feriados.Count == 0)
         {
-            _logger.LogInformation("Nenhum feriado nos próximos {Days} dias.", daysAhead);
+            logger.LogInformation("Nenhum feriado nos próximos {Days} dias.", daysAhead);
             return new PushSendResult(0, 0, 0);
         }
 
-        var subscriptions = await _db.PushSubscriptions.ToListAsync(ct);
+        var subscriptions = await db.PushSubscriptions.ToListAsync(ct);
         if (subscriptions.Count == 0)
         {
             return new PushSendResult(0, 0, 0);
@@ -66,7 +53,7 @@ public class HolidayPushSender : IHolidayPushSender
         var feriadoIds = feriados.Select(f => f.Id).ToList();
         var subscriptionIds = subscriptions.Select(s => s.Id).ToList();
 
-        var alreadySent = await _db.NotificationLogs
+        var alreadySent = await db.NotificationLogs
             .Where(l => l.SentDate == todayDateOnly
                 && feriadoIds.Contains(l.FeriadoId)
                 && subscriptionIds.Contains(l.SubscriptionId))
@@ -110,12 +97,12 @@ public class HolidayPushSender : IHolidayPushSender
                 {
                     await client.SendNotificationAsync(pushSub, payload, vapid, ct);
 
-                    _db.NotificationLogs.Add(new NotificationLog
+                    db.NotificationLogs.Add(new NotificationLog
                     {
                         SubscriptionId = sub.Id,
                         FeriadoId = feriado.Id,
                         SentDate = todayDateOnly,
-                        SentAtUtc = _time.GetUtcNow().UtcDateTime
+                        SentAtUtc = time.GetUtcNow().UtcDateTime
                     });
 
                     sent++;
@@ -128,7 +115,7 @@ public class HolidayPushSender : IHolidayPushSender
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex,
+                    logger.LogWarning(ex,
                         "Falha ao enviar push para subscription {Id}.", sub.Id);
                 }
             }
@@ -136,12 +123,12 @@ public class HolidayPushSender : IHolidayPushSender
 
         if (toRemove.Count > 0)
         {
-            _db.PushSubscriptions.RemoveRange(toRemove);
+            db.PushSubscriptions.RemoveRange(toRemove);
         }
 
-        await _db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(ct);
 
-        _logger.LogInformation(
+        logger.LogInformation(
             "Envio: {Sent} enviadas, {Removed} removidas, {Skipped} já enviadas hoje.",
             sent, toRemove.Count, skipped);
 

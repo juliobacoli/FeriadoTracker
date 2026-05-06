@@ -5,26 +5,19 @@ namespace FeriadoTracker.Web.Controllers;
 
 [ApiController]
 [Route("api/dev/push")]
-public class DevPushController : ControllerBase
+public class DevPushController(
+    IHolidayPushSender sender,
+    IWebHostEnvironment env) : ControllerBase
 {
-    private readonly IHolidayPushSender _sender;
-    private readonly IWebHostEnvironment _env;
-
-    public DevPushController(IHolidayPushSender sender, IWebHostEnvironment env)
-    {
-        _sender = sender;
-        _env = env;
-    }
-
     [HttpPost("trigger")]
     public async Task<IActionResult> Trigger(CancellationToken ct)
     {
-        if (!_env.IsDevelopment())
+        if (!env.IsDevelopment())
         {
             return NotFound();
         }
 
-        var result = await _sender.SendDailyAsync(ct);
+        var result = await sender.SendDailyAsync(ct);
         return Ok(result);
     }
 }

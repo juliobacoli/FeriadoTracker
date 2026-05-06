@@ -23,6 +23,8 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddAntiforgery();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>();
 
 var dbPath = builder.Configuration["DB_PATH"]
     ?? Path.Combine(builder.Environment.ContentRootPath, "Data", "feriados.db");

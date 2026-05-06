@@ -54,8 +54,7 @@ public class HolidayPushSender(
         var subscriptionIds = subscriptions.Select(s => s.Id).ToList();
 
         var alreadySent = await db.NotificationLogs
-            .Where(l => l.SentDate == todayDateOnly
-                && feriadoIds.Contains(l.FeriadoId)
+            .Where(l => feriadoIds.Contains(l.FeriadoId)
                 && subscriptionIds.Contains(l.SubscriptionId))
             .Select(l => new { l.SubscriptionId, l.FeriadoId })
             .ToListAsync(ct);
@@ -126,7 +125,7 @@ public class HolidayPushSender(
         await db.SaveChangesAsync(ct);
 
         logger.LogInformation(
-            "Envio: {Sent} enviadas, {Removed} removidas, {Skipped} já enviadas hoje.",
+            "Envio: {Sent} enviadas, {Removed} removidas, {Skipped} já notificadas anteriormente.",
             sent, toRemove.Count, skipped);
 
         return new PushSendResult(sent, toRemove.Count, skipped);

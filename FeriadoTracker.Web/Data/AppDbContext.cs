@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
             .IsUnique();
 
         modelBuilder.Entity<NotificationLog>()
-            .HasIndex(n => new { n.SubscriptionId, n.FeriadoId, n.SentDate })
+            .HasIndex(n => new { n.SubscriptionId, n.FeriadoId })
             .IsUnique();
 
         modelBuilder.Entity<NotificationLog>()

@@ -1,8 +1,10 @@
 using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Threading.RateLimiting;
 
 if (args.Length > 0 && args[0] == "generate-vapid-keys")
 {
@@ -25,6 +27,17 @@ builder.Services.AddControllers();
 builder.Services.AddAntiforgery();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("push", o =>
+    {
+        o.PermitLimit = 10;
+        o.Window = TimeSpan.FromMinutes(1);
+        o.QueueLimit = 0;
+    });
+});
 
 var dbPath = builder.Configuration["DB_PATH"]
     ?? Path.Combine(builder.Environment.ContentRootPath, "Data", "feriados.db");
@@ -103,6 +116,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 app.UseAntiforgery();
+app.UseRateLimiter();
 
 app.MapStaticAssets();
 app.MapRazorPages()

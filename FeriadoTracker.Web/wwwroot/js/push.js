@@ -63,6 +63,11 @@ async function subscribe() {
         })
     });
 
+    if (response.status === 429) {
+        await sub.unsubscribe();
+        throw new Error('rate-limited');
+    }
+
     if (!response.ok) {
         await sub.unsubscribe();
         throw new Error('Falha ao registrar no servidor');
@@ -73,11 +78,16 @@ async function unsubscribe() {
     const sub = await getCurrentSubscription();
     if (!sub) return;
 
-    await fetch(UNSUBSCRIBE_ENDPOINT, {
+    const response = await fetch(UNSUBSCRIBE_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ endpoint: sub.endpoint })
     });
+
+    if (response.status === 429) {
+        throw new Error('rate-limited');
+    }
+
     await sub.unsubscribe();
 }
 
@@ -118,9 +128,17 @@ export async function setupPushButton(button) {
             await refresh();
         } catch (err) {
             console.error('Push toggle falhou', err);
-            const msg = err && err.message === 'Permissão negada'
-                ? 'Permissão negada pelo navegador.'
-                : 'Não foi possível alterar a inscrição. Tente novamente.';
+            let msg;
+            switch (err && err.message) {
+                case 'Permissão negada':
+                    msg = 'Permissão negada pelo navegador.';
+                    break;
+                case 'rate-limited':
+                    msg = 'Muitas tentativas. Aguarde 1 minuto e tente novamente.';
+                    break;
+                default:
+                    msg = 'Não foi possível alterar a inscrição. Tente novamente.';
+            }
             showToast(msg, 'error');
         } finally {
             button.disabled = false;

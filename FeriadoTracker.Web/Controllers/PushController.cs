@@ -2,12 +2,14 @@ using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Dtos;
 using FeriadoTracker.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace FeriadoTracker.Web.Controllers;
 
 [ApiController]
 [Route("api/push")]
+[EnableRateLimiting("push")]
 public class PushController(AppDbContext db, TimeProvider time, IConfiguration config) : ControllerBase
 {
     [HttpGet("vapid-public-key")]

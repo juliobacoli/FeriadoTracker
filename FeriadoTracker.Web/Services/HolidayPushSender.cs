@@ -73,15 +73,12 @@ public class HolidayPushSender(
         foreach (var feriado in feriados)
         {
             var diffDays = (feriado.Data.Date - today).Days;
-            var title = "Feriado se aproxima!";
-            var body = diffDays switch
+            var payload = JsonSerializer.Serialize(new
             {
-                0 => $"Hoje é {feriado.Nome}!",
-                1 => $"Amanhã é {feriado.Nome}!",
-                _ => $"Faltam {diffDays} dias para {feriado.Nome}."
-            };
-
-            var payload = JsonSerializer.Serialize(new { title, body, url = "/" });
+                title = NotificationTemplates.Title,
+                body = NotificationTemplates.Body(diffDays, feriado.Nome),
+                url = NotificationTemplates.DefaultUrl
+            });
 
             foreach (var sub in subscriptions)
             {

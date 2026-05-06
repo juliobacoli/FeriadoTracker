@@ -51,8 +51,7 @@
                     @foreach (var feriado in Model.ProximosFeriados)
                     {
                         var isNext = Model.ProximoFeriado is not null
-                        && feriado.Data == Model.ProximoFeriado.Data
-                        && feriado.Nome == Model.ProximoFeriado.Nome;
+                        && feriado.Id == Model.ProximoFeriado.Id;
 
                         <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
                              data-target-date="@feriado.Data.ToString("yyyy-MM-ddTHH:mm:ss")"

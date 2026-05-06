@@ -33,7 +33,7 @@ public class PushController : ControllerBase
     }
 
     [HttpPost("subscribe")]
-    public async Task<IActionResult> Subscribe([FromBody] PushSubscriptionDto dto)
+    public async Task<IActionResult> Subscribe([FromBody] PushSubscriptionDto dto, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(dto.Endpoint)
             || string.IsNullOrWhiteSpace(dto.P256dh)
@@ -43,7 +43,7 @@ public class PushController : ControllerBase
         }
 
         var existing = await _db.PushSubscriptions
-            .FirstOrDefaultAsync(s => s.Endpoint == dto.Endpoint);
+            .FirstOrDefaultAsync(s => s.Endpoint == dto.Endpoint, ct);
 
         if (existing is not null)
         {
@@ -61,12 +61,12 @@ public class PushController : ControllerBase
             });
         }
 
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(ct);
         return Ok();
     }
 
     [HttpPost("unsubscribe")]
-    public async Task<IActionResult> Unsubscribe([FromBody] UnsubscribeDto dto)
+    public async Task<IActionResult> Unsubscribe([FromBody] UnsubscribeDto dto, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(dto.Endpoint))
         {
@@ -74,12 +74,12 @@ public class PushController : ControllerBase
         }
 
         var sub = await _db.PushSubscriptions
-            .FirstOrDefaultAsync(s => s.Endpoint == dto.Endpoint);
+            .FirstOrDefaultAsync(s => s.Endpoint == dto.Endpoint, ct);
 
         if (sub is not null)
         {
             _db.PushSubscriptions.Remove(sub);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
         }
 
         return NoContent();

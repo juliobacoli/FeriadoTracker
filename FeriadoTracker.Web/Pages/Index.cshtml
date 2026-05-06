@@ -98,7 +98,7 @@
 }
 
 @section Scripts {
-    <script src="~/js/confetti-lib.js" asp-append-version="true"></script>
-    <script type="module" src="~/js/main.js" asp-append-version="true"></script>
+    <script src="~/js/confetti-lib.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
+    <script type="module" src="~/js/main.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
 }
 

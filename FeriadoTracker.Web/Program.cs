@@ -1,7 +1,18 @@
 using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Services;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+
+if (args.Length > 0 && args[0] == "generate-vapid-keys")
+{
+    var keys = WebPush.VapidHelper.GenerateVapidKeys();
+    Console.WriteLine($"VapidPublicKey:  {keys.PublicKey}");
+    Console.WriteLine($"VapidPrivateKey: {keys.PrivateKey}");
+    return;
+}
+
+DotNetEnv.Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,14 +21,33 @@ CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+builder.Services.AddAntiforgery();
 
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "feriados.db");
+var dbPath = builder.Configuration["DB_PATH"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "Data", "feriados.db");
 Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+
+var legacyDbPath = Path.Combine(builder.Environment.ContentRootPath, "feriados.db");
+if (File.Exists(legacyDbPath) && !File.Exists(dbPath))
+{
+    File.Move(legacyDbPath, dbPath);
+}
+
+var keysPath = builder.Configuration["DATA_PROTECTION_KEYS_PATH"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "Data", "keys");
+Directory.CreateDirectory(keysPath);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+    .SetApplicationName("FeriadoTracker");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
-builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<TimeProvider, BrazilTimeProvider>();
 builder.Services.AddScoped<IHolidayService, HolidayService>();
+builder.Services.AddScoped<IHolidayPushSender, HolidayPushSender>();
+builder.Services.AddHostedService<HolidayNotificationService>();
 
 var app = builder.Build();
 
@@ -46,21 +76,21 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("Permissions-Policy",
         "camera=(), microphone=(), geolocation=(), payment=()");
-    var connectSrc = app.Environment.IsDevelopment()
-        ? "connect-src 'self' https://*.clarity.ms ws://localhost:* wss://localhost:* http://localhost:*; "
-        : "connect-src 'self' https://*.clarity.ms; ";
 
-    context.Response.Headers.Append("Content-Security-Policy",
-        "default-src 'self'; " +
-        $"script-src 'self' 'nonce-{nonce}' https://*.clarity.ms; " +
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-        "font-src 'self' https://fonts.gstatic.com; " +
-        "img-src 'self' data: https://*.clarity.ms; " +
-        connectSrc +
-        "worker-src 'self' blob:; " +
-        "frame-src 'none'; " +
-        "object-src 'none'; " +
-        "base-uri 'self'");
+    if (!app.Environment.IsDevelopment())
+    {
+        context.Response.Headers.Append("Content-Security-Policy",
+            "default-src 'self'; " +
+            $"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' https://*.clarity.ms; " +
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+            "font-src 'self' https://fonts.gstatic.com; " +
+            "img-src 'self' data: https://*.clarity.ms; " +
+            "connect-src 'self' https://*.clarity.ms; " +
+            "worker-src 'self' blob:; " +
+            "frame-src 'none'; " +
+            "object-src 'none'; " +
+            "base-uri 'self'");
+    }
 
     await next();
 });
@@ -70,9 +100,11 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+app.MapControllers();
 
 app.Run();

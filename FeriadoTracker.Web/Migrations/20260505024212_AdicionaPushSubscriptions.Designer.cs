@@ -3,6 +3,7 @@ using System;
 using FeriadoTracker.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FeriadoTracker.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260505024212_AdicionaPushSubscriptions")]
+    partial class AdicionaPushSubscriptions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -141,34 +144,6 @@ namespace FeriadoTracker.Web.Migrations
                         });
                 });
 
-            modelBuilder.Entity("FeriadoTracker.Web.Models.NotificationLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FeriadoId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("SentAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateOnly>("SentDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SubscriptionId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FeriadoId");
-
-                    b.HasIndex("SubscriptionId", "FeriadoId", "SentDate")
-                        .IsUnique();
-
-                    b.ToTable("NotificationLogs");
-                });
-
             modelBuilder.Entity("FeriadoTracker.Web.Models.PushSubscription", b =>
                 {
                     b.Property<int>("Id")
@@ -199,25 +174,6 @@ namespace FeriadoTracker.Web.Migrations
                         .IsUnique();
 
                     b.ToTable("PushSubscriptions");
-                });
-
-            modelBuilder.Entity("FeriadoTracker.Web.Models.NotificationLog", b =>
-                {
-                    b.HasOne("FeriadoTracker.Web.Models.Feriado", "Feriado")
-                        .WithMany()
-                        .HasForeignKey("FeriadoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FeriadoTracker.Web.Models.PushSubscription", "Subscription")
-                        .WithMany()
-                        .HasForeignKey("SubscriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Feriado");
-
-                    b.Navigation("Subscription");
                 });
 #pragma warning restore 612, 618
         }

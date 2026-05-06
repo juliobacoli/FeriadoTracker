@@ -1,8 +1,12 @@
 import { startConfetti, attachConfettiButton } from './confetti.js';
 import { createCountdown } from './countdown.js';
 import { attachTimelineHandlers } from './timeline.js';
+import { setupPushButton } from './push.js';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const pushBtn = document.getElementById('pushToggle');
+    if (pushBtn) setupPushButton(pushBtn);
+
     const wrapper = document.querySelector('.holiday-wrapper');
     if (!wrapper) return;
 

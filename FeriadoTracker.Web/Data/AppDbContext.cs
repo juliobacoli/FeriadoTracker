@@ -7,9 +7,31 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     public DbSet<Feriado> Feriados { get; set; }
+    public DbSet<PushSubscription> PushSubscriptions { get; set; }
+    public DbSet<NotificationLog> NotificationLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<PushSubscription>()
+            .HasIndex(p => p.Endpoint)
+            .IsUnique();
+
+        modelBuilder.Entity<NotificationLog>()
+            .HasIndex(n => new { n.SubscriptionId, n.FeriadoId, n.SentDate })
+            .IsUnique();
+
+        modelBuilder.Entity<NotificationLog>()
+            .HasOne(n => n.Subscription)
+            .WithMany()
+            .HasForeignKey(n => n.SubscriptionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NotificationLog>()
+            .HasOne(n => n.Feriado)
+            .WithMany()
+            .HasForeignKey(n => n.FeriadoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Feriado>().HasData(
             new Feriado { Id = 1, Nome = "Natal", Data = new DateTime(2025, 12, 25), Tipo = "Nacional" },
             new Feriado { Id = 2, Nome = "Confraternização Universal", Data = new DateTime(2026, 01, 01), Tipo = "Nacional" },

@@ -362,5 +362,14 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+*.db
 *.db-shm
 *.db-wal
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# DataProtection keys (geradas localmente)
+**/Data/keys/

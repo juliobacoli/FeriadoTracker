@@ -128,6 +128,14 @@ public class HolidayServiceTests
     }
 
     [Fact]
+    public void BrazilTimeProvider_UsaTimeZoneSaoPaulo()
+    {
+        var provider = new BrazilTimeProvider();
+
+        Assert.Equal(TimeSpan.FromHours(-3), provider.LocalTimeZone.BaseUtcOffset);
+    }
+
+    [Fact]
     public async Task GetProximoFeriadoAsync_RetornaPrimeiroQuandoMultiplosNoMesmoDia()
     {
         await using var ctx = CreateInMemoryContext(nameof(GetProximoFeriadoAsync_RetornaPrimeiroQuandoMultiplosNoMesmoDia));

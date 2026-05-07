@@ -60,6 +60,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddSingleton<TimeProvider, BrazilTimeProvider>();
+builder.Services.AddSingleton<IWebPushClient, VapidWebPushClient>();
 builder.Services.AddScoped<IHolidayService, HolidayService>();
 builder.Services.AddScoped<IHolidayPushSender, HolidayPushSender>();
 builder.Services.AddHostedService<HolidayNotificationService>();

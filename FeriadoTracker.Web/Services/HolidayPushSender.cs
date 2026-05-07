@@ -2,117 +2,73 @@ using System.Text.Json;
 using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Models;
 using Microsoft.EntityFrameworkCore;
-using WebPushSubscription = WebPush.PushSubscription;
-using WebPushClient = WebPush.WebPushClient;
-using VapidDetails = WebPush.VapidDetails;
-using WebPushException = WebPush.WebPushException;
 
 namespace FeriadoTracker.Web.Services;
 
 public class HolidayPushSender(
     AppDbContext db,
     IConfiguration config,
+    IWebPushClient pushClient,
     TimeProvider time,
     ILogger<HolidayPushSender> logger) : IHolidayPushSender
 {
     public async Task<PushSendResult> SendDailyAsync(CancellationToken ct = default)
     {
-        var publicKey = config["WebPush:VapidPublicKey"];
-        var privateKey = config["WebPush:VapidPrivateKey"];
-        var subject = config["WebPush:Subject"];
-        var daysAhead = int.TryParse(config["WebPush:DaysAhead"], out var d) ? d : 3;
-
-        if (string.IsNullOrWhiteSpace(publicKey)
-            || string.IsNullOrWhiteSpace(privateKey)
-            || string.IsNullOrWhiteSpace(subject))
-        {
-            logger.LogWarning("VAPID não configurado. Envio pulado.");
-            return new PushSendResult(0, 0, 0);
-        }
+        var settings = LoadSettings();
+        if (settings is null) return new PushSendResult(0, 0, 0);
 
         var today = time.GetLocalNow().Date;
-        var until = today.AddDays(daysAhead);
+        var until = today.AddDays(settings.DaysAhead);
         var todayDateOnly = DateOnly.FromDateTime(today);
 
-        var feriados = await db.Feriados
-            .Where(f => f.Data >= today && f.Data <= until)
-            .ToListAsync(ct);
-
+        var feriados = await GetFeriadosAsync(today, until, ct);
         if (feriados.Count == 0)
         {
-            logger.LogInformation("Nenhum feriado nos próximos {Days} dias.", daysAhead);
+            logger.LogInformation("Nenhum feriado nos próximos {Days} dias.", settings.DaysAhead);
             return new PushSendResult(0, 0, 0);
         }
 
         var subscriptions = await db.PushSubscriptions.ToListAsync(ct);
-        if (subscriptions.Count == 0)
-        {
-            return new PushSendResult(0, 0, 0);
-        }
+        if (subscriptions.Count == 0) return new PushSendResult(0, 0, 0);
 
-        var feriadoIds = feriados.Select(f => f.Id).ToList();
-        var subscriptionIds = subscriptions.Select(s => s.Id).ToList();
+        var alreadySent = await GetAlreadySentAsync(feriados, subscriptions, ct);
 
-        var alreadySent = await db.NotificationLogs
-            .Where(l => feriadoIds.Contains(l.FeriadoId)
-                && subscriptionIds.Contains(l.SubscriptionId))
-            .Select(l => new { l.SubscriptionId, l.FeriadoId })
-            .ToListAsync(ct);
-
-        var sentSet = alreadySent
-            .Select(x => (x.SubscriptionId, x.FeriadoId))
-            .ToHashSet();
-
-        var vapid = new VapidDetails(subject, publicKey, privateKey);
-        var client = new WebPushClient();
         var toRemove = new List<PushSubscription>();
         var sent = 0;
         var skipped = 0;
 
         foreach (var feriado in feriados)
         {
-            var diffDays = (feriado.Data.Date - today).Days;
-            var payload = JsonSerializer.Serialize(new
-            {
-                title = NotificationTemplates.Title,
-                body = NotificationTemplates.Body(diffDays, feriado.Nome),
-                url = NotificationTemplates.DefaultUrl
-            });
+            var payload = BuildPayload(feriado, today);
 
             foreach (var sub in subscriptions)
             {
-                if (sentSet.Contains((sub.Id, feriado.Id)))
+                if (alreadySent.Contains((sub.Id, feriado.Id)))
                 {
                     skipped++;
                     continue;
                 }
 
-                var pushSub = new WebPushSubscription(sub.Endpoint, sub.P256dh, sub.Auth);
+                var outcome = await pushClient.SendAsync(
+                    sub.Endpoint, sub.P256dh, sub.Auth, payload, ct);
 
-                try
+                switch (outcome)
                 {
-                    await client.SendNotificationAsync(pushSub, payload, vapid, ct);
-
-                    db.NotificationLogs.Add(new NotificationLog
-                    {
-                        SubscriptionId = sub.Id,
-                        FeriadoId = feriado.Id,
-                        SentDate = todayDateOnly,
-                        SentAtUtc = time.GetUtcNow().UtcDateTime
-                    });
-
-                    sent++;
-                }
-                catch (WebPushException ex) when (
-                    ex.StatusCode == System.Net.HttpStatusCode.Gone
-                    || ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    toRemove.Add(sub);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWarning(ex,
-                        "Falha ao enviar push para subscription {Id}.", sub.Id);
+                    case PushSendOutcome.Success:
+                        db.NotificationLogs.Add(new NotificationLog
+                        {
+                            SubscriptionId = sub.Id,
+                            FeriadoId = feriado.Id,
+                            SentDate = todayDateOnly,
+                            SentAtUtc = time.GetUtcNow().UtcDateTime
+                        });
+                        sent++;
+                        break;
+                    case PushSendOutcome.Gone:
+                        toRemove.Add(sub);
+                        break;
+                    case PushSendOutcome.Failed:
+                        break;
                 }
             }
         }
@@ -130,4 +86,57 @@ public class HolidayPushSender(
 
         return new PushSendResult(sent, toRemove.Count, skipped);
     }
+
+    private SendSettings? LoadSettings()
+    {
+        var publicKey = config["WebPush:VapidPublicKey"];
+        var privateKey = config["WebPush:VapidPrivateKey"];
+        var subject = config["WebPush:Subject"];
+        var daysAhead = int.TryParse(config["WebPush:DaysAhead"], out var d) ? d : 3;
+
+        if (string.IsNullOrWhiteSpace(publicKey)
+            || string.IsNullOrWhiteSpace(privateKey)
+            || string.IsNullOrWhiteSpace(subject))
+        {
+            logger.LogWarning("VAPID não configurado. Envio pulado.");
+            return null;
+        }
+
+        return new SendSettings(daysAhead);
+    }
+
+    private Task<List<Feriado>> GetFeriadosAsync(DateTime today, DateTime until, CancellationToken ct) =>
+        db.Feriados
+            .Where(f => f.Data >= today && f.Data <= until)
+            .ToListAsync(ct);
+
+    private async Task<HashSet<(int SubscriptionId, int FeriadoId)>> GetAlreadySentAsync(
+        List<Feriado> feriados,
+        List<PushSubscription> subscriptions,
+        CancellationToken ct)
+    {
+        var feriadoIds = feriados.Select(f => f.Id).ToList();
+        var subscriptionIds = subscriptions.Select(s => s.Id).ToList();
+
+        var rows = await db.NotificationLogs
+            .Where(l => feriadoIds.Contains(l.FeriadoId)
+                && subscriptionIds.Contains(l.SubscriptionId))
+            .Select(l => new { l.SubscriptionId, l.FeriadoId })
+            .ToListAsync(ct);
+
+        return rows.Select(x => (x.SubscriptionId, x.FeriadoId)).ToHashSet();
+    }
+
+    private static string BuildPayload(Feriado feriado, DateTime today)
+    {
+        var diffDays = (feriado.Data.Date - today).Days;
+        return JsonSerializer.Serialize(new
+        {
+            title = NotificationTemplates.Title,
+            body = NotificationTemplates.Body(diffDays, feriado.Nome),
+            url = NotificationTemplates.DefaultUrl
+        });
+    }
+
+    private sealed record SendSettings(int DaysAhead);
 }

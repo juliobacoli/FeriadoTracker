@@ -2,7 +2,7 @@ using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Models;
 using FeriadoTracker.Web.Services;
 using Microsoft.EntityFrameworkCore;
-using Moq;
+using Microsoft.Extensions.Time.Testing;
 
 namespace FeriadoTracker.Web.Tests;
 
@@ -16,12 +16,11 @@ public class HolidayServiceTests
         return new AppDbContext(options);
     }
 
-    private static TimeProvider FakeTime(DateTime utcNow)
+    private static FakeTimeProvider FakeTime(DateTime utcNow, TimeZoneInfo? localZone = null)
     {
-        var mock = new Mock<TimeProvider>();
-        mock.Setup(t => t.GetUtcNow()).Returns(new DateTimeOffset(utcNow, TimeSpan.Zero));
-        mock.Setup(t => t.LocalTimeZone).Returns(TimeZoneInfo.Utc);
-        return mock.Object;
+        var provider = new FakeTimeProvider(new DateTimeOffset(utcNow, TimeSpan.Zero));
+        provider.SetLocalTimeZone(localZone ?? TimeZoneInfo.Utc);
+        return provider;
     }
 
     [Fact]
@@ -116,11 +115,9 @@ public class HolidayServiceTests
         await ctx.SaveChangesAsync();
 
         var brt = TimeZoneInfo.CreateCustomTimeZone("BRT", TimeSpan.FromHours(-3), "BRT", "BRT");
-        var mock = new Mock<TimeProvider>();
-        mock.Setup(t => t.GetUtcNow()).Returns(new DateTimeOffset(2026, 5, 2, 2, 30, 0, TimeSpan.Zero));
-        mock.Setup(t => t.LocalTimeZone).Returns(brt);
+        var time = FakeTime(new DateTime(2026, 5, 2, 2, 30, 0), brt);
 
-        var service = new HolidayService(ctx, mock.Object);
+        var service = new HolidayService(ctx, time);
         var resultado = await service.GetProximoFeriadoAsync();
 
         Assert.NotNull(resultado);

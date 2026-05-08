@@ -3,6 +3,7 @@ using System;
 using FeriadoTracker.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FeriadoTracker.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260505030433_AdicionaNotificationLog")]
+    partial class AdicionaNotificationLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -23,7 +26,7 @@ namespace FeriadoTracker.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateOnly>("Data")
+                    b.Property<DateTime>("Data")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Nome")
@@ -44,98 +47,98 @@ namespace FeriadoTracker.Web.Migrations
                         new
                         {
                             Id = 1,
-                            Data = new DateOnly(2025, 12, 25),
+                            Data = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Natal",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 2,
-                            Data = new DateOnly(2026, 1, 1),
+                            Data = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Confraternização Universal",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 3,
-                            Data = new DateOnly(2026, 2, 16),
+                            Data = new DateTime(2026, 2, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Carnaval",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 4,
-                            Data = new DateOnly(2026, 2, 17),
+                            Data = new DateTime(2026, 2, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Carnaval",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 5,
-                            Data = new DateOnly(2026, 4, 3),
+                            Data = new DateTime(2026, 4, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Sexta-feira Santa",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 6,
-                            Data = new DateOnly(2026, 4, 21),
+                            Data = new DateTime(2026, 4, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Tiradentes",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 7,
-                            Data = new DateOnly(2026, 5, 1),
+                            Data = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Dia do Trabalho",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 8,
-                            Data = new DateOnly(2026, 6, 4),
+                            Data = new DateTime(2026, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Corpus Christi",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 9,
-                            Data = new DateOnly(2026, 9, 7),
+                            Data = new DateTime(2026, 9, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Independência do Brasil",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 10,
-                            Data = new DateOnly(2026, 10, 12),
+                            Data = new DateTime(2026, 10, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Nossa Senhora Aparecida",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 11,
-                            Data = new DateOnly(2026, 11, 2),
+                            Data = new DateTime(2026, 11, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Finados",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 12,
-                            Data = new DateOnly(2026, 11, 15),
+                            Data = new DateTime(2026, 11, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Proclamação da República",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 13,
-                            Data = new DateOnly(2026, 11, 20),
+                            Data = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Dia Nacional da Consciência Negra",
                             Tipo = "Nacional"
                         },
                         new
                         {
                             Id = 14,
-                            Data = new DateOnly(2026, 12, 25),
+                            Data = new DateTime(2026, 12, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nome = "Natal",
                             Tipo = "Nacional"
                         });
@@ -163,7 +166,7 @@ namespace FeriadoTracker.Web.Migrations
 
                     b.HasIndex("FeriadoId");
 
-                    b.HasIndex("SubscriptionId", "FeriadoId")
+                    b.HasIndex("SubscriptionId", "FeriadoId", "SentDate")
                         .IsUnique();
 
                     b.ToTable("NotificationLogs");

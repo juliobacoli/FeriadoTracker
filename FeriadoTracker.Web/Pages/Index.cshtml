@@ -4,7 +4,7 @@
 @model FeriadoTracker.Web.Pages.IndexModel
 
 <div class="page-wrapper page-center">
-    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">
+    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado?.Data.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">
         <div class="holiday-card card">
             <div class="holiday-header">
                 <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
@@ -51,11 +51,10 @@
                     @foreach (var feriado in Model.ProximosFeriados)
                     {
                         var isNext = Model.ProximoFeriado is not null
-                        && feriado.Data == Model.ProximoFeriado.Data
-                        && feriado.Nome == Model.ProximoFeriado.Nome;
+                        && feriado.Id == Model.ProximoFeriado.Id;
 
                         <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
-                             data-target-date="@feriado.Data.ToString("yyyy-MM-ddTHH:mm:ss")"
+                             data-target-date="@feriado.Data.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-ddTHH:mm:ss")"
                              data-target-name="@feriado.Nome"
                              data-target-formatted="@feriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))">
                             <div class="holiday-timeline-dot"></div>
@@ -79,7 +78,7 @@
         }
 
         <div class="creator-card">
-            <a href="https://juliobacoli.com.br/" target="_blank" class="creator-link">
+            <a href="https://juliobacoli.com.br/" target="_blank" rel="noopener noreferrer" class="creator-link">
                 <svg class="site-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <path d="M2 12h20" />
@@ -98,7 +97,7 @@
 }
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="~/js/holiday-countdown.js" asp-append-version="true"></script>
+    <script src="~/js/confetti-lib.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
+    <script type="module" src="~/js/main.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
 }
 

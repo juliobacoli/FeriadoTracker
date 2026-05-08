@@ -8,7 +8,7 @@ public class HolidayService(AppDbContext context, TimeProvider timeProvider) : I
 {
     public async Task<Feriado?> GetProximoFeriadoAsync()
     {
-        var hoje = timeProvider.GetLocalNow().Date;
+        var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
         return await context.Feriados
             .Where(f => f.Data >= hoje)
             .OrderBy(f => f.Data)
@@ -17,7 +17,7 @@ public class HolidayService(AppDbContext context, TimeProvider timeProvider) : I
 
     public async Task<List<Feriado>> GetProximosFeriadosAsync()
     {
-        var hoje = timeProvider.GetLocalNow().Date;
+        var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
         return await context.Feriados
             .Where(f => f.Data >= hoje)

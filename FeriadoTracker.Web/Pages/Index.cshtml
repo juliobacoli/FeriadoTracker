@@ -4,7 +4,7 @@
 @model FeriadoTracker.Web.Pages.IndexModel
 
 <div class="page-wrapper page-center">
-    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado?.Data.ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">
+    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado?.Data.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">
         <div class="holiday-card card">
             <div class="holiday-header">
                 <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
@@ -54,7 +54,7 @@
                         && feriado.Id == Model.ProximoFeriado.Id;
 
                         <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
-                             data-target-date="@feriado.Data.ToString("yyyy-MM-ddTHH:mm:ss")"
+                             data-target-date="@feriado.Data.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-ddTHH:mm:ss")"
                              data-target-name="@feriado.Nome"
                              data-target-formatted="@feriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))">
                             <div class="holiday-timeline-dot"></div>

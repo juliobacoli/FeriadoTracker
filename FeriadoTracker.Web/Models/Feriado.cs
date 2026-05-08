@@ -11,7 +11,7 @@ public class Feriado
     [MaxLength(100)]
     public string Nome { get; set; } = string.Empty;
 
-    public DateTime Data { get; set; }
+    public DateOnly Data { get; set; }
 
     [MaxLength(50)]
     public string Tipo { get; set; } = "Nacional";

@@ -79,7 +79,7 @@ public class HolidayPushSenderTests
     public async Task SendDailyAsync_RetornaZerosQuandoVapidNaoConfigurado()
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_RetornaZerosQuandoVapidNaoConfigurado));
-        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Trabalho", Data = new DateTime(2026, 5, 1), Tipo = "Nacional" });
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Trabalho", Data = new DateOnly(2026, 5, 1), Tipo = "Nacional" });
         ctx.PushSubscriptions.Add(MakeSub(1, "https://push/abc"));
         await ctx.SaveChangesAsync();
 
@@ -98,7 +98,7 @@ public class HolidayPushSenderTests
     public async Task SendDailyAsync_RetornaZerosQuandoNaoTemFeriadosNaJanela()
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_RetornaZerosQuandoNaoTemFeriadosNaJanela));
-        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Distante", Data = new DateTime(2026, 12, 25), Tipo = "Nacional" });
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Distante", Data = new DateOnly(2026, 12, 25), Tipo = "Nacional" });
         ctx.PushSubscriptions.Add(MakeSub(1, "https://push/abc"));
         await ctx.SaveChangesAsync();
 
@@ -115,7 +115,7 @@ public class HolidayPushSenderTests
     public async Task SendDailyAsync_RetornaZerosQuandoNaoTemSubscriptions()
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_RetornaZerosQuandoNaoTemSubscriptions));
-        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Trabalho", Data = new DateTime(2026, 5, 4), Tipo = "Nacional" });
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Trabalho", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" });
         await ctx.SaveChangesAsync();
 
         var client = new FakePushClient();
@@ -131,7 +131,7 @@ public class HolidayPushSenderTests
     public async Task SendDailyAsync_EnviaParaCadaSubscriptionEPersisteLog()
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_EnviaParaCadaSubscriptionEPersisteLog));
-        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateTime(2026, 5, 4), Tipo = "Nacional" });
+        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" });
         ctx.PushSubscriptions.AddRange(
             MakeSub(1, "https://push/a"),
             MakeSub(2, "https://push/b"));
@@ -152,7 +152,7 @@ public class HolidayPushSenderTests
     public async Task SendDailyAsync_PulaQuandoLogJaExiste()
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_PulaQuandoLogJaExiste));
-        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateTime(2026, 5, 4), Tipo = "Nacional" });
+        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" });
         ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
         ctx.NotificationLogs.Add(new NotificationLog
         {
@@ -177,7 +177,7 @@ public class HolidayPushSenderTests
     public async Task SendDailyAsync_RemoveSubscriptionsComOutcomeGone()
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_RemoveSubscriptionsComOutcomeGone));
-        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateTime(2026, 5, 4), Tipo = "Nacional" });
+        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" });
         ctx.PushSubscriptions.AddRange(
             MakeSub(1, "https://push/ok"),
             MakeSub(2, "https://push/gone"));
@@ -202,8 +202,8 @@ public class HolidayPushSenderTests
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_NaoEnviaParaFeriadoForaDaJanela));
         ctx.Feriados.AddRange(
-            new Feriado { Id = 1, Nome = "Dentro", Data = new DateTime(2026, 5, 4), Tipo = "Nacional" },
-            new Feriado { Id = 2, Nome = "Fora", Data = new DateTime(2026, 5, 20), Tipo = "Nacional" });
+            new Feriado { Id = 1, Nome = "Dentro", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" },
+            new Feriado { Id = 2, Nome = "Fora", Data = new DateOnly(2026, 5, 20), Tipo = "Nacional" });
         ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
         await ctx.SaveChangesAsync();
 
@@ -220,7 +220,7 @@ public class HolidayPushSenderTests
     public async Task SendDailyAsync_OutcomeFailedNaoMarcaLogNemRemove()
     {
         await using var ctx = CreateContext(nameof(SendDailyAsync_OutcomeFailedNaoMarcaLogNemRemove));
-        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateTime(2026, 5, 4), Tipo = "Nacional" });
+        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" });
         ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
         await ctx.SaveChangesAsync();
 

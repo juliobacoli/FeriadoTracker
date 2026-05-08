@@ -18,9 +18,8 @@ public class HolidayPushSender(
         var settings = LoadSettings();
         if (settings is null) return new PushSendResult(0, 0, 0);
 
-        var today = time.GetLocalNow().Date;
+        var today = DateOnly.FromDateTime(time.GetLocalNow().Date);
         var until = today.AddDays(settings.DaysAhead);
-        var todayDateOnly = DateOnly.FromDateTime(today);
 
         var feriados = await GetFeriadosAsync(today, until, ct);
         if (feriados.Count == 0)
@@ -60,7 +59,7 @@ public class HolidayPushSender(
                         {
                             SubscriptionId = sub.Id,
                             FeriadoId = feriado.Id,
-                            SentDate = todayDateOnly,
+                            SentDate = today,
                             SentAtUtc = time.GetUtcNow().UtcDateTime
                         });
                         sent++;
@@ -106,7 +105,7 @@ public class HolidayPushSender(
         return new SendSettings(daysAhead);
     }
 
-    private Task<List<Feriado>> GetFeriadosAsync(DateTime today, DateTime until, CancellationToken ct) =>
+    private Task<List<Feriado>> GetFeriadosAsync(DateOnly today, DateOnly until, CancellationToken ct) =>
         db.Feriados
             .Where(f => f.Data >= today && f.Data <= until)
             .ToListAsync(ct);
@@ -128,9 +127,9 @@ public class HolidayPushSender(
         return rows.Select(x => (x.SubscriptionId, x.FeriadoId)).ToHashSet();
     }
 
-    private static string BuildPayload(Feriado feriado, DateTime today)
+    private static string BuildPayload(Feriado feriado, DateOnly today)
     {
-        var diffDays = (feriado.Data.Date - today).Days;
+        var diffDays = feriado.Data.DayNumber - today.DayNumber;
         return JsonSerializer.Serialize(new
         {
             title = NotificationTemplates.Title,

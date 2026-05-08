@@ -1,5 +1,8 @@
 namespace FeriadoTracker.Web.Services;
 
+// Assume execução em uma única réplica. Multi-réplica enviaria push duplicado
+// porque cada instância dispararia seu próprio scheduler. Para escalar, é
+// necessário um lock distribuído (ex.: tabela de claim) ou job runner externo.
 public class HolidayNotificationService(IServiceScopeFactory scopeFactory, TimeProvider time, ILogger<HolidayNotificationService> logger) : BackgroundService
 {
     private const int RunHour = 8;
@@ -43,6 +46,6 @@ public class HolidayNotificationService(IServiceScopeFactory scopeFactory, TimeP
             now.Year, now.Month, now.Day,
             RunHour, 0, 0, now.Offset);
 
-        return now < todayAtRunHour ? todayAtRunHour : todayAtRunHour.AddDays(1);
+        return now <= todayAtRunHour ? todayAtRunHour : todayAtRunHour.AddDays(1);
     }
 }

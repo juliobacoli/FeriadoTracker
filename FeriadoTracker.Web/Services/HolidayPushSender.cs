@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FeriadoTracker.Web.Data;
+using FeriadoTracker.Web.Dtos;
 using FeriadoTracker.Web.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -137,6 +138,4 @@ public class HolidayPushSender(
             url = NotificationTemplates.DefaultUrl
         });
     }
-
-    private sealed record SendSettings(int DaysAhead);
 }

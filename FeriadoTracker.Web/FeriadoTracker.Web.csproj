@@ -27,4 +27,8 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="FeriadoTracker.Web.Tests" />
+  </ItemGroup>
+
 </Project>

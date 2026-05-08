@@ -39,7 +39,7 @@ public class HolidayNotificationService(IServiceScopeFactory scopeFactory, TimeP
         }
     }
 
-    private DateTimeOffset ComputeNextRun()
+    internal DateTimeOffset ComputeNextRun()
     {
         var now = time.GetLocalNow();
         var todayAtRunHour = new DateTimeOffset(

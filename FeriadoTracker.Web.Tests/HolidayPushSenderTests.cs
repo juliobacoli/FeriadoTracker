@@ -146,6 +146,10 @@ public class HolidayPushSenderTests
         Assert.Equal(0, result.Removed);
         Assert.Equal(2, client.Calls.Count);
         Assert.Equal(2, await ctx.NotificationLogs.CountAsync());
+
+        var payload = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(client.Calls[0].Payload);
+        Assert.Equal("Feriado se aproxima!", payload.GetProperty("title").GetString());
+        Assert.Contains("Trabalho", payload.GetProperty("body").GetString());
     }
 
     [Fact]

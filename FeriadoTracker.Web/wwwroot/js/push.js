@@ -91,6 +91,27 @@ async function unsubscribe() {
     await sub.unsubscribe();
 }
 
+const HINT_DISMISSED_KEY = 'push-hint-dismissed';
+
+function setupHint(button) {
+    const hint = document.getElementById('pushHint');
+    if (!hint) return null;
+
+    if (localStorage.getItem(HINT_DISMISSED_KEY) === '1') return null;
+
+    function hide(persist) {
+        hint.hidden = true;
+        if (persist) localStorage.setItem(HINT_DISMISSED_KEY, '1');
+    }
+
+    const closeBtn = document.getElementById('pushHintClose');
+    if (closeBtn) closeBtn.addEventListener('click', () => hide(true));
+
+    button.addEventListener('click', () => hide(true), { once: true });
+
+    return { show: () => { hint.hidden = false; } };
+}
+
 export async function setupPushButton(button) {
     if (!button) return;
 
@@ -146,4 +167,10 @@ export async function setupPushButton(button) {
     });
 
     await refresh();
+
+    const current = await getCurrentSubscription();
+    if (!current) {
+        const hint = setupHint(button);
+        if (hint) setTimeout(() => hint.show(), 2000);
+    }
 }

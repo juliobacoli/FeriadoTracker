@@ -2,6 +2,7 @@ import { startConfetti, attachConfettiButton } from './confetti.js';
 import { createCountdown } from './countdown.js';
 import { attachTimelineHandlers } from './timeline.js';
 import { setupPushButton } from './push.js';
+import { setupShareButton } from './share.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const pushBtn = document.getElementById('pushToggle');
@@ -23,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const confettiBtn = document.getElementById('confettiToggle');
     attachConfettiButton(confettiBtn);
+
+    const shareBtn = document.getElementById('btnShare');
+    if (shareBtn) setupShareButton(shareBtn, elements);
 
     const countdown = createCountdown({
         elements,

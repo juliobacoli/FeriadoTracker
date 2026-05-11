@@ -686,6 +686,116 @@ h1.titulo-feriado {
     opacity: 0.5;
 }
 
+.ios-install-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 env(safe-area-inset-bottom, 0);
+    animation: ios-overlay-in 0.2s ease-out;
+}
+
+.ios-install-overlay[hidden] {
+    display: none;
+}
+
+@keyframes ios-overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.ios-install-modal {
+    background: var(--bg-card);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 24px 36px;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    animation: ios-modal-up 0.25s ease-out;
+}
+
+@keyframes ios-modal-up {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.ios-install-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: var(--border-color);
+    border: 0;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 18px;
+    line-height: 1;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.ios-install-close:hover {
+    opacity: 1;
+}
+
+.ios-install-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+}
+
+.ios-install-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+    line-height: 1.5;
+}
+
+.ios-install-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    counter-reset: step;
+}
+
+.ios-install-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.ios-install-step-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    color: var(--accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ios-install-step-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
 .theme-toggle {
     position: fixed;
     top: 20px;
@@ -781,4 +891,46 @@ html.dark .moon-icon {
         padding: 1.2rem 1rem !important;
         border-radius: 18px;
     }
+}
+
+/* Botão de Compartilhar */
+.share-wrapper {
+    margin-top: 2.2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-share {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 99px;
+    padding: 14px 28px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+    transition: all 0.25s ease;
+}
+
+.btn-share[hidden] {
+    display: none;
+}
+
+.btn-share:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+    background: var(--accent-secondary);
+}
+
+.btn-share:active {
+    transform: translateY(0);
+}
+
+.btn-share svg {
+    width: 20px;
+    height: 20px;
 }

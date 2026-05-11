@@ -19,6 +19,29 @@ function isSupported() {
     return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 }
 
+function isIosNonStandalone() {
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) || window.navigator.standalone === false;
+    return isIos && !window.navigator.standalone;
+}
+
+function setupIosInstallModal(button) {
+    const overlay = document.getElementById('iosInstallOverlay');
+    if (!overlay) {
+        button.addEventListener('click', () => {
+            showToast('Para ativar notificações no iPhone, adicione o app à tela inicial primeiro.', 'info');
+        });
+        return;
+    }
+
+    const close = () => { overlay.hidden = true; };
+
+    document.getElementById('iosInstallClose')?.addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); }, { once: false });
+
+    button.addEventListener('click', () => { overlay.hidden = false; });
+}
+
 async function getRegistration() {
     let reg = await navigator.serviceWorker.getRegistration('/');
     if (!reg) {
@@ -114,6 +137,11 @@ function setupHint(button) {
 
 export async function setupPushButton(button) {
     if (!button) return;
+
+    if (isIosNonStandalone()) {
+        setupIosInstallModal(button);
+        return;
+    }
 
     if (!isSupported()) {
         button.hidden = true;

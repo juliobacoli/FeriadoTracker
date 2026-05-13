@@ -4,6 +4,10 @@ const VAPID_ENDPOINT = '/api/push/vapid-public-key';
 const SUBSCRIBE_ENDPOINT = '/api/push/subscribe';
 const UNSUBSCRIBE_ENDPOINT = '/api/push/unsubscribe';
 
+function getAntiforgeryToken() {
+    return document.querySelector('meta[name="request-verification-token"]')?.content ?? '';
+}
+
 function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -78,7 +82,7 @@ async function subscribe() {
     const json = sub.toJSON();
     const response = await fetch(SUBSCRIBE_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getAntiforgeryToken() },
         body: JSON.stringify({
             endpoint: json.endpoint,
             p256dh: json.keys.p256dh,
@@ -103,7 +107,7 @@ async function unsubscribe() {
 
     const response = await fetch(UNSUBSCRIBE_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getAntiforgeryToken() },
         body: JSON.stringify({ endpoint: sub.endpoint })
     });
 

@@ -1,6 +1,5 @@
 using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Dtos;
-using FeriadoTracker.Web.Filters;
 using FeriadoTracker.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -25,7 +24,7 @@ public class PushController(AppDbContext db, TimeProvider time, IConfiguration c
     }
 
     [HttpPost("subscribe")]
-    [SameOrigin]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Subscribe([FromBody] PushSubscriptionDto dto, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(dto.Endpoint)
@@ -71,7 +70,7 @@ public class PushController(AppDbContext db, TimeProvider time, IConfiguration c
     }
 
     [HttpPost("unsubscribe")]
-    [SameOrigin]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Unsubscribe([FromBody] UnsubscribeDto dto, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(dto.Endpoint))

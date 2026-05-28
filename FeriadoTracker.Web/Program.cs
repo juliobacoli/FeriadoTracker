@@ -100,7 +100,7 @@ app.Use(async (context, next) =>
             $"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' https://*.clarity.ms; " +
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
             "font-src 'self' https://fonts.gstatic.com; " +
-            "img-src 'self' data: https://*.clarity.ms; " +
+            "img-src 'self' data: https://*.clarity.ms https://c.bing.com; " +
             "connect-src 'self' https://*.clarity.ms; " +
             "worker-src 'self' blob:; " +
             "frame-src 'none'; " +

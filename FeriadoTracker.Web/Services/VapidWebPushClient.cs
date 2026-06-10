@@ -7,9 +7,11 @@ namespace FeriadoTracker.Web.Services;
 
 public class VapidWebPushClient(
     IConfiguration config,
-    ILogger<VapidWebPushClient> logger) : IWebPushClient
+    ILogger<VapidWebPushClient> logger,
+    HttpClient? httpClient = null) : IWebPushClient
 {
-    private readonly WebPushClientLib _client = new();
+    // HttpClient injetável para testes (captura da request real); produção usa o padrão.
+    private readonly WebPushClientLib _client = httpClient is null ? new() : new(httpClient);
 
     public async Task<PushSendOutcome> SendAsync(string endpoint, string p256dh, string auth, string payload, CancellationToken ct = default)
     {
@@ -24,12 +26,19 @@ public class VapidWebPushClient(
             return PushSendOutcome.Failed;
         }
 
-        var vapid = new VapidDetails(subject, publicKey, privateKey);
         var subscription = new WebPushSubscription(endpoint, p256dh, auth);
+
+        // TTL curto: push service descarta a mensagem se não entregar em 24h,
+        // evitando notificações com contagem de dias defasada.
+        var options = new Dictionary<string, object>
+        {
+            ["vapidDetails"] = new VapidDetails(subject, publicKey, privateKey),
+            ["TTL"] = 86400
+        };
 
         try
         {
-            await _client.SendNotificationAsync(subscription, payload, vapid, ct);
+            await _client.SendNotificationAsync(subscription, payload, options, ct);
             return PushSendOutcome.Success;
         }
         catch (WebPushException ex) when (

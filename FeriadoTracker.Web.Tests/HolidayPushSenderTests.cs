@@ -10,6 +10,8 @@ namespace FeriadoTracker.Web.Tests;
 
 public class HolidayPushSenderTests
 {
+    #region Infraestrutura de teste
+
     private const string ValidPublicKey = "test-public-key";
     private const string ValidPrivateKey = "test-private-key";
 
@@ -74,6 +76,10 @@ public class HolidayPushSenderTests
             client,
             time,
             NullLogger<HolidayPushSender>.Instance);
+
+    #endregion
+
+    #region Testes de integração — sender + EF Core (InMemory) + push client fake
 
     [Fact]
     public async Task SendDailyAsync_RetornaZerosQuandoVapidNaoConfigurado()
@@ -150,6 +156,27 @@ public class HolidayPushSenderTests
         var payload = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(client.Calls[0].Payload);
         Assert.Equal("Feriado se aproxima!", payload.GetProperty("title").GetString());
         Assert.Contains("Trabalho", payload.GetProperty("body").GetString());
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_PayloadUsaDataAbsolutaNaoContagemRelativa()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_PayloadUsaDataAbsolutaNaoContagemRelativa));
+        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" });
+        ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2026, 5, 1)));
+
+        await sender.SendDailyAsync();
+
+        var payload = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(client.Calls[0].Payload);
+        var body = payload.GetProperty("body").GetString();
+
+        // Entrega atrasada não pode tornar a mensagem mentirosa: data absoluta, sem "Faltam X dias".
+        Assert.Equal("Trabalho em 04 de maio.", body);
+        Assert.DoesNotContain("Faltam", body);
     }
 
     [Fact]
@@ -238,4 +265,6 @@ public class HolidayPushSenderTests
         Assert.Empty(await ctx.NotificationLogs.ToListAsync());
         Assert.Equal(1, await ctx.PushSubscriptions.CountAsync());
     }
+
+    #endregion
 }

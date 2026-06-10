@@ -133,7 +133,7 @@ public class HolidayPushSender(
         return JsonSerializer.Serialize(new
         {
             title = NotificationTemplates.Title,
-            body = NotificationTemplates.Body(diffDays, feriado.Nome),
+            body = NotificationTemplates.Body(diffDays, feriado.Nome, feriado.Data),
             url = NotificationTemplates.DefaultUrl
         });
     }

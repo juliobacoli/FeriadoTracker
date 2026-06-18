@@ -7,6 +7,7 @@ public interface IWebPushClient
         string p256dh,
         string auth,
         string payload,
+        int ttlSeconds,
         CancellationToken ct = default);
 }
 

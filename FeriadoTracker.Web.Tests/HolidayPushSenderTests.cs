@@ -46,12 +46,12 @@ public class HolidayPushSenderTests
     private sealed class FakePushClient : IWebPushClient
     {
         public Func<string, PushSendOutcome> OutcomeFor { get; set; } = _ => PushSendOutcome.Success;
-        public List<(string Endpoint, string Payload)> Calls { get; } = new();
+        public List<(string Endpoint, string Payload, int TtlSeconds)> Calls { get; } = new();
 
         public Task<PushSendOutcome> SendAsync(
-            string endpoint, string p256dh, string auth, string payload, CancellationToken ct = default)
+            string endpoint, string p256dh, string auth, string payload, int ttlSeconds, CancellationToken ct = default)
         {
-            Calls.Add((endpoint, payload));
+            Calls.Add((endpoint, payload, ttlSeconds));
             return Task.FromResult(OutcomeFor(endpoint));
         }
     }
@@ -80,6 +80,25 @@ public class HolidayPushSenderTests
     #endregion
 
     #region Testes de integração — sender + EF Core (InMemory) + push client fake
+
+    [Fact]
+    public async Task SendDailyAsync_CalculaTtlDinamicoAteOFinalDoFeriado()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_CalculaTtlDinamicoAteOFinalDoFeriado));
+        ctx.Feriados.Add(new Feriado { Id = 10, Nome = "Trabalho", Data = new DateOnly(2026, 5, 4), Tipo = "Nacional" });
+        ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        // 01/05/2026 08:00:00 UTC
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2026, 5, 1, 8, 0, 0, DateTimeKind.Utc)));
+
+        await sender.SendDailyAsync();
+
+        Assert.Single(client.Calls);
+        // Diferença entre 01/05/2026 08:00:00 e 04/05/2026 23:59:59 = 316799 segundos
+        Assert.Equal(316799, client.Calls[0].TtlSeconds);
+    }
 
     [Fact]
     public async Task SendDailyAsync_RetornaZerosQuandoVapidNaoConfigurado()

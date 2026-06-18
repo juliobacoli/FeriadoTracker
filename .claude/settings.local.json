@@ -15,7 +15,16 @@
       "PowerShell(dotnet build *)",
       "PowerShell(dotnet test *)",
       "PowerShell(git push *)",
-      "PowerShell(git merge *)"
+      "PowerShell(git merge *)",
+      "PowerShell(New-Item *)",
+      "Bash(gh pr *)",
+      "PowerShell(railway *)",
+      "PowerShell(ssh-keygen *)",
+      "PowerShell(railway ssh -i \"$env:USERPROFILE\\\\.ssh\\\\id_ed25519\" \"sqlite3 /data/feriados.db \"\"SELECT nl.SentDate, nl.SentAtUtc, f.Nome FROM NotificationLogs nl JOIN Feriados f ON f.Id = nl.FeriadoId WHERE f.Nome LIKE '%Corpus%';\"\"\" 2>&1)",
+      "PowerShell($dll = Get-ChildItem \"$env:USERPROFILE\\\\.nuget\\\\packages\\\\webpush\\\\1.0.12\\\\lib\" -Recurse -Filter WebPush.dll | Select-Object -First 1; $asm = [System.Reflection.Assembly]::LoadFile\\($dll.FullName\\); $t = $asm.GetType\\('WebPush.WebPushClient'\\); $t.GetConstructors\\(\\) | ForEach-Object { $_.ToString\\(\\) })",
+      "PowerShell(git *)",
+      "PowerShell(gh pr view 7 --repo juliobacoli/FeriadoTracker --json state,mergedAt,mergedBy --jq '{state: .state, mergedAt: .mergedAt, mergedBy: .mergedBy.login}')",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

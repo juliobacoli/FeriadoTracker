@@ -74,19 +74,22 @@ public class VapidWebPushClientTests
 
     #region Testes de integração — atravessam a lib WebPush e o pipeline HTTP (handler fake)
 
-    [Fact]
-    public async Task SendAsync_EnviaHeaderTtlDe24Horas()
+    [Theory]
+    [InlineData(3600)]
+    [InlineData(86400)]
+    [InlineData(432000)]
+    public async Task SendAsync_EnviaHeaderTtlDinamico(int ttlSeconds)
     {
         var (client, handler) = BuildClient(HttpStatusCode.Created);
         var (p256dh, auth) = MakeSubscriptionKeys();
 
         var outcome = await client.SendAsync(
-            "https://fcm.googleapis.com/fcm/send/teste", p256dh, auth, "{\"title\":\"x\"}");
+            "https://fcm.googleapis.com/fcm/send/teste", p256dh, auth, "{\"title\":\"x\"}", ttlSeconds);
 
         Assert.Equal(PushSendOutcome.Success, outcome);
         Assert.NotNull(handler.CapturedRequest);
         Assert.True(handler.CapturedRequest!.Headers.TryGetValues("TTL", out var values));
-        Assert.Equal("86400", Assert.Single(values!));
+        Assert.Equal(ttlSeconds.ToString(), Assert.Single(values!));
     }
 
     [Theory]
@@ -98,7 +101,7 @@ public class VapidWebPushClientTests
         var (p256dh, auth) = MakeSubscriptionKeys();
 
         var outcome = await client.SendAsync(
-            "https://fcm.googleapis.com/fcm/send/teste", p256dh, auth, "{}");
+            "https://fcm.googleapis.com/fcm/send/teste", p256dh, auth, "{}", 86400);
 
         Assert.Equal(PushSendOutcome.Gone, outcome);
     }
@@ -112,7 +115,7 @@ public class VapidWebPushClientTests
     {
         var (client, handler) = BuildClient(HttpStatusCode.Created, BuildConfig(withVapid: false));
 
-        var outcome = await client.SendAsync("https://push/x", "p", "a", "{}");
+        var outcome = await client.SendAsync("https://push/x", "p", "a", "{}", 86400);
 
         Assert.Equal(PushSendOutcome.Failed, outcome);
         Assert.Null(handler.CapturedRequest);

@@ -49,8 +49,13 @@ public class HolidayPushSender(
                     continue;
                 }
 
+                var localNow = time.GetLocalNow();
+                var fimDoFeriado = new DateTimeOffset(feriado.Data.ToDateTime(new TimeOnly(23, 59, 59)), localNow.Offset);
+                var ttlSeconds = (int)(fimDoFeriado - localNow).TotalSeconds;
+                if (ttlSeconds < 0) ttlSeconds = 0;
+
                 var outcome = await pushClient.SendAsync(
-                    sub.Endpoint, sub.P256dh, sub.Auth, payload, ct);
+                    sub.Endpoint, sub.P256dh, sub.Auth, payload, ttlSeconds, ct);
 
                 switch (outcome)
                 {

@@ -41,11 +41,6 @@ public class HolidayPushSender(
         {
             var payload = BuildPayload(feriado, today);
 
-            var localNow = time.GetLocalNow();
-            var fimDoFeriado = new DateTimeOffset(feriado.Data.ToDateTime(new TimeOnly(23, 59, 59)), localNow.Offset);
-            var ttlSeconds = (int)(fimDoFeriado - localNow).TotalSeconds;
-            if (ttlSeconds < 0) ttlSeconds = 0;
-
             foreach (var sub in subscriptions)
             {
                 if (alreadySent.Contains((sub.Id, feriado.Id)))
@@ -53,6 +48,11 @@ public class HolidayPushSender(
                     skipped++;
                     continue;
                 }
+
+                var localNow = time.GetLocalNow();
+                var fimDoFeriado = new DateTimeOffset(feriado.Data.ToDateTime(new TimeOnly(23, 59, 59)), localNow.Offset);
+                var ttlSeconds = (int)(fimDoFeriado - localNow).TotalSeconds;
+                if (ttlSeconds < 0) ttlSeconds = 0;
 
                 var outcome = await pushClient.SendAsync(
                     sub.Endpoint, sub.P256dh, sub.Auth, payload, ttlSeconds, ct);

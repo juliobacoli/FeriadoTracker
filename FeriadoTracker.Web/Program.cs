@@ -25,6 +25,7 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddAntiforgery();
+builder.Services.AddOutputCache();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>();
 
@@ -56,7 +57,7 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
     .SetApplicationName("FeriadoTracker");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextPool<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddSingleton<TimeProvider, BrazilTimeProvider>();
@@ -112,16 +113,12 @@ app.Use(async (context, next) =>
 });
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
+app.UseOutputCache();
 app.UseAuthorization();
 app.UseAntiforgery();
 app.UseRateLimiter();
-
 app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapRazorPages().WithStaticAssets();
 app.MapControllers();
-
 app.Run();

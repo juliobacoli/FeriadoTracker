@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FeriadoTracker.Web.Pages;
 
+[OutputCache(Duration = 86400)]
 public class IndexModel(IHolidayService service) : PageModel
 {
     public Feriado? ProximoFeriado { get; set; }

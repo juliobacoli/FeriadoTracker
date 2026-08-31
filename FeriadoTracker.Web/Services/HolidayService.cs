@@ -10,6 +10,7 @@ public class HolidayService(AppDbContext context, TimeProvider timeProvider) : I
     {
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
         return await context.Feriados
+            .AsNoTracking()
             .Where(f => f.Data >= hoje)
             .OrderBy(f => f.Data)
             .FirstOrDefaultAsync();
@@ -20,6 +21,7 @@ public class HolidayService(AppDbContext context, TimeProvider timeProvider) : I
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
         return await context.Feriados
+            .AsNoTracking()
             .Where(f => f.Data >= hoje)
             .OrderBy(f => f.Data)
             .ToListAsync();

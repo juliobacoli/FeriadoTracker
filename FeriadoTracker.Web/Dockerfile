@@ -1,13 +1,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+ARG TARGETARCH
 WORKDIR /src
 
 COPY FeriadoTracker.Web/FeriadoTracker.Web.csproj ./FeriadoTracker.Web/
-RUN dotnet restore ./FeriadoTracker.Web/FeriadoTracker.Web.csproj -r linux-musl-x64
+RUN RID="linux-musl-$([ "$TARGETARCH" = arm64 ] && echo arm64 || echo x64)" && \
+    dotnet restore ./FeriadoTracker.Web/FeriadoTracker.Web.csproj -r "$RID"
 
 COPY . ./
-RUN dotnet publish ./FeriadoTracker.Web/FeriadoTracker.Web.csproj \
+RUN RID="linux-musl-$([ "$TARGETARCH" = arm64 ] && echo arm64 || echo x64)" && \
+    dotnet publish ./FeriadoTracker.Web/FeriadoTracker.Web.csproj \
     -c Release -o /app/out \
-    -r linux-musl-x64 --self-contained false \
+    -r "$RID" --self-contained false \
     -p:PublishReadyToRun=true
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine

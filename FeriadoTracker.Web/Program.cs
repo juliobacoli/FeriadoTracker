@@ -3,7 +3,6 @@ using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 using System.Threading.RateLimiting;
 
 if (args.Length > 0 && args[0] == "generate-vapid-keys")
@@ -18,14 +17,9 @@ DotNetEnv.Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-var cultureInfo = new CultureInfo("pt-BR");
-CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
-CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
-
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddAntiforgery();
-builder.Services.AddOutputCache();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>();
 
@@ -57,8 +51,9 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
     .SetApplicationName("FeriadoTracker");
 
-builder.Services.AddDbContextPool<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
+builder.Services.AddDbContextPool<AppDbContext>(
+    options => options.UseSqlite($"Data Source={dbPath}"),
+    poolSize: 8);
 
 builder.Services.AddSingleton<TimeProvider, BrazilTimeProvider>();
 builder.Services.AddSingleton<IWebPushClient, VapidWebPushClient>();
@@ -114,7 +109,6 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseOutputCache();
 app.UseAuthorization();
 app.UseAntiforgery();
 app.UseRateLimiter();

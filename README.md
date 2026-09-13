@@ -5,9 +5,9 @@ Aplicação Fullstack para rastreio de feriados nacionais brasileiros, focada em
 ## 🛠️ Tecnologias e Implementação Técnica
 
 ### Backend & Dados
-*   **.NET 9 (Razor Pages):** Utilização da versão mais recente da plataforma, aproveitando as melhorias de performance e a nova estrutura de renderização de páginas.
+*   **.NET 10 (Razor Pages):** Plataforma em LTS, aproveitando o trimming automático de buffers pooled do Kestrel e as melhorias de GC que reduzem a memória residente.
 *   **Service Layer:** Arquitetura baseada em uma camada de serviço dedicada (`HolidayService`) para centralizar a lógica de busca e filtragem de feriados, mantendo as Razor Pages leves e focadas em apresentação.
-*   **Entity Framework Core 9:** Gerenciamento da persistência com suporte a **Migrations automatizadas**, que garantem que o esquema do banco de dados esteja sempre atualizado na inicialização da aplicação.
+*   **Entity Framework Core 10:** Gerenciamento da persistência com suporte a **Migrations automatizadas**, que garantem que o esquema do banco de dados esteja sempre atualizado na inicialização da aplicação.
 *   **SQLite:** Banco de dados relacional leve e embutido, escolhido pela portabilidade e eficiência em aplicações de consulta rápida.
 *   **Web Push (VAPID):** Notificações push nativas de browser para lembrar usuários dos próximos feriados, com `BackgroundService` agendado em horário fixo (08h BRT).
 
@@ -19,14 +19,14 @@ Aplicação Fullstack para rastreio de feriados nacionais brasileiros, focada em
 
 ### Segurança & Performance
 *   **Segurança por Design:** Implementação de uma política rigorosa de **Content Security Policy (CSP)** com nonce + `strict-dynamic`, validação de mesmo origin nos endpoints de push e rate limit (10 req/min) para mitigar abuso.
-*   **Otimização .NET 9:** Uso dos novos recursos `MapStaticAssets` e `WithStaticAssets` do .NET 9, que otimizam o roteamento e a entrega de arquivos estáticos.
-*   **Localização (I18N):** Configuração global de cultura para `pt-BR` e `BrazilTimeProvider` que fixa o fuso horário em `America/Sao_Paulo` independente do host.
+*   **Otimização de memória:** Imagem `alpine` (musl) com `InvariantGlobalization`, publicação `ReadyToRun`, `DbContextPool` limitado e GC workstation não concorrente — o alvo é minimizar a RSS, já que o host cobra por memória. `MapStaticAssets` e `WithStaticAssets` cuidam do roteamento e da entrega de arquivos estáticos.
+*   **Localização (I18N):** Formatação pt-BR feita por `PtBrFormat` (sem ICU, para permitir `InvariantGlobalization=true`) e `BrazilTimeProvider` que fixa o fuso horário em `America/Sao_Paulo` independente do host.
 
 ## 🚀 Setup local
 
 ### Pré-requisitos
-*   .NET SDK 9
-*   `dotnet-ef` 9 (`dotnet tool install --global dotnet-ef --version 9.0.0`)
+*   .NET SDK 10
+*   `dotnet-ef` 10 (`dotnet tool install --global dotnet-ef --version 10.0.0`)
 
 ### Variáveis de ambiente
 

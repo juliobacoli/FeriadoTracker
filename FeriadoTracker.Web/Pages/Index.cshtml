@@ -1,10 +1,10 @@
 ﻿@page
-@using System.Globalization
+@using FeriadoTracker.Web.Services
 
 @model FeriadoTracker.Web.Pages.IndexModel
 
 <div class="page-wrapper page-center">
-    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado?.Data.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-ddTHH:mm:ss") ?? "")">
+    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado is null ? "" : PtBrFormat.Iso(Model.ProximoFeriado.Data))">
         <div class="holiday-card card">
             <div class="holiday-header">
                 <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
@@ -13,7 +13,7 @@
                 @if (Model.ProximoFeriado is not null)
                 {
                     <p class="holiday-date">
-                        @Model.ProximoFeriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))
+                        @PtBrFormat.DataPorExtenso(Model.ProximoFeriado.Data)
                     </p>
                 }
                 else
@@ -67,18 +67,14 @@
                         && feriado.Id == Model.ProximoFeriado.Id;
 
                         <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
-                             data-target-date="@feriado.Data.ToDateTime(TimeOnly.MinValue).ToString("yyyy-MM-ddTHH:mm:ss")"
+                             data-target-date="@PtBrFormat.Iso(feriado.Data)"
                              data-target-name="@feriado.Nome"
-                             data-target-formatted="@feriado.Data.ToString("dd 'de' MMMM 'de' yyyy", new CultureInfo("pt-BR"))">
+                             data-target-formatted="@PtBrFormat.DataPorExtenso(feriado.Data)">
                             <div class="holiday-timeline-dot"></div>
 
                             <div class="holiday-timeline-content">
                                 <span class="holiday-timeline-date">
-                                    @{
-                                        var diaSemana = feriado.Data.ToString("dddd", new CultureInfo("pt-BR"));
-                                        diaSemana = char.ToUpper(diaSemana[0]) + diaSemana.Substring(1);
-                                    }
-                                    @feriado.Data.ToString("dd/MM/yyyy") - @diaSemana
+                                    @PtBrFormat.DataCurta(feriado.Data) - @PtBrFormat.DiaDaSemana(feriado.Data)
                                 </span>
                                 <span class="holiday-timeline-name">
                                     @feriado.Nome

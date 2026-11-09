@@ -5,7 +5,7 @@
 }
 
 <div class="page-center">
-    <div class="card">
+    <div class="card error-card">
         <h1>Algo deu errado</h1>
         <p>Não foi possível carregar esta página. Tente de novo em alguns instantes.</p>
 
@@ -17,3 +17,7 @@
         <p><a asp-page="/Index">Voltar para o início</a></p>
     </div>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/holiday.css" asp-append-version="true" />
+}

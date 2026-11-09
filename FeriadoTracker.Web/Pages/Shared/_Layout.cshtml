@@ -1,6 +1,6 @@
 ﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,7 +13,22 @@
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "uyihmukn30");
     </script>
-    <title>@ViewData["Title"] Qual o próximo feriado?</title>
+    <title>@(ViewData["Title"] is string titulo && titulo.Length > 0 ? $"{titulo} | " : "")Qual o próximo feriado?</title>
+    @{
+        var urlBase = $"https://{Context.Request.Host}";
+        const string descricao = "Veja quantos dias faltam para o próximo feriado nacional e confira os próximos feriados do Brasil.";
+    }
+    <meta name="description" content="@descricao" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FeriadoTracker" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Qual o próximo feriado?" />
+    <meta property="og:description" content="@descricao" />
+    <meta property="og:url" content="@urlBase/" />
+    <meta property="og:image" content="@urlBase/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta name="twitter:card" content="summary" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -25,6 +40,15 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Feriados" />
+    <script nonce="@Context.Items["csp-nonce"]">
+        (function () {
+            var tema = null;
+            try { tema = localStorage.getItem('theme'); } catch (e) { }
+            if (tema === 'dark' || (tema === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     @RenderSection("Styles", required: false)
@@ -113,11 +137,6 @@
         (function() {
             const themeToggle = document.getElementById('themeToggle');
             const htmlElement = document.documentElement;
-
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                htmlElement.classList.add('dark');
-            }
 
             themeToggle.addEventListener('click', function() {
                 htmlElement.classList.toggle('dark');

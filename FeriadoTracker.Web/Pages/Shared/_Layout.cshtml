@@ -25,6 +25,15 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Feriados" />
+    <script nonce="@Context.Items["csp-nonce"]">
+        (function () {
+            var tema = null;
+            try { tema = localStorage.getItem('theme'); } catch (e) { }
+            if (tema === 'dark' || (tema === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     @RenderSection("Styles", required: false)
@@ -113,11 +122,6 @@
         (function() {
             const themeToggle = document.getElementById('themeToggle');
             const htmlElement = document.documentElement;
-
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                htmlElement.classList.add('dark');
-            }
 
             themeToggle.addEventListener('click', function() {
                 htmlElement.classList.toggle('dark');

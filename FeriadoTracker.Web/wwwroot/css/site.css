@@ -17,25 +17,6 @@ body {
     background: linear-gradient(135deg, var(--bg-gradient-start, #f5f7fa) 0%, var(--bg-gradient-end, #c3cfe2) 100%);
 }
 
-.btn:focus,
-.btn:active:focus,
-.btn-link.nav-link:focus,
-.form-control:focus,
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-.form-floating > .form-control::placeholder,
-.form-floating > .form-control-plaintext::placeholder {
-    color: var(--bs-secondary-color);
-    text-align: end;
-}
-
-.form-floating > .form-control:focus::placeholder,
-.form-floating > .form-control-plaintext:focus::placeholder {
-    text-align: start;
-}
-
 .page-center {
     min-height: calc(100vh - 1px);
     display: flex;

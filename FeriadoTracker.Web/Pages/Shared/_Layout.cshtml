@@ -13,7 +13,7 @@
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "uyihmukn30");
     </script>
-    <title>@ViewData["Title"] Qual o próximo feriado?</title>
+    <title>@(ViewData["Title"] is string titulo && titulo.Length > 0 ? $"{titulo} | " : "")Qual o próximo feriado?</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">

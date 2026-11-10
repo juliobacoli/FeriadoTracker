@@ -59,7 +59,7 @@ public static class FeriadoVisaoBuilder
         return $"{PtBrFormat.DiaDaSemana(a.Inicio)}, {a.Inicio.Day} de {PtBrFormat.Mes(a.Inicio)}";
     }
 
-    private static string Impacto(FeriadoAnalisado a) => a.Tipo switch
+    public static string Impacto(FeriadoAnalisado a) => a.Tipo switch
     {
         TipoFolga.FimDeSemana => $"Cai num {PtBrFormat.DiaDaSemanaMinusculo(a.Inicio)}. Não vira folga.",
         TipoFolga.Prolongado => $"Fim de semana de {a.DiasDeFolga} dias.",

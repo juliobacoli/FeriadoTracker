@@ -194,8 +194,93 @@ public class HolidayPushSenderTests
         var body = payload.GetProperty("body").GetString();
 
         // Entrega atrasada não pode tornar a mensagem mentirosa: data absoluta, sem "Faltam X dias".
-        Assert.Equal("Trabalho em 04 de maio.", body);
+        Assert.Equal("Trabalho em 04 de maio. Fim de semana de 3 dias.", body);
         Assert.DoesNotContain("Faltam", body);
+    }
+
+    private static string Corpo(string payload) =>
+        System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(payload).GetProperty("body").GetString()!;
+
+    [Fact]
+    public async Task SendDailyAsync_CarnavalGeraUmAvisoSo()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_CarnavalGeraUmAvisoSo));
+        ctx.Feriados.AddRange(
+            new Feriado { Id = 16, Nome = "Carnaval", Data = new DateOnly(2027, 2, 8), Tipo = "Nacional" },
+            new Feriado { Id = 17, Nome = "Carnaval", Data = new DateOnly(2027, 2, 9), Tipo = "Nacional" });
+        ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 2, 4)));
+
+        var result = await sender.SendDailyAsync();
+
+        Assert.Equal(1, result.Sent);
+        Assert.Equal("Carnaval em 08 de fevereiro. Fim de semana de 4 dias.", Corpo(Assert.Single(client.Calls).Payload));
+        Assert.Equal(16, (await ctx.NotificationLogs.SingleAsync()).FeriadoId);
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_CarnavalNaoRepeteQuandoLogAntigoEDoSegundoDia()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_CarnavalNaoRepeteQuandoLogAntigoEDoSegundoDia));
+        ctx.Feriados.AddRange(
+            new Feriado { Id = 16, Nome = "Carnaval", Data = new DateOnly(2027, 2, 8), Tipo = "Nacional" },
+            new Feriado { Id = 17, Nome = "Carnaval", Data = new DateOnly(2027, 2, 9), Tipo = "Nacional" });
+        ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
+        ctx.NotificationLogs.Add(new NotificationLog
+        {
+            SubscriptionId = 1,
+            FeriadoId = 17,
+            SentDate = new DateOnly(2027, 2, 4),
+            SentAtUtc = new DateTime(2027, 2, 4)
+        });
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        // Terça de Carnaval: o feriado começou ontem e ainda está na janela.
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 2, 9)));
+
+        var result = await sender.SendDailyAsync();
+
+        Assert.Equal(0, result.Sent);
+        Assert.Equal(1, result.Skipped);
+        Assert.Empty(client.Calls);
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_FeriadoNoFimDeSemanaAvisaQueNaoViraFolga()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_FeriadoNoFimDeSemanaAvisaQueNaoViraFolga));
+        ctx.Feriados.Add(new Feriado { Id = 27, Nome = "Natal", Data = new DateOnly(2027, 12, 25), Tipo = "Nacional" });
+        ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 12, 22)));
+
+        await sender.SendDailyAsync();
+
+        Assert.Equal("Natal em 25 de dezembro. Cai num sábado. Não vira folga.", Corpo(Assert.Single(client.Calls).Payload));
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_FeriadoNaTercaAvisaDaPonte()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_FeriadoNaTercaAvisaDaPonte));
+        ctx.Feriados.Add(new Feriado { Id = 24, Nome = "Finados", Data = new DateOnly(2027, 11, 2), Tipo = "Nacional" });
+        ctx.PushSubscriptions.Add(MakeSub(1, "https://push/a"));
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 10, 29)));
+
+        await sender.SendDailyAsync();
+
+        Assert.Equal(
+            "Finados em 02 de novembro. Com a ponte na segunda-feira, são 4 dias de folga.",
+            Corpo(Assert.Single(client.Calls).Payload));
     }
 
     [Fact]

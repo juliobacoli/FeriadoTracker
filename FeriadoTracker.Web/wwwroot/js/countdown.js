@@ -148,6 +148,9 @@ export function createCountdown(section) {
         el.exact.hidden = !e.partes;
 
         if (e.chave !== ultimaChave) {
+            // Página em cache pode trazer como próxima uma folga que já acabou: pede a seguinte.
+            if (e.chave === 'passou' && alvo.proxima && api.aoPassar?.()) return;
+
             ultimaChave = e.chave;
 
             const filhos = e.partes ? e.partes.map(([n, u]) => parte(n, u)) : [etiqueta(e.etiqueta)];
@@ -175,5 +178,7 @@ export function createCountdown(section) {
         intervalo = null;
     }
 
-    return { definir, start, stop, render };
+    /** aoPassar: chamado quando a próxima folga acabou; devolve true se trocou o alvo. */
+    const api = { definir, start, stop, render, aoPassar: null };
+    return api;
 }

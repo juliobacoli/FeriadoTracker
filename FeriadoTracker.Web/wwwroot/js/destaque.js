@@ -21,6 +21,20 @@ export function setupDestaque({ section, proxima, countdown }) {
 
     let atual = proxima;
 
+    /** Passa a próxima folga para a linha seguinte que vira folga e ainda não acabou. */
+    function avancar() {
+        const d = new Date();
+        const hoje = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const nova = linhas.find(l => Number(l.dataset.indice) > proxima
+            && l.dataset.tipo !== 'FimDeSemana'
+            && l.dataset.folgaFimIso >= hoje);
+        if (!nova) return false;
+
+        proxima = Number(nova.dataset.indice);
+        mostrar(proxima);
+        return true;
+    }
+
     function mostrar(indice) {
         atual = indice;
         const f = linha(indice).dataset;
@@ -58,6 +72,7 @@ export function setupDestaque({ section, proxima, countdown }) {
         focarDestaque();
     });
 
+    countdown.aoPassar = avancar;
     countdown.definir(linha(proxima).dataset, true);
 
     return { atual: () => linha(atual).dataset };

@@ -94,8 +94,8 @@ app.Use(async (context, next) =>
         context.Response.Headers.Append("Content-Security-Policy",
             "default-src 'self'; " +
             $"script-src 'self' 'nonce-{nonce}' 'strict-dynamic' https://*.clarity.ms; " +
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-            "font-src 'self' https://fonts.gstatic.com; " +
+            "style-src 'self' 'unsafe-inline'; " +
+            "font-src 'self'; " +
             "img-src 'self' data: https://*.clarity.ms https://c.bing.com; " +
             "connect-src 'self' https://*.clarity.ms; " +
             "worker-src 'self' blob:; " +

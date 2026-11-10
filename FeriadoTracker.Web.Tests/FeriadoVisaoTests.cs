@@ -67,19 +67,6 @@ public class FeriadoVisaoTests
     }
 
     [Fact]
-    public void Json_UsaCamelCaseEnumComoTextoEEscapaHtml()
-    {
-        var v = Visao(F("</script><b>", 2026, 11, 20));
-
-        var json = System.Text.Json.JsonSerializer.Serialize([v], FeriadoJsonContext.Default.ListFeriadoVisao);
-
-        Assert.Contains("\"tipo\":\"Prolongado\"", json);
-        Assert.Contains("\"inicioIso\":\"2026-11-20\"", json);
-        Assert.Contains("\"faixa\":[{\"iso\":", json);
-        Assert.DoesNotContain("</script>", json);
-    }
-
-    [Fact]
     public async Task Servico_NoSabadoDepoisDaSexta_MantemOFeriadoAteOFimDaFolga()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()

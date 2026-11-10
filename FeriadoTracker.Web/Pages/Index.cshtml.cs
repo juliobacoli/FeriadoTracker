@@ -1,4 +1,3 @@
-using System.Text.Json;
 using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
@@ -18,10 +17,6 @@ public class IndexModel(IHolidayService service, TimeProvider timeProvider) : Pa
 
     /// <summary>Dias de calendário até o destaque, para a primeira pintura antes do JS.</summary>
     public int DiasAteDestaque { get; private set; }
-
-    /// <summary>Feriados em JSON para o cliente trocar o destaque ao clicar na lista.</summary>
-    public string FeriadosJson => JsonSerializer.Serialize(Feriados, FeriadoJsonContext.Default.ListFeriadoVisao);
-
     public async Task OnGetAsync()
     {
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);

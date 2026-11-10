@@ -144,7 +144,8 @@ export function createCountdown(section) {
         const e = estado(agora);
 
         el.exact.textContent = e.exact ?? '';
-        el.exact.hidden = !e.exact;
+        // Fica visível (com altura reservada no CSS) enquanto há contagem, para não empurrar a página.
+        el.exact.hidden = !e.partes;
 
         if (e.chave !== ultimaChave) {
             ultimaChave = e.chave;

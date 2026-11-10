@@ -1,28 +1,11 @@
-function diaDaFaixa(dia) {
-    const li = document.createElement('li');
-    if (dia.classe) li.className = dia.classe;
-    li.dataset.iso = dia.iso;
-    li.setAttribute('aria-label', dia.rotulo);
-
-    const wd = document.createElement('span');
-    wd.className = 'wd';
-    wd.setAttribute('aria-hidden', 'true');
-    wd.textContent = dia.diaSemana;
-
-    const dn = document.createElement('span');
-    dn.className = 'dn';
-    dn.setAttribute('aria-hidden', 'true');
-    dn.textContent = dia.dia;
-
-    li.append(wd, dn);
-    return li;
-}
-
 /**
  * Lista clicável: cada linha leva o feriado ao destaque e
  * "Voltar para a próxima folga" desfaz a seleção.
+ *
+ * O servidor renderiza tudo: os textos vêm nos data-* da linha
+ * e a faixa de dias num <template id="faixa-N">. Aqui só se copia.
  */
-export function setupDestaque({ section, feriados, proxima, countdown }) {
+export function setupDestaque({ section, proxima, countdown }) {
     const el = {
         nome: section.querySelector('#focusName'),
         data: section.querySelector('#focusDate'),
@@ -31,7 +14,8 @@ export function setupDestaque({ section, feriados, proxima, countdown }) {
         legendaPonte: section.querySelector('#legendPonte'),
         voltar: section.querySelector('#focusBack')
     };
-    const linhas = document.querySelectorAll('.row[data-indice]');
+    const linhas = [...document.querySelectorAll('.row[data-indice]')];
+    const linha = indice => linhas.find(l => Number(l.dataset.indice) === indice);
     const empilhado = window.matchMedia('(max-width: 959px)');
     const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -39,17 +23,17 @@ export function setupDestaque({ section, feriados, proxima, countdown }) {
 
     function mostrar(indice) {
         atual = indice;
-        const f = feriados[indice];
+        const f = linha(indice).dataset;
 
         el.nome.textContent = f.nome;
         el.data.textContent = f.dataTexto;
-        el.faixa.replaceChildren(...f.faixa.map(diaDaFaixa));
+        el.faixa.replaceChildren(document.getElementById(`faixa-${indice}`).content.cloneNode(true));
         el.impacto.textContent = f.impacto;
         el.impacto.classList.toggle('is-long', f.tipo === 'Prolongado');
-        el.legendaPonte.hidden = !f.temPonte;
+        el.legendaPonte.hidden = f.temPonte !== 'true';
         el.voltar.hidden = indice === proxima;
 
-        linhas.forEach(l => l.setAttribute('aria-pressed', Number(l.dataset.indice) === indice ? 'true' : 'false'));
+        linhas.forEach(l => l.setAttribute('aria-pressed', l === linha(indice) ? 'true' : 'false'));
 
         countdown.definir(f, indice === proxima);
     }
@@ -62,9 +46,9 @@ export function setupDestaque({ section, feriados, proxima, countdown }) {
         el.nome.focus({ preventScroll: true });
     }
 
-    linhas.forEach(linha => {
-        linha.addEventListener('click', () => {
-            mostrar(Number(linha.dataset.indice));
+    linhas.forEach(l => {
+        l.addEventListener('click', () => {
+            mostrar(Number(l.dataset.indice));
             focarDestaque();
         });
     });
@@ -74,7 +58,7 @@ export function setupDestaque({ section, feriados, proxima, countdown }) {
         focarDestaque();
     });
 
-    countdown.definir(feriados[proxima], true);
+    countdown.definir(linha(proxima).dataset, true);
 
-    return { atual: () => feriados[atual] };
+    return { atual: () => linha(atual).dataset };
 }

@@ -2,6 +2,17 @@
 @using FeriadoTracker.Web.Services
 @model FeriadoTracker.Web.Pages.IndexModel
 
+@{
+    // Faixa de dias em volta do feriado: usada no destaque e nos templates da lista.
+    void Faixa(FeriadoVisao feriado)
+    {
+        foreach (var dia in feriado.Faixa)
+        {
+            <li class="@dia.Classe" data-iso="@dia.Iso" aria-label="@dia.Rotulo"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span></li>
+        }
+    }
+}
+
 <div class="page">
     @if (Model.Destaque is { } d)
     {
@@ -18,10 +29,7 @@
 
             <figure class="strip">
                 <ol class="strip-days" id="focusStrip" aria-label="Dias em volta do feriado">
-                    @foreach (var dia in d.Faixa)
-                    {
-                        <li class="@dia.Classe" data-iso="@dia.Iso" aria-label="@dia.Rotulo"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span></li>
-                    }
+                    @{ Faixa(d); }
                 </ol>
                 <figcaption>
                     <p class="impact @(d.Tipo == TipoFolga.Prolongado ? "is-long" : "")" id="focusImpact">@d.Impacto</p>
@@ -69,17 +77,27 @@
                         if (f.Tipo == TipoFolga.Prolongado) classe += " is-long";
 
                         <li>
-                            <button type="button" class="row @classe" data-indice="@i" aria-pressed="@(i == Model.IndiceDestaque ? "true" : "false")">
+                            @* Os data-* levam ao destaque tudo o que ele mostra deste feriado. *@
+                            <button type="button" class="row @classe" aria-pressed="@(i == Model.IndiceDestaque ? "true" : "false")"
+                                    data-indice="@i"
+                                    data-nome="@f.Nome"
+                                    data-tipo="@f.Tipo"
+                                    data-inicio-iso="@f.InicioIso"
+                                    data-fim-iso="@f.FimIso"
+                                    data-folga-fim-iso="@f.FolgaFimIso"
+                                    data-data-texto="@f.DataTexto"
+                                    data-impacto="@f.Impacto"
+                                    data-nota-no-dia="@f.NotaNoDia"
+                                    data-tem-ponte="@(f.TemPonte ? "true" : "false")">
                                 <span class="row-date"><span class="row-day">@f.DiaLista</span><span class="row-mon">@f.MesLista</span></span>
                                 <span><span class="row-name">@f.Nome</span><span class="row-info">@f.ImpactoCurto</span></span>
                             </button>
+                            <template id="faixa-@i">@{ Faixa(f); }</template>
                         </li>
                     }
                 </ul>
             }
         </section>
-
-        <script type="application/json" id="feriadosDados">@Html.Raw(Model.FeriadosJson)</script>
     }
 </div>
 

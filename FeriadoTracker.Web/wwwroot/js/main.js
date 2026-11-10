@@ -10,14 +10,11 @@ document.addEventListener('DOMContentLoaded', function () {
     ]);
 
     const section = document.getElementById('destaque');
-    const dados = document.getElementById('feriadosDados');
-    if (!section || !dados) return;
+    if (!section) return;
 
-    const feriados = JSON.parse(dados.textContent);
     const countdown = createCountdown(section);
     const destaque = setupDestaque({
         section,
-        feriados,
         proxima: Number(section.dataset.proxima),
         countdown
     });

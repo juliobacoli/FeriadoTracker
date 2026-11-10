@@ -5,16 +5,10 @@
 <div class="page">
     @if (Model.Destaque is { } d)
     {
-        <section class="focus" id="destaque" aria-labelledby="focusName"
-                 data-nome="@d.Nome"
-                 data-inicio="@d.InicioIso"
-                 data-fim="@d.FimIso"
-                 data-folga-fim="@d.FolgaFimIso"
-                 data-tipo="@d.Tipo"
-                 data-nota="@d.NotaNoDia">
+        <section class="focus" id="destaque" aria-labelledby="focusName" data-proxima="@Model.IndiceDestaque">
             <p class="kicker" id="focusKicker">Sua próxima folga</p>
-            <h1 class="name" id="focusName">@d.Nome</h1>
-            <p class="date">@d.DataTexto</p>
+            <h1 class="name" id="focusName" tabindex="-1">@d.Nome</h1>
+            <p class="date" id="focusDate">@d.DataTexto</p>
 
             <div class="count" id="focusCount">
                 <span class="count-part"><span class="count-num">@Model.DiasAteDestaque</span><span class="count-unit">@(Model.DiasAteDestaque == 1 ? "dia" : "dias")</span></span>
@@ -23,20 +17,17 @@
             <p class="today-note" id="focusNote" hidden></p>
 
             <figure class="strip">
-                <ol class="strip-days" aria-label="Dias em volta do feriado">
+                <ol class="strip-days" id="focusStrip" aria-label="Dias em volta do feriado">
                     @foreach (var dia in d.Faixa)
                     {
                         <li class="@dia.Classe" data-iso="@dia.Iso" aria-label="@dia.Rotulo"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span></li>
                     }
                 </ol>
                 <figcaption>
-                    <p class="impact @(d.Tipo == TipoFolga.Prolongado ? "is-long" : "")">@d.Impacto</p>
+                    <p class="impact @(d.Tipo == TipoFolga.Prolongado ? "is-long" : "")" id="focusImpact">@d.Impacto</p>
                     <ul class="legend">
                         <li><span class="sw sw-off" aria-hidden="true"></span>Folga</li>
-                        @if (d.TemPonte)
-                        {
-                            <li><span class="sw sw-ponte" aria-hidden="true"></span>Ponte possível</li>
-                        }
+                        <li id="legendPonte" hidden="@(!d.TemPonte)"><span class="sw sw-ponte" aria-hidden="true"></span>Ponte possível</li>
                     </ul>
                 </figcaption>
             </figure>
@@ -47,6 +38,8 @@
                     <span>Compartilhar</span>
                 </button>
             </div>
+
+            <p class="back" id="focusBack" hidden><button type="button">Voltar para a próxima folga</button></p>
         </section>
     }
     else
@@ -60,24 +53,27 @@
     {
         <section aria-labelledby="listTitle">
             <h2 class="list-title" id="listTitle">Próximos feriados</h2>
-            @foreach (var ano in Model.Feriados.GroupBy(f => f.Ano))
+            @foreach (var ano in Model.Feriados.Select((f, i) => (f, i)).GroupBy(x => x.f.Ano))
             {
                 <h3 class="year">@ano.Key</h3>
                 <ul class="rows">
-                    @foreach (var f in ano)
+                    @foreach (var (f, i) in ano)
                     {
                         var classe = f.Tipo == TipoFolga.FimDeSemana ? "is-weekend" : "is-off";
                         if (f.Tipo == TipoFolga.Prolongado) classe += " is-long";
-                        if (ReferenceEquals(f, Model.Destaque)) classe += " is-selected";
 
-                        <li class="row @classe">
-                            <span class="row-date"><span class="row-day">@f.DiaLista</span><span class="row-mon">@f.MesLista</span></span>
-                            <span><span class="row-name">@f.Nome</span><span class="row-info">@f.ImpactoCurto</span></span>
+                        <li>
+                            <button type="button" class="row @classe" data-indice="@i" aria-pressed="@(i == Model.IndiceDestaque ? "true" : "false")">
+                                <span class="row-date"><span class="row-day">@f.DiaLista</span><span class="row-mon">@f.MesLista</span></span>
+                                <span><span class="row-name">@f.Nome</span><span class="row-info">@f.ImpactoCurto</span></span>
+                            </button>
                         </li>
                     }
                 </ul>
             }
         </section>
+
+        <script type="application/json" id="feriadosDados">@Html.Raw(Model.FeriadosJson)</script>
     }
 </div>
 

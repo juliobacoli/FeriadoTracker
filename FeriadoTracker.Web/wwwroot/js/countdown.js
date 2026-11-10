@@ -51,8 +51,7 @@ export function createCountdown(section) {
         kicker: section.querySelector('#focusKicker'),
         count: section.querySelector('#focusCount'),
         exact: section.querySelector('#focusExact'),
-        note: section.querySelector('#focusNote'),
-        dias: section.querySelectorAll('.strip-days li')
+        note: section.querySelector('#focusNote')
     };
     const tituloOriginal = document.title;
 
@@ -60,15 +59,20 @@ export function createCountdown(section) {
     let intervalo = null;
     let ultimaChave = '';
 
-    function definir(dados) {
+    /**
+     * @param feriado Item do JSON de feriados (FeriadoVisao).
+     * @param proxima Se é a próxima folga ou um feriado escolhido na lista.
+     */
+    function definir(feriado, proxima = true) {
         alvo = {
-            nome: dados.nome,
-            inicio: parseData(dados.inicio),
-            fimFeriado: addDias(parseData(dados.fim), 1),
-            fimFolga: addDias(parseData(dados.folgaFim), 1),
-            folgaFimIso: dados.folgaFim,
-            fimDeSemana: dados.tipo === 'FimDeSemana',
-            nota: dados.nota
+            nome: feriado.nome,
+            proxima,
+            inicio: parseData(feriado.inicioIso),
+            fimFeriado: addDias(parseData(feriado.fimIso), 1),
+            fimFolga: addDias(parseData(feriado.folgaFimIso), 1),
+            folgaFimIso: feriado.folgaFimIso,
+            fimDeSemana: feriado.tipo === 'FimDeSemana',
+            nota: feriado.notaNoDia
         };
         ultimaChave = '';
         render();
@@ -129,7 +133,8 @@ export function createCountdown(section) {
 
     function marcarHoje(agora) {
         const hojeIso = iso(agora);
-        el.dias.forEach(li => li.classList.toggle('today', li.dataset.iso === hojeIso));
+        section.querySelectorAll('.strip-days li')
+            .forEach(li => li.classList.toggle('today', li.dataset.iso === hojeIso));
     }
 
     function render() {
@@ -150,7 +155,8 @@ export function createCountdown(section) {
             el.note.textContent = e.nota ?? '';
             el.note.hidden = !e.nota;
 
-            el.kicker.textContent = e.emFolga ? 'Sua folga começou' : 'Sua próxima folga';
+            el.kicker.textContent = !alvo.proxima ? 'Feriado escolhido'
+                : e.emFolga ? 'Sua folga começou' : 'Sua próxima folga';
             document.body.classList.toggle('is-holiday', !!e.emFolga);
             document.title = e.titulo;
             marcarHoje(agora);

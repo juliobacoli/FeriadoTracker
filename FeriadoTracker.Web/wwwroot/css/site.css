@@ -40,6 +40,11 @@ html.dark {
     box-sizing: border-box;
 }
 
+/* Garante que o atributo hidden vença os display definidos abaixo. */
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -728,12 +733,22 @@ html.dark body.is-holiday {
 }
 
 .row {
+    width: 100%;
     display: grid;
     grid-template-columns: 68px minmax(0, 1fr);
     gap: 14px;
     align-items: center;
+    text-align: left;
+    background: none;
+    border: 0;
     border-bottom: 1px solid var(--line);
     padding: 12px 8px 12px 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.row:hover {
+    background: var(--surface);
 }
 
 .row-date {
@@ -761,17 +776,45 @@ html.dark body.is-holiday {
     box-shadow: inset 0 -4px 0 var(--folga);
 }
 
-.row.is-selected {
+/* Seleção: bloco da data em âmbar + fundo lavado, sem borda lateral. */
+.row[aria-pressed="true"] {
     background: var(--folga-wash);
 }
 
-.row.is-selected .row-date {
+.row[aria-pressed="true"] .row-date {
     background: var(--folga);
 }
 
-.row.is-selected .row-day,
-.row.is-selected .row-mon {
+.row[aria-pressed="true"] .row-day,
+.row[aria-pressed="true"] .row-mon {
     color: var(--folga-ink);
+}
+
+.back {
+    margin: 18px 0 0;
+}
+
+.back[hidden] {
+    display: none;
+}
+
+.back button {
+    min-height: 44px;
+    background: none;
+    border: 0;
+    padding: 8px 0;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.name:focus {
+    outline: none;
+}
+
+.name:focus-visible {
+    outline: 3px solid var(--focus);
 }
 
 .row-name {
@@ -841,6 +884,7 @@ html.dark body.is-holiday {
     .tool,
     .btn,
     .mono,
+    .row,
     .toast {
         transition: none;
     }

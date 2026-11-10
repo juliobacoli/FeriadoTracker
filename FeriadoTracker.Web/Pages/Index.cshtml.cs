@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
@@ -12,8 +13,14 @@ public class IndexModel(IHolidayService service, TimeProvider timeProvider) : Pa
 
     public List<FeriadoVisao> Feriados { get; private set; } = [];
 
+    /// <summary>Posição do destaque em <see cref="Feriados"/>; -1 sem destaque.</summary>
+    public int IndiceDestaque { get; private set; } = -1;
+
     /// <summary>Dias de calendário até o destaque, para a primeira pintura antes do JS.</summary>
     public int DiasAteDestaque { get; private set; }
+
+    /// <summary>Feriados em JSON para o cliente trocar o destaque ao clicar na lista.</summary>
+    public string FeriadosJson => JsonSerializer.Serialize(Feriados, FeriadoJsonContext.Default.ListFeriadoVisao);
 
     public async Task OnGetAsync()
     {
@@ -25,7 +32,8 @@ public class IndexModel(IHolidayService service, TimeProvider timeProvider) : Pa
         var proxima = FolgaCalculator.ProximaFolga(analisados);
         if (proxima is not null)
         {
-            Destaque = Feriados[analisados.IndexOf(proxima)];
+            IndiceDestaque = analisados.IndexOf(proxima);
+            Destaque = Feriados[IndiceDestaque];
             DiasAteDestaque = Math.Max(0, proxima.Inicio.DayNumber - hoje.DayNumber);
         }
     }

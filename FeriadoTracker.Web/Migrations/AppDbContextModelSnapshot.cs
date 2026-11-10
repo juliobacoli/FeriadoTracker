@@ -15,7 +15,7 @@ namespace FeriadoTracker.Web.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
             modelBuilder.Entity("FeriadoTracker.Web.Models.Feriado", b =>
                 {
@@ -136,6 +136,97 @@ namespace FeriadoTracker.Web.Migrations
                         {
                             Id = 14,
                             Data = new DateOnly(2026, 12, 25),
+                            Nome = "Natal",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Data = new DateOnly(2027, 1, 1),
+                            Nome = "Confraternização Universal",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Data = new DateOnly(2027, 2, 8),
+                            Nome = "Carnaval",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Data = new DateOnly(2027, 2, 9),
+                            Nome = "Carnaval",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Data = new DateOnly(2027, 3, 26),
+                            Nome = "Sexta-feira Santa",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Data = new DateOnly(2027, 4, 21),
+                            Nome = "Tiradentes",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Data = new DateOnly(2027, 5, 1),
+                            Nome = "Dia do Trabalho",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Data = new DateOnly(2027, 5, 27),
+                            Nome = "Corpus Christi",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Data = new DateOnly(2027, 9, 7),
+                            Nome = "Independência do Brasil",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Data = new DateOnly(2027, 10, 12),
+                            Nome = "Nossa Senhora Aparecida",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Data = new DateOnly(2027, 11, 2),
+                            Nome = "Finados",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Data = new DateOnly(2027, 11, 15),
+                            Nome = "Proclamação da República",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Data = new DateOnly(2027, 11, 20),
+                            Nome = "Dia Nacional da Consciência Negra",
+                            Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Data = new DateOnly(2027, 12, 25),
                             Nome = "Natal",
                             Tipo = "Nacional"
                         });

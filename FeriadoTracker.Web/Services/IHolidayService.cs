@@ -6,4 +6,5 @@ public interface IHolidayService
 {
     Task<Feriado?> GetProximoFeriadoAsync();
     Task<List<Feriado>> GetProximosFeriadosAsync();
+    Task<List<FeriadoAnalisado>> GetProximosFeriadosAnalisadosAsync();
 }

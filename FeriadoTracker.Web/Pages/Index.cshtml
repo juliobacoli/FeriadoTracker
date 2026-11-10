@@ -1,95 +1,86 @@
 ﻿@page
 @using FeriadoTracker.Web.Services
-
 @model FeriadoTracker.Web.Pages.IndexModel
 
-<div class="page-wrapper page-center">
-    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado is null ? "" : PtBrFormat.Iso(Model.ProximoFeriado.Data))">
-        <div class="holiday-card card">
-            <div class="holiday-header">
-                <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
-                <h1 class="holiday-title">@Model.ProximoFeriado?.Nome</h1>
+<div class="page">
+    @if (Model.Destaque is { } d)
+    {
+        <section class="focus" id="destaque" aria-labelledby="focusName"
+                 data-nome="@d.Nome"
+                 data-inicio="@d.InicioIso"
+                 data-fim="@d.FimIso"
+                 data-folga-fim="@d.FolgaFimIso"
+                 data-tipo="@d.Tipo"
+                 data-nota="@d.NotaNoDia">
+            <p class="kicker" id="focusKicker">Sua próxima folga</p>
+            <h1 class="name" id="focusName">@d.Nome</h1>
+            <p class="date">@d.DataTexto</p>
 
-                @if (Model.ProximoFeriado is not null)
-                {
-                    <p class="holiday-date">
-                        @PtBrFormat.DataPorExtenso(Model.ProximoFeriado.Data)
-                    </p>
-                }
-                else
-                {
-                    <p class="holiday-date">Nenhum feriado encontrado.</p>
-                }
+            <div class="count" id="focusCount">
+                <span class="count-part"><span class="count-num">@Model.DiasAteDestaque</span><span class="count-unit">@(Model.DiasAteDestaque == 1 ? "dia" : "dias")</span></span>
             </div>
+            <p class="exact" id="focusExact" aria-hidden="true"></p>
+            <p class="today-note" id="focusNote" hidden></p>
 
-            <div class="countdown-grid metric-grid">
-                <div class="countdown-box metric-box">
-                    <div id="days" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Dias</div>
-                </div>
-                <div class="countdown-box metric-box">
-                    <div id="hours" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Horas</div>
-                </div>
-                <div class="countdown-box metric-box">
-                    <div id="minutes" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Minutos</div>
-                </div>
-                <div class="countdown-box metric-box">
-                    <div id="seconds" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Segundos</div>
-                </div>
-            </div>
-            
-            <div class="share-wrapper">
-                <button id="btnShare" class="btn-share" hidden aria-label="Compartilhar feriado">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                    </svg>
-                    Compartilhar
+            <figure class="strip">
+                <ol class="strip-days" aria-label="Dias em volta do feriado">
+                    @foreach (var dia in d.Faixa)
+                    {
+                        <li class="@dia.Classe" data-iso="@dia.Iso" aria-label="@dia.Rotulo"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span></li>
+                    }
+                </ol>
+                <figcaption>
+                    <p class="impact @(d.Tipo == TipoFolga.Prolongado ? "is-long" : "")">@d.Impacto</p>
+                    <ul class="legend">
+                        <li><span class="sw sw-off" aria-hidden="true"></span>Folga</li>
+                        @if (d.TemPonte)
+                        {
+                            <li><span class="sw sw-ponte" aria-hidden="true"></span>Ponte possível</li>
+                        }
+                    </ul>
+                </figcaption>
+            </figure>
+
+            <div class="actions">
+                <button class="btn" id="btnShare" type="button" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+                    <span>Compartilhar</span>
                 </button>
             </div>
-        </div>
+        </section>
+    }
+    else
+    {
+        <section class="focus">
+            <h1 class="name">Nenhum feriado encontrado.</h1>
+        </section>
+    }
 
-        @if (Model.ProximosFeriados is not null && Model.ProximosFeriados.Any())
-        {
-            <div class="holiday-timeline-wrapper card">
-                <h2 class="holiday-timeline-title">Linha do tempo dos próximos feriados</h2>
-
-                <div class="holiday-timeline">
-                    @foreach (var feriado in Model.ProximosFeriados)
+    @if (Model.Feriados.Count > 0)
+    {
+        <section aria-labelledby="listTitle">
+            <h2 class="list-title" id="listTitle">Próximos feriados</h2>
+            @foreach (var ano in Model.Feriados.GroupBy(f => f.Ano))
+            {
+                <h3 class="year">@ano.Key</h3>
+                <ul class="rows">
+                    @foreach (var f in ano)
                     {
-                        var isNext = Model.ProximoFeriado is not null
-                        && feriado.Id == Model.ProximoFeriado.Id;
+                        var classe = f.Tipo == TipoFolga.FimDeSemana ? "is-weekend" : "is-off";
+                        if (f.Tipo == TipoFolga.Prolongado) classe += " is-long";
+                        if (ReferenceEquals(f, Model.Destaque)) classe += " is-selected";
 
-                        <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
-                             data-target-date="@PtBrFormat.Iso(feriado.Data)"
-                             data-target-name="@feriado.Nome"
-                             data-target-formatted="@PtBrFormat.DataPorExtenso(feriado.Data)">
-                            <div class="holiday-timeline-dot"></div>
-
-                            <div class="holiday-timeline-content">
-                                <span class="holiday-timeline-date">
-                                    @PtBrFormat.DataCurta(feriado.Data) - @PtBrFormat.DiaDaSemana(feriado.Data)
-                                </span>
-                                <span class="holiday-timeline-name">
-                                    @feriado.Nome
-                                </span>
-                            </div>
-                        </div>
+                        <li class="row @classe">
+                            <span class="row-date"><span class="row-day">@f.DiaLista</span><span class="row-mon">@f.MesLista</span></span>
+                            <span><span class="row-name">@f.Nome</span><span class="row-info">@f.ImpactoCurto</span></span>
+                        </li>
                     }
-                </div>
-            </div>
-        }
-    </div>
+                </ul>
+            }
+        </section>
+    }
 </div>
 
 @section Scripts {
-    <script src="~/js/confetti-lib.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
     <script type="module" src="~/js/main.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
 }
-

@@ -1,4 +1,3 @@
-using FeriadoTracker.Web.Models;
 using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
@@ -6,14 +5,28 @@ using Microsoft.AspNetCore.Mvc;
 namespace FeriadoTracker.Web.Pages;
 
 [ResponseCache(Duration = 86400)]
-public class IndexModel(IHolidayService service) : PageModel
+public class IndexModel(IHolidayService service, TimeProvider timeProvider) : PageModel
 {
-    public Feriado? ProximoFeriado { get; set; }
-    public List<Feriado> ProximosFeriados { get; set; } = new();
+    /// <summary>Próxima folga: primeiro feriado que não cai no fim de semana.</summary>
+    public FeriadoVisao? Destaque { get; private set; }
+
+    public List<FeriadoVisao> Feriados { get; private set; } = [];
+
+    /// <summary>Dias de calendário até o destaque, para a primeira pintura antes do JS.</summary>
+    public int DiasAteDestaque { get; private set; }
 
     public async Task OnGetAsync()
     {
-        ProximoFeriado = await service.GetProximoFeriadoAsync();
-        ProximosFeriados = await service.GetProximosFeriadosAsync();
+        var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
+        var analisados = await service.GetProximosFeriadosAnalisadosAsync();
+
+        Feriados = analisados.Select(a => FeriadoVisaoBuilder.Criar(a, hoje)).ToList();
+
+        var proxima = FolgaCalculator.ProximaFolga(analisados);
+        if (proxima is not null)
+        {
+            Destaque = Feriados[analisados.IndexOf(proxima)];
+            DiasAteDestaque = Math.Max(0, proxima.Inicio.DayNumber - hoje.DayNumber);
+        }
     }
 }

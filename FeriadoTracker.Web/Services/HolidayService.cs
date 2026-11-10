@@ -37,8 +37,9 @@ public class HolidayService(AppDbContext context, TimeProvider timeProvider) : I
             .Where(f => f.Data >= hoje.AddDays(-7))
             .ToListAsync();
 
+        // Mantém o feriado enquanto a folga dele não acabou (sábado depois de um feriado na sexta).
         return FolgaCalculator.Analisar(feriados)
-            .Where(f => f.Fim >= hoje)
+            .Where(f => f.FolgaFim >= hoje)
             .ToList();
     }
 }

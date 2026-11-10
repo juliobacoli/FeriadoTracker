@@ -452,65 +452,219 @@ html.dark .sun-icon {
     overflow-wrap: anywhere;
 }
 
-/* Provisório: estrutura antiga do Index, substituída na fatia 3 (destaque). */
-.holiday-wrapper {
-    width: 100%;
-    max-width: 720px;
-    display: grid;
-    gap: 24px;
+/* Modo âmbar: no dia da folga a tela inteira esquenta. */
+body.is-holiday {
+    --paper: #FDF0D5;
+    --line: #ECD8AD;
 }
 
-.holiday-subtitle {
+html.dark body.is-holiday {
+    --paper: #2A2216;
+    --surface: #352A1B;
+    --line: #4A3B25;
+}
+
+/* Index: destaque + lista */
+.page {
+    display: grid;
+    gap: 40px;
+}
+
+.kicker {
+    font-size: 16px;
     color: var(--muted);
+    margin: 0 0 6px;
     font-weight: 500;
 }
 
-.holiday-title {
-    font-size: clamp(30px, 6vw, 42px);
+.name {
+    font-size: clamp(30px, 7vw, 42px);
     font-weight: 750;
     font-stretch: 80%;
     line-height: 1.05;
-    margin: 4px 0 0;
+    letter-spacing: -0.015em;
+    margin: 0;
 }
 
-.holiday-date {
+.date {
     margin: 6px 0 0;
     font-size: 18px;
 }
 
-.countdown-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 20px;
+.count {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 20px;
+    margin: 22px 0 4px;
 }
 
-.countdown-box {
-    display: grid;
-    justify-items: center;
-    padding: 12px 0;
-    border: 1px solid var(--line);
-    border-radius: 10px;
+.count-part {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
 }
 
-.countdown-number {
-    font-size: 40px;
+.count-num {
+    font-size: clamp(104px, 30vw, 168px);
     font-weight: 800;
     font-stretch: 62%;
-    line-height: 1;
+    line-height: 0.78;
+    letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
 }
 
-.countdown-label {
-    font-size: 13px;
+.count-unit {
+    font-size: 26px;
+    font-weight: 600;
+    font-stretch: 75%;
+}
+
+.count-word {
+    font-size: clamp(56px, 14vw, 80px);
+    font-weight: 800;
+    font-stretch: 62%;
+    line-height: 0.9;
+    color: var(--folga-ink);
+    background: var(--folga);
+    padding: 4px 12px 0;
+    border-radius: 10px;
+}
+
+.exact {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 10px 0 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.today-note {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 14px 0 0;
+}
+
+.strip {
+    margin: 28px 0 0;
+}
+
+.strip-days {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.strip-days li {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 8px 0 10px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.strip-days .wd {
+    font-size: 12px;
     color: var(--muted);
 }
 
-.share-wrapper {
-    margin-top: 20px;
+.strip-days .dn {
+    font-size: 22px;
+    font-weight: 700;
+    font-stretch: 70%;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
 }
 
-.btn-share {
+.strip-days li.off {
+    background: var(--folga);
+    border-color: var(--folga);
+    color: var(--folga-ink);
+}
+
+.strip-days li.off .wd {
+    color: var(--folga-ink);
+}
+
+.strip-days li.ponte {
+    background: repeating-linear-gradient(135deg, var(--folga-wash) 0 6px, var(--surface) 6px 12px);
+    border: 2px dashed var(--ink);
+}
+
+.strip-days li.holiday .dn {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 3px;
+}
+
+.strip-days li.weekend-only {
+    border: 2px solid var(--alerta);
+}
+
+.strip-days li.weekend-only .dn {
+    color: var(--alerta);
+}
+
+.strip-days li.today {
+    box-shadow: inset 0 -4px 0 var(--ink);
+}
+
+.impact {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 14px 0 0;
+}
+
+.impact.is-long,
+.row.is-long .row-info {
+    color: var(--ok);
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sw {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.sw-off {
+    background: var(--folga);
+}
+
+.sw-ponte {
+    border: 2px dashed var(--ink);
+    background: var(--folga-wash);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 26px 0 0;
+}
+
+.btn {
     min-height: 48px;
     padding: 0 20px;
     border-radius: 12px;
@@ -521,57 +675,178 @@ html.dark .sun-icon {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
-.btn-share[hidden] {
+.btn[hidden] {
     display: none;
 }
 
-.btn-share svg {
+.btn svg {
     width: 18px;
     height: 18px;
 }
 
-.holiday-timeline-title {
+.btn:hover {
+    border-color: var(--ink);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn.is-done {
+    border-color: var(--ok);
+    background: var(--ok-wash);
+}
+
+.btn.is-done svg {
+    color: var(--ok);
+}
+
+.list-title {
     font-size: 24px;
     font-weight: 750;
     font-stretch: 80%;
-    margin: 0 0 8px;
+    margin: 0;
+    letter-spacing: -0.01em;
 }
 
-.holiday-timeline-item {
-    display: flex;
-    gap: 12px;
-    padding: 12px 8px;
+.year {
+    font-size: 48px;
+    font-weight: 800;
+    font-stretch: 62%;
+    color: var(--muted);
+    line-height: 1;
+    margin: 28px 0 4px;
+}
+
+.rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
     border-bottom: 1px solid var(--line);
-    cursor: pointer;
+    padding: 12px 8px 12px 0;
 }
 
-.holiday-timeline-item.is-selected {
+.row-date {
+    display: grid;
+    justify-items: center;
+    line-height: 1;
+    padding: 8px 0;
+    border-radius: 10px;
+}
+
+.row-day {
+    font-size: 32px;
+    font-weight: 800;
+    font-stretch: 62%;
+    font-variant-numeric: tabular-nums;
+}
+
+.row-mon {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+.row.is-off .row-date {
+    box-shadow: inset 0 -4px 0 var(--folga);
+}
+
+.row.is-selected {
     background: var(--folga-wash);
 }
 
-.holiday-timeline-content {
-    display: grid;
+.row.is-selected .row-date {
+    background: var(--folga);
 }
 
-.holiday-timeline-date {
+.row.is-selected .row-day,
+.row.is-selected .row-mon {
+    color: var(--folga-ink);
+}
+
+.row-name {
+    display: block;
+    font-weight: 600;
+}
+
+.row-info {
+    display: block;
     color: var(--muted);
     font-size: 15px;
 }
 
-.holiday-timeline-name {
-    font-weight: 600;
+.row.is-weekend .row-info {
+    color: var(--alerta);
+}
+
+/* Celular: 7 dias na faixa. */
+@media (max-width: 639px) {
+    .strip-days {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .strip-days li:first-child,
+    .strip-days li:last-child {
+        display: none;
+    }
+
+    .strip-days li {
+        padding: 10px 0 12px;
+    }
+
+    .strip-days .wd {
+        font-size: 13px;
+    }
+
+    .strip-days .dn {
+        font-size: 26px;
+    }
+}
+
+/* Desktop: destaque e lista lado a lado. */
+@media (min-width: 960px) {
+    .page {
+        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+        gap: 64px;
+        align-items: start;
+        padding-top: 16px;
+    }
+
+    .focus {
+        position: sticky;
+        top: 24px;
+    }
+
+    .count-num {
+        font-size: 168px;
+    }
+
+    .name {
+        font-size: 42px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .tool,
+    .btn,
     .mono,
     .toast {
         transition: none;
     }
 
-    .tool:active {
+    .tool:active,
+    .btn:active {
         transform: none;
     }
 }

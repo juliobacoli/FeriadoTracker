@@ -1,6 +1,4 @@
-import { startConfetti, attachConfettiButton } from './confetti.js';
 import { createCountdown } from './countdown.js';
-import { attachTimelineHandlers } from './timeline.js';
 import { setupPushButton } from './push.js';
 import { setupShareButton } from './share.js';
 
@@ -8,45 +6,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const pushBtn = document.getElementById('pushToggle');
     if (pushBtn) setupPushButton(pushBtn);
 
-    const wrapper = document.querySelector('.holiday-wrapper');
-    if (!wrapper) return;
+    const destaque = document.getElementById('destaque');
+    if (!destaque) return;
 
-    const elements = {
-        days: document.getElementById('days'),
-        hours: document.getElementById('hours'),
-        minutes: document.getElementById('minutes'),
-        seconds: document.getElementById('seconds'),
-        card: document.querySelector('.holiday-card'),
-        title: document.querySelector('.holiday-title'),
-        subtitle: document.querySelector('.holiday-subtitle'),
-        date: document.querySelector('.holiday-date')
-    };
-
-    const confettiBtn = document.getElementById('confettiToggle');
-    attachConfettiButton(confettiBtn);
+    const countdown = createCountdown(destaque);
+    countdown.definir(destaque.dataset);
+    countdown.start();
 
     const shareBtn = document.getElementById('btnShare');
-    if (shareBtn) setupShareButton(shareBtn, elements);
-
-    const countdown = createCountdown({
-        elements,
-        onZero() {
-            if (confettiBtn) confettiBtn.hidden = false;
-            startConfetti();
-        }
-    });
-
-    const timelineItems = document.querySelectorAll('.holiday-timeline-item');
-    attachTimelineHandlers({
-        items: timelineItems,
-        elements,
-        confettiBtn,
-        countdown
-    });
-
-    const initialDateString = wrapper.getAttribute('data-initial-date');
-    if (initialDateString) {
-        countdown.setDate(new Date(initialDateString));
+    if (shareBtn) {
+        setupShareButton(shareBtn, () => ({
+            nome: destaque.dataset.nome,
+            inicio: destaque.dataset.inicio
+        }));
     }
-    countdown.start();
 });

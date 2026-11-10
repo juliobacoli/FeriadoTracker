@@ -1,11 +1,13 @@
 import { createCountdown } from './countdown.js';
 import { setupDestaque } from './destaque.js';
-import { setupPushButton } from './push.js';
+import { setupPushButtons } from './push.js';
 import { setupShareButton } from './share.js';
 
 document.addEventListener('DOMContentLoaded', function () {
-    const pushBtn = document.getElementById('pushToggle');
-    if (pushBtn) setupPushButton(pushBtn);
+    setupPushButtons([
+        document.getElementById('pushToggle'),
+        document.getElementById('btnLembrete')
+    ]);
 
     const section = document.getElementById('destaque');
     const dados = document.getElementById('feriadosDados');

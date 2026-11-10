@@ -1,3 +1,5 @@
+import { showToast } from './toast.js';
+
 function diasAte(inicioIso) {
     const [a, m, d] = inicioIso.split('-').map(Number);
     const agora = new Date();
@@ -16,6 +18,7 @@ function textoCompartilhado({ nome, inicio }) {
 export function setupShareButton(btn, feriadoAtual) {
     btn.hidden = false;
     const rotulo = btn.querySelector('span');
+    let timer = null;
 
     btn.addEventListener('click', async () => {
         if (navigator.share) {
@@ -35,12 +38,15 @@ export function setupShareButton(btn, feriadoAtual) {
             await navigator.clipboard.writeText(window.location.origin);
             rotulo.textContent = 'Link copiado';
             btn.classList.add('is-done');
-            setTimeout(() => {
+            showToast('Link copiado. É só colar na conversa.', 'success');
+            clearTimeout(timer);
+            timer = setTimeout(() => {
                 rotulo.textContent = 'Compartilhar';
                 btn.classList.remove('is-done');
-            }, 2800);
+            }, 3000);
         } catch (err) {
             console.error('Erro ao copiar link:', err);
+            showToast('Não foi possível copiar o link.', 'error');
         }
     });
 }

@@ -120,63 +120,76 @@ async function unsubscribe() {
 
 const HINT_DISMISSED_KEY = 'push-hint-dismissed';
 
-function setupHint(button) {
+function hintDispensada() {
+    try { return localStorage.getItem(HINT_DISMISSED_KEY) === '1'; } catch { return false; }
+}
+
+function setupHint(buttons) {
     const hint = document.getElementById('pushHint');
-    if (!hint) return null;
+    if (!hint || hintDispensada()) return null;
 
-    if (localStorage.getItem(HINT_DISMISSED_KEY) === '1') return null;
-
-    function hide(persist) {
+    function hide() {
         hint.hidden = true;
-        if (persist) localStorage.setItem(HINT_DISMISSED_KEY, '1');
+        try { localStorage.setItem(HINT_DISMISSED_KEY, '1'); } catch { }
     }
 
-    const closeBtn = document.getElementById('pushHintClose');
-    if (closeBtn) closeBtn.addEventListener('click', () => hide(true));
-
-    button.addEventListener('click', () => hide(true), { once: true });
+    document.getElementById('pushHintClose')?.addEventListener('click', hide);
+    buttons.forEach(b => b.addEventListener('click', hide, { once: true }));
 
     return { show: () => { hint.hidden = false; } };
 }
 
-export async function setupPushButton(button) {
-    if (!button) return;
+/** Atualiza rótulo, ícone (via aria-pressed) e dica de cada botão de lembrete. */
+function renderEstado(buttons, active) {
+    buttons.forEach(button => {
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        button.title = active ? 'Desativar lembretes' : 'Ativar lembretes';
+        const rotulo = button.querySelector('[data-rotulo-on]');
+        if (rotulo) rotulo.textContent = active ? rotulo.dataset.rotuloOn : rotulo.dataset.rotuloOff;
+    });
+}
+
+/**
+ * Liga os botões de lembrete (sino do topo e botão principal) ao push.
+ * Todos compartilham o mesmo estado de inscrição.
+ */
+export async function setupPushButtons(buttons) {
+    buttons = buttons.filter(Boolean);
+    if (buttons.length === 0) return;
 
     if (isIosNonStandalone()) {
-        setupIosInstallModal(button);
+        buttons.forEach(setupIosInstallModal);
         return;
     }
 
     if (!isSupported()) {
-        button.hidden = true;
+        buttons.forEach(b => { b.hidden = true; });
         return;
     }
 
     if (Notification.permission === 'denied') {
-        button.disabled = true;
-        button.title = 'Notificações bloqueadas pelo navegador';
-        button.setAttribute('aria-pressed', 'false');
+        buttons.forEach(b => {
+            b.disabled = true;
+            b.title = 'Notificações bloqueadas pelo navegador';
+            b.setAttribute('aria-pressed', 'false');
+        });
         return;
     }
 
     async function refresh() {
-        const sub = await getCurrentSubscription();
-        const active = !!sub;
-        button.classList.toggle('is-active', active);
-        button.title = active ? 'Desativar notificações' : 'Ativar notificações';
-        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        renderEstado(buttons, !!(await getCurrentSubscription()));
     }
 
-    button.addEventListener('click', async () => {
-        button.disabled = true;
+    async function alternar() {
+        buttons.forEach(b => { b.disabled = true; });
         try {
             const sub = await getCurrentSubscription();
             if (sub) {
                 await unsubscribe();
-                showToast('Notificações desativadas.', 'info');
+                showToast('Lembretes desativados.', 'info');
             } else {
                 await subscribe();
-                showToast('Notificações ativadas! Avisaremos antes do próximo feriado.', 'success');
+                showToast('Lembretes ativados. Você recebe um aviso alguns dias antes de cada feriado.', 'success');
             }
             await refresh();
         } catch (err) {
@@ -190,19 +203,20 @@ export async function setupPushButton(button) {
                     msg = 'Muitas tentativas. Aguarde 1 minuto e tente novamente.';
                     break;
                 default:
-                    msg = 'Não foi possível alterar a inscrição. Tente novamente.';
+                    msg = 'Não foi possível alterar os lembretes. Tente novamente.';
             }
             showToast(msg, 'error');
         } finally {
-            button.disabled = false;
+            buttons.forEach(b => { b.disabled = false; });
         }
-    });
+    }
+
+    buttons.forEach(b => b.addEventListener('click', alternar));
 
     await refresh();
 
-    const current = await getCurrentSubscription();
-    if (!current) {
-        const hint = setupHint(button);
+    if (!(await getCurrentSubscription())) {
+        const hint = setupHint(buttons);
         if (hint) setTimeout(() => hint.show(), 2000);
     }
 }

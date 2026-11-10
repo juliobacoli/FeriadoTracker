@@ -12,6 +12,7 @@
     --ok: #256B5B;
     --ok-wash: #E0F0EB;
     --toast-icon: #7FD4BE;
+    --toast-alerta: #F08A85;
     --focus: #1B2A4A;
     --overlay: rgba(15, 22, 38, 0.55);
     color-scheme: light;
@@ -30,6 +31,7 @@ html.dark {
     --ok: #6CC9AE;
     --ok-wash: #15302B;
     --toast-icon: #256B5B;
+    --toast-alerta: #B4363A;
     --focus: #E9B04A;
     --overlay: rgba(0, 0, 0, 0.6);
     color-scheme: dark;
@@ -262,6 +264,9 @@ html.dark .sun-icon {
 }
 
 .toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     max-width: 460px;
     background: var(--ink);
     color: var(--paper);
@@ -279,6 +284,17 @@ html.dark .sun-icon {
 .toast.is-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.toast svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    color: var(--toast-icon);
+}
+
+.toast-error svg {
+    color: var(--toast-alerta);
 }
 
 /* Dica do sino */
@@ -705,8 +721,45 @@ html.dark body.is-holiday {
     background: var(--ok-wash);
 }
 
-.btn.is-done svg {
+.btn.is-done svg,
+.btn-main[aria-pressed="true"] svg {
     color: var(--ok);
+}
+
+/* Botão principal neutro (o âmbar é só da folga); ativo, vira confirmação. */
+.btn-main {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+}
+
+.btn-main:hover {
+    border-color: var(--ink);
+    opacity: 0.92;
+}
+
+.btn-main[aria-pressed="true"] {
+    background: var(--ok-wash);
+    color: var(--ink);
+    border-color: var(--ok);
+    opacity: 1;
+}
+
+.btn:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+/* Ícone trocado pela confirmação quando ativo/concluído. */
+.btn .icon-on,
+.btn[aria-pressed="true"] .icon-off,
+.btn.is-done .icon-off {
+    display: none;
+}
+
+.btn[aria-pressed="true"] .icon-on,
+.btn.is-done .icon-on {
+    display: block;
 }
 
 .list-title {

@@ -4,10 +4,7 @@ import { setupPushButtons } from './push.js';
 import { setupShareButton } from './share.js';
 
 document.addEventListener('DOMContentLoaded', function () {
-    setupPushButtons([
-        document.getElementById('pushToggle'),
-        document.getElementById('btnLembrete')
-    ]);
+    setupPushButtons([document.getElementById('btnLembrete')]);
 
     const section = document.getElementById('destaque');
     if (!section) return;

@@ -30,20 +30,19 @@ function isIosNonStandalone() {
 
 function setupIosInstallModal(button) {
     const overlay = document.getElementById('iosInstallOverlay');
-    if (!overlay) {
+    if (!overlay || typeof overlay.showModal !== 'function') {
         button.addEventListener('click', () => {
             showToast('Para ativar notificações no iPhone, adicione o app à tela inicial primeiro.', 'info');
         });
         return;
     }
 
-    const close = () => { overlay.hidden = true; };
+    // <dialog> nativo: showModal prende o foco e o Esc fecha sozinho.
+    document.getElementById('iosInstallClose')?.addEventListener('click', () => overlay.close());
+    // O conteúdo ocupa o dialog inteiro; clique com alvo no próprio dialog é clique no fundo.
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.close(); });
 
-    document.getElementById('iosInstallClose')?.addEventListener('click', close);
-    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); }, { once: false });
-
-    button.addEventListener('click', () => { overlay.hidden = false; });
+    button.addEventListener('click', () => { if (!overlay.open) overlay.showModal(); });
 }
 
 async function getRegistration() {
@@ -118,28 +117,7 @@ async function unsubscribe() {
     await sub.unsubscribe();
 }
 
-const HINT_DISMISSED_KEY = 'push-hint-dismissed';
-
-function hintDispensada() {
-    try { return localStorage.getItem(HINT_DISMISSED_KEY) === '1'; } catch { return false; }
-}
-
-function setupHint(buttons) {
-    const hint = document.getElementById('pushHint');
-    if (!hint || hintDispensada()) return null;
-
-    function hide() {
-        hint.hidden = true;
-        try { localStorage.setItem(HINT_DISMISSED_KEY, '1'); } catch { }
-    }
-
-    document.getElementById('pushHintClose')?.addEventListener('click', hide);
-    buttons.forEach(b => b.addEventListener('click', hide, { once: true }));
-
-    return { show: () => { hint.hidden = false; } };
-}
-
-/** Atualiza rótulo, ícone (via aria-pressed) e dica de cada botão de lembrete. */
+/** Atualiza rótulo, ícone (via aria-pressed) e title de cada botão de lembrete. */
 function renderEstado(buttons, active) {
     buttons.forEach(button => {
         button.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -150,7 +128,7 @@ function renderEstado(buttons, active) {
 }
 
 /**
- * Liga os botões de lembrete (sino do topo e botão principal) ao push.
+ * Liga os botões de lembrete ao push.
  * Todos compartilham o mesmo estado de inscrição.
  */
 export async function setupPushButtons(buttons) {
@@ -214,9 +192,4 @@ export async function setupPushButtons(buttons) {
     buttons.forEach(b => b.addEventListener('click', alternar));
 
     await refresh();
-
-    if (!(await getCurrentSubscription())) {
-        const hint = setupHint(buttons);
-        if (hint) setTimeout(() => hint.show(), 2000);
-    }
 }

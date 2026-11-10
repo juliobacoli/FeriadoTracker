@@ -1,5 +1,4 @@
 const HORA = 3600000;
-const DIA = 24 * HORA;
 
 function pad(n) {
     return String(n).padStart(2, '0');
@@ -45,6 +44,8 @@ function etiqueta(texto) {
 /**
  * Contagem que cresce conforme o feriado chega:
  * dias (> 48 h) → h e min (até 1 h) → mm:ss (última hora) → modo âmbar no dia.
+ * Com mais de 48 h, o número grande são os dias completos e a linha de baixo é o relógio
+ * (h, min, s) do que sobra: as duas linhas formam uma conta só.
  */
 export function createCountdown(section) {
     const el = {
@@ -54,6 +55,22 @@ export function createCountdown(section) {
         note: section.querySelector('#focusNote')
     };
     const tituloOriginal = document.title;
+
+    // Relógio da linha de baixo: montado uma vez; a cada segundo só os números mudam.
+    const relogio = { raiz: document.createDocumentFragment(), numeros: [] };
+    {
+        const raiz = document.createElement('span');
+        raiz.className = 'clock';
+        for (const unidade of ['h', 'min', 's']) {
+            const item = parte('00', unidade);
+            item.className = 'clock-part';
+            item.firstChild.className = 'clock-num';
+            item.lastChild.className = 'clock-unit';
+            relogio.numeros.push(item.firstChild);
+            raiz.appendChild(item);
+        }
+        relogio.raiz = raiz;
+    }
 
     let alvo = null;
     let intervalo = null;
@@ -86,12 +103,11 @@ export function createCountdown(section) {
         const s = totS % 60;
 
         if (ms > 48 * HORA) {
-            const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
-            const dias = Math.round((alvo.inicio - hoje) / DIA);
+            const dias = Math.floor(totS / 86400);
             return {
                 chave: `d${dias}`,
                 partes: [[String(dias), 'dias']],
-                exact: `Faltam ${Math.floor(totS / 86400)}d ${pad(h)}h ${pad(mi)}min ${pad(s)}s`,
+                relogio: [[pad(h), 'h'], [pad(mi), 'min'], [pad(s), 's']],
                 titulo: `${dias} dias para ${alvo.nome}`
             };
         }
@@ -143,7 +159,13 @@ export function createCountdown(section) {
         const agora = new Date();
         const e = estado(agora);
 
-        el.exact.textContent = e.exact ?? '';
+        if (e.relogio) {
+            if (relogio.raiz.parentNode !== el.exact) el.exact.replaceChildren(relogio.raiz);
+            e.relogio.forEach(([n], i) => { relogio.numeros[i].textContent = n; });
+        } else {
+            el.exact.textContent = e.exact ?? '';
+        }
+        el.exact.classList.toggle('is-clock', !!e.relogio);
         // Fica visível (com altura reservada no CSS) enquanto há contagem, para não empurrar a página.
         el.exact.hidden = !e.partes;
 

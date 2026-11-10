@@ -8,7 +8,7 @@
     {
         foreach (var dia in feriado.Faixa)
         {
-            <li class="@dia.Classe" data-iso="@dia.Iso" aria-label="@dia.Rotulo"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span></li>
+            <li class="@dia.Classe" data-iso="@dia.Iso"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span><span class="sr-only">@dia.Rotulo</span></li>
         }
     }
 }
@@ -33,9 +33,10 @@
                 </ol>
                 <figcaption>
                     <p class="impact @(d.Tipo == TipoFolga.Prolongado ? "is-long" : "")" id="focusImpact">@d.Impacto</p>
-                    <ul class="legend">
+                    @* A legenda só aparece quando há ponte: sozinha, "Folga" não explica nada. *@
+                    <ul class="legend" id="legendPonte" hidden="@(!d.TemPonte)">
                         <li><span class="sw sw-off" aria-hidden="true"></span>Folga</li>
-                        <li id="legendPonte" hidden="@(!d.TemPonte)"><span class="sw sw-ponte" aria-hidden="true"></span>Ponte possível</li>
+                        <li><span class="sw sw-ponte" aria-hidden="true"></span>Ponte possível</li>
                     </ul>
                 </figcaption>
             </figure>
@@ -46,11 +47,7 @@
                     <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
                     <span data-rotulo-off="Me avisar dos feriados" data-rotulo-on="Lembretes ativos">Me avisar dos feriados</span>
                 </button>
-                <button class="btn" id="btnShare" type="button" hidden>
-                    <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-                    <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-                    <span>Compartilhar</span>
-                </button>
+                <button class="link-btn" id="btnShare" type="button" hidden><span>Compartilhar</span></button>
             </div>
 
             <p class="back" id="focusBack" hidden><button type="button">Voltar para a próxima folga</button></p>
@@ -66,7 +63,8 @@
     @if (Model.Feriados.Count > 0)
     {
         <section aria-labelledby="listTitle">
-            <h2 class="list-title" id="listTitle">Próximos feriados</h2>
+            <h2 class="list-title" id="listTitle">Feriados nacionais</h2>
+            <p class="list-sub">@Model.PeriodoLista</p>
             @foreach (var ano in Model.Feriados.Select((f, i) => (f, i)).GroupBy(x => x.f.Ano))
             {
                 <h3 class="year">@ano.Key</h3>
@@ -74,7 +72,7 @@
                     @foreach (var (f, i) in ano)
                     {
                         var classe = f.Tipo == TipoFolga.FimDeSemana ? "is-weekend" : "is-off";
-                        if (f.Tipo == TipoFolga.Prolongado) classe += " is-long";
+                        if (f.FolgaLonga) classe += " is-long";
 
                         <li>
                             @* Os data-* levam ao destaque tudo o que ele mostra deste feriado. *@

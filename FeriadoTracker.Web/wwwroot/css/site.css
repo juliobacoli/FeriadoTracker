@@ -30,6 +30,17 @@
     --toast-alerta: #F08A85;
     --focus: #1B2A4A;
     --overlay: rgba(15, 22, 38, 0.55);
+    --raio: 10px;
+    --raio-g: 16px;
+
+    /* Escala de fonte (7 passos). Espaçamentos seguem múltiplos de 0.25rem. */
+    --t-xs: 0.8125rem;
+    --t-sm: 0.9375rem;
+    --t-md: 1rem;
+    --t-lg: 1.125rem;
+    --t-xl: 1.5rem;
+    --t-2xl: 2rem;
+    --t-3xl: 2.625rem;
     color-scheme: light;
 }
 
@@ -65,12 +76,13 @@ html.dark {
 body {
     margin: 0;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     background: var(--paper);
     color: var(--ink);
     font-family: "Archivo", system-ui, sans-serif;
-    font-size: 16px;
+    font-size: var(--t-md);
     line-height: 1.5;
 }
 
@@ -83,8 +95,23 @@ a {
     color: inherit;
 }
 
-a:hover {
-    text-decoration-thickness: 2px;
+@media (hover: hover) {
+    a:hover {
+        text-decoration-thickness: 2px;
+    }
+}
+
+/* Texto só para leitor de tela. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
 }
 
 :focus-visible {
@@ -96,51 +123,49 @@ a:hover {
 /* Cabeçalho */
 .topbar {
     width: 100%;
-    max-width: 1120px;
+    max-width: 70rem;
     margin: 0 auto;
-    padding: 14px 16px;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 .brand {
     font-weight: 700;
     font-stretch: 85%;
-    font-size: 18px;
+    font-size: var(--t-lg);
     letter-spacing: -0.01em;
     text-decoration: none;
 }
 
-.brand:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
+@media (hover: hover) {
+    .brand:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
 }
 
 .tools {
     display: flex;
-    gap: 8px;
-}
-
-.tool-wrap {
-    position: relative;
+    gap: 0.5rem;
 }
 
 .tool {
-    min-height: 44px;
-    min-width: 44px;
-    padding: 0 12px;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    padding: 0 0.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    border-radius: 10px;
+    gap: 0.5rem;
+    border: 0;
+    background: none;
+    border-radius: var(--raio);
     cursor: pointer;
     font-weight: 500;
-    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
 .tool[hidden] {
@@ -148,13 +173,15 @@ a:hover {
 }
 
 .tool svg {
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
     flex: none;
 }
 
-.tool:hover {
-    border-color: var(--ink);
+@media (hover: hover) {
+    .tool:hover {
+        background: var(--line);
+    }
 }
 
 .tool:active {
@@ -166,20 +193,6 @@ a:hover {
     opacity: 0.5;
 }
 
-.tool .label {
-    display: none;
-}
-
-.tool-notify[aria-pressed="true"] {
-    border-color: var(--ok);
-    color: var(--ok);
-    background: var(--ok-wash);
-}
-
-.tool-notify[aria-pressed="true"] svg {
-    fill: currentColor;
-}
-
 .sun-icon,
 html.dark .moon-icon {
     display: none;
@@ -189,51 +202,45 @@ html.dark .sun-icon {
     display: block;
 }
 
-@media (min-width: 640px) {
-    .tool .label {
-        display: inline;
-    }
-}
-
 /* Conteúdo e rodapé */
 .conteudo {
     flex: 1;
     width: 100%;
-    max-width: 1120px;
+    max-width: 70rem;
     margin: 0 auto;
-    padding: 8px 16px 48px;
+    padding: 0.5rem 1rem 3rem;
 }
 
 .foot {
     width: 100%;
-    max-width: 1120px;
+    max-width: 70rem;
     margin: 0 auto;
-    padding: 28px 16px 48px;
+    padding: 1.5rem 1rem 3rem;
     border-top: 1px solid var(--line);
 }
 
 .credit {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.75rem;
     text-decoration: none;
     color: var(--ink);
-    min-height: 44px;
-    border-radius: 12px;
-    padding-right: 8px;
+    min-height: 2.75rem;
+    border-radius: var(--raio);
+    padding-right: 0.5rem;
 }
 
 .mono {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--raio);
     background: var(--ink);
     color: var(--paper);
     display: grid;
     place-items: center;
     font-weight: 800;
     font-stretch: 70%;
-    font-size: 18px;
+    font-size: var(--t-lg);
     letter-spacing: 0.02em;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -244,36 +251,40 @@ html.dark .sun-icon {
 }
 
 .credit-label {
-    font-size: 13px;
+    font-size: var(--t-xs);
     color: var(--muted);
 }
 
 .credit-name {
-    font-size: 16px;
-    font-weight: 650;
+    font-size: var(--t-md);
+    font-weight: 600;
 }
 
-.credit:hover .credit-name {
-    text-decoration: underline;
-    text-underline-offset: 3px;
+@media (hover: hover) {
+    .credit:hover .credit-name {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
 }
 
-.credit:hover .mono {
-    background: var(--folga);
-    color: var(--folga-ink);
+@media (hover: hover) {
+    .credit:hover .mono {
+        background: var(--folga);
+        color: var(--folga-ink);
+    }
 }
 
 /* Aviso no topo */
 .toast-container {
     position: fixed;
-    top: 76px;
+    top: 4.75rem;
     left: 0;
     right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 0 16px;
+    gap: 0.5rem;
+    padding: 0 1rem;
     z-index: 2000;
     pointer-events: none;
 }
@@ -281,15 +292,15 @@ html.dark .sun-icon {
 .toast {
     display: flex;
     align-items: center;
-    gap: 10px;
-    max-width: 460px;
+    gap: 0.5rem;
+    max-width: 28.75rem;
     background: var(--ink);
     color: var(--paper);
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    border-radius: var(--raio);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
     font-weight: 500;
-    font-size: 15px;
+    font-size: var(--t-sm);
     line-height: 1.35;
     opacity: 0;
     transform: translateY(-8px);
@@ -302,8 +313,8 @@ html.dark .sun-icon {
 }
 
 .toast svg {
-    width: 18px;
-    height: 18px;
+    width: 1.125rem;
+    height: 1.125rem;
     flex: none;
     color: var(--toast-icon);
 }
@@ -312,118 +323,59 @@ html.dark .sun-icon {
     color: var(--toast-alerta);
 }
 
-/* Dica do sino */
-.push-hint {
-    position: absolute;
-    top: calc(100% + 12px);
-    right: 0;
-    width: 260px;
-    max-width: calc(100vw - 32px);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 12px 40px 12px 14px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    z-index: 1001;
-}
-
-.push-hint[hidden] {
-    display: none;
-}
-
-.push-hint::before {
-    content: "";
-    position: absolute;
-    top: -7px;
-    right: 16px;
-    width: 12px;
-    height: 12px;
-    background: var(--surface);
-    border-top: 1px solid var(--line);
-    border-left: 1px solid var(--line);
-    transform: rotate(45deg);
-}
-
-.push-hint-text {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.push-hint-close {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 36px;
-    height: 36px;
-    background: none;
-    border: 0;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 22px;
-    line-height: 1;
-    color: var(--muted);
-}
-
-.push-hint-close:hover {
-    color: var(--ink);
-}
-
 /* Instalação no iPhone */
 .ios-install-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--overlay);
-    z-index: 2000;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    width: 100%;
+    max-width: 30rem;
+    margin: auto auto 0;
+    padding: 0;
+    border: 0;
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: var(--raio-g) var(--raio-g) 0 0;
 }
 
-.ios-install-overlay[hidden] {
-    display: none;
+.ios-install-overlay::backdrop {
+    background: var(--overlay);
 }
 
 .ios-install-modal {
     position: relative;
-    width: 100%;
-    max-width: 480px;
-    background: var(--surface);
-    border-radius: 20px 20px 0 0;
-    padding: 28px 24px 36px;
+    padding: 1.5rem 1.5rem calc(2rem + env(safe-area-inset-bottom, 0));
 }
 
 .ios-install-close {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 44px;
-    height: 44px;
+    top: 0.625rem;
+    right: 0.625rem;
+    width: 2.75rem;
+    height: 2.75rem;
     background: none;
     border: 0;
-    border-radius: 10px;
+    border-radius: var(--raio);
     cursor: pointer;
-    font-size: 22px;
+    font-size: var(--t-xl);
     line-height: 1;
     color: var(--muted);
 }
 
-.ios-install-close:hover {
-    color: var(--ink);
+@media (hover: hover) {
+    .ios-install-close:hover {
+        color: var(--ink);
+    }
 }
 
 .ios-install-title {
-    font-size: 20px;
-    font-weight: 750;
+    font-size: var(--t-lg);
+    font-weight: 700;
     font-stretch: 80%;
-    margin: 0 0 8px;
+    margin: 0 0 0.5rem;
 }
 
 .ios-install-subtitle {
-    font-size: 14px;
+    font-size: var(--t-sm);
     color: var(--muted);
-    margin: 0 0 20px;
+    margin: 0 0 1.25rem;
 }
 
 .ios-install-steps {
@@ -431,44 +383,44 @@ html.dark .sun-icon {
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 16px;
+    gap: 1rem;
 }
 
 .ios-install-step {
     display: flex;
     align-items: center;
-    gap: 14px;
-    font-size: 15px;
+    gap: 0.75rem;
+    font-size: var(--t-sm);
     line-height: 1.4;
 }
 
 .ios-install-step-icon {
     flex: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--raio);
     border: 1px solid var(--line);
     display: grid;
     place-items: center;
 }
 
 .ios-install-step-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 /* Página de erro */
 .page-center {
     display: flex;
     justify-content: center;
-    padding: 24px 0;
+    padding: 1.5rem 0;
 }
 
 .card {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 28px 24px;
+    border-radius: var(--raio-g);
+    padding: 1.5rem;
 }
 
 .error-card {
@@ -503,19 +455,20 @@ html.dark body.is-holiday {
 /* Index: destaque + lista */
 .page {
     display: grid;
-    gap: 40px;
+    gap: 2.5rem;
 }
 
 .kicker {
-    font-size: 16px;
+    font-size: var(--t-md);
     color: var(--muted);
-    margin: 0 0 6px;
+    margin: 0 0 0.375rem;
     font-weight: 500;
 }
 
 .name {
-    font-size: clamp(30px, 7vw, 42px);
-    font-weight: 750;
+    text-wrap: balance;
+    font-size: clamp(1.875rem, 7vw, 2.625rem);
+    font-weight: 700;
     font-stretch: 80%;
     line-height: 1.05;
     letter-spacing: -0.015em;
@@ -523,26 +476,26 @@ html.dark body.is-holiday {
 }
 
 .date {
-    margin: 6px 0 0;
-    font-size: 18px;
+    margin: 0.375rem 0 0;
+    font-size: var(--t-lg);
 }
 
 .count {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 8px 20px;
-    margin: 22px 0 4px;
+    gap: 0.5rem 1.25rem;
+    margin: 1.5rem 0 0.25rem;
 }
 
 .count-part {
     display: inline-flex;
     align-items: baseline;
-    gap: 6px;
+    gap: 0.375rem;
 }
 
 .count-num {
-    font-size: clamp(104px, 30vw, 168px);
+    font-size: clamp(6.5rem, 30vw, 10.5rem);
     font-weight: 800;
     font-stretch: 62%;
     line-height: 0.78;
@@ -551,66 +504,93 @@ html.dark body.is-holiday {
 }
 
 .count-unit {
-    font-size: 26px;
+    font-size: var(--t-xl);
     font-weight: 600;
     font-stretch: 75%;
 }
 
 .count-word {
-    font-size: clamp(56px, 14vw, 80px);
+    font-size: clamp(3.5rem, 14vw, 5rem);
     font-weight: 800;
     font-stretch: 62%;
     line-height: 0.9;
     color: var(--folga-ink);
     background: var(--folga);
-    padding: 4px 12px 0;
-    border-radius: 10px;
+    padding: 0.25rem 0.75rem 0;
+    border-radius: var(--raio);
 }
 
+/* Altura reservada para o relógio: a troca de estado não empurra a página. */
 .exact {
+    display: flex;
+    align-items: center;
     color: var(--muted);
-    font-size: 15px;
-    margin: 10px 0 0;
-    min-height: 1.5em;
+    font-size: var(--t-sm);
+    margin: 0.75rem 0 0;
+    min-height: 2.25rem;
     font-variant-numeric: tabular-nums;
 }
 
-.today-note {
-    font-size: 20px;
+/* Relógio: continuação do número grande, na mesma fonte condensada. */
+.clock {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.clock-part {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.clock-num {
+    font-size: var(--t-2xl);
+    font-weight: 700;
+    font-stretch: 68%;
+    line-height: 1;
+    color: var(--ink);
+}
+
+.clock-unit {
+    font-size: var(--t-md);
     font-weight: 600;
-    margin: 14px 0 0;
+    font-stretch: 80%;
+}
+
+.today-note {
+    font-size: var(--t-lg);
+    font-weight: 600;
+    margin: 0.75rem 0 0;
 }
 
 .strip {
-    margin: 28px 0 0;
+    margin: 1.5rem 0 0;
 }
 
+/* Régua: dias comuns são só número; a folga é uma barra contínua. */
 .strip-days {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(9, minmax(0, 1fr));
-    gap: 4px;
 }
 
 .strip-days li {
     display: grid;
     justify-items: center;
-    gap: 2px;
-    padding: 8px 0 10px;
-    border-radius: 8px;
-    background: var(--surface);
-    border: 1px solid var(--line);
+    gap: 0.125rem;
+    padding: 0.5rem 0 0.75rem;
 }
 
 .strip-days .wd {
-    font-size: 12px;
+    font-size: var(--t-xs);
     color: var(--muted);
 }
 
 .strip-days .dn {
-    font-size: 22px;
+    font-size: var(--t-xl);
     font-weight: 700;
     font-stretch: 70%;
     line-height: 1.1;
@@ -619,17 +599,34 @@ html.dark body.is-holiday {
 
 .strip-days li.off {
     background: var(--folga);
-    border-color: var(--folga);
     color: var(--folga-ink);
+}
+
+/* Fim de semana que a ponte liga à folga: entra na barra, em tom claro. */
+.strip-days li.emenda {
+    background: var(--folga-wash);
+}
+
+/* Canto arredondado só nas pontas do período (folga + ponte + emenda). */
+.strip-days li:is(.off, .ponte, .emenda):not(:is(.off, .ponte, .emenda) + li) {
+    border-top-left-radius: var(--raio);
+    border-bottom-left-radius: var(--raio);
+}
+
+.strip-days li:is(.off, .ponte, .emenda):not(:has(+ :is(.off, .ponte, .emenda))) {
+    border-top-right-radius: var(--raio);
+    border-bottom-right-radius: var(--raio);
 }
 
 .strip-days li.off .wd {
     color: var(--folga-ink);
 }
 
+/* outline em vez de border: não muda a altura da barra. */
 .strip-days li.ponte {
-    background: repeating-linear-gradient(135deg, var(--folga-wash) 0 6px, var(--surface) 6px 12px);
-    border: 2px dashed var(--ink);
+    background: repeating-linear-gradient(135deg, var(--folga-wash) 0 6px, transparent 6px 12px);
+    outline: 2px dashed var(--ink);
+    outline-offset: -2px;
 }
 
 .strip-days li.holiday .dn {
@@ -639,7 +636,9 @@ html.dark body.is-holiday {
 }
 
 .strip-days li.weekend-only {
-    border: 2px solid var(--alerta);
+    outline: 2px solid var(--alerta);
+    outline-offset: -2px;
+    border-radius: var(--raio);
 }
 
 .strip-days li.weekend-only .dn {
@@ -651,9 +650,9 @@ html.dark body.is-holiday {
 }
 
 .impact {
-    font-size: 18px;
+    font-size: var(--t-lg);
     font-weight: 600;
-    margin: 14px 0 0;
+    margin: 0.75rem 0 0;
 }
 
 .impact.is-long,
@@ -664,23 +663,23 @@ html.dark body.is-holiday {
 .legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 18px;
-    margin: 8px 0 0;
+    gap: 0.375rem 1rem;
+    margin: 0.5rem 0 0;
     padding: 0;
     list-style: none;
     color: var(--muted);
-    font-size: 14px;
+    font-size: var(--t-sm);
 }
 
 .legend li {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.375rem;
 }
 
 .sw {
-    width: 14px;
-    height: 14px;
+    width: 0.875rem;
+    height: 0.875rem;
     border-radius: 3px;
     display: inline-block;
 }
@@ -697,21 +696,49 @@ html.dark body.is-holiday {
 .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin: 26px 0 0;
+    align-items: center;
+    gap: 0.375rem 1.5rem;
+    margin: 1.5rem 0 0;
+}
+
+.link-btn {
+    min-height: 2.75rem;
+    background: none;
+    border: 0;
+    padding: 0.5rem 0;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    .link-btn:hover {
+        text-decoration-thickness: 2px;
+    }
+}
+
+.link-btn:active,
+.back button:active {
+    transform: translateY(1px);
+}
+
+.link-btn.is-done {
+    color: var(--ok);
+    text-decoration: none;
 }
 
 .btn {
-    min-height: 48px;
-    padding: 0 20px;
-    border-radius: 12px;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border-radius: var(--raio);
     border: 1px solid var(--line);
     background: var(--surface);
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
     transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
@@ -720,12 +747,14 @@ html.dark body.is-holiday {
 }
 
 .btn svg {
-    width: 18px;
-    height: 18px;
+    width: 1.125rem;
+    height: 1.125rem;
 }
 
-.btn:hover {
-    border-color: var(--ink);
+@media (hover: hover) {
+    .btn:hover {
+        border-color: var(--ink);
+    }
 }
 
 .btn:active {
@@ -749,9 +778,11 @@ html.dark body.is-holiday {
     border-color: var(--ink);
 }
 
-.btn-main:hover {
-    border-color: var(--ink);
-    opacity: 0.92;
+@media (hover: hover) {
+    .btn-main:hover {
+        border-color: var(--ink);
+        opacity: 0.92;
+    }
 }
 
 .btn-main[aria-pressed="true"] {
@@ -778,21 +809,41 @@ html.dark body.is-holiday {
     display: block;
 }
 
+/* Troca de feriado no destaque: entrada curta para a mudança ser percebida. */
+@keyframes surgir {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+.focus.is-troca :is(.kicker, .name, .date, .count, .exact, .today-note, .strip) {
+    animation: surgir 0.18s ease-out both;
+}
+
 .list-title {
-    font-size: 24px;
-    font-weight: 750;
+    font-size: var(--t-xl);
+    font-weight: 700;
     font-stretch: 80%;
     margin: 0;
     letter-spacing: -0.01em;
 }
 
+.list-sub {
+    margin: 0.125rem 0 0;
+    color: var(--muted);
+    font-size: var(--t-sm);
+}
+
 .year {
-    font-size: 48px;
-    font-weight: 800;
-    font-stretch: 62%;
+    font-size: var(--t-sm);
+    font-weight: 700;
+    letter-spacing: 0.06em;
     color: var(--muted);
     line-height: 1;
-    margin: 28px 0 4px;
+    margin: 1.5rem 0 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
 }
 
 .rows {
@@ -804,45 +855,79 @@ html.dark body.is-holiday {
 .row {
     width: 100%;
     display: grid;
-    grid-template-columns: 68px minmax(0, 1fr);
-    gap: 14px;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: 0.75rem;
     align-items: center;
     text-align: left;
     background: none;
     border: 0;
     border-bottom: 1px solid var(--line);
-    padding: 12px 8px 12px 0;
+    padding: 0.375rem 0.5rem 0.375rem 0;
     cursor: pointer;
     transition: background-color 0.15s ease;
+    position: relative;
 }
 
-.row:hover {
-    background: var(--surface);
+@media (hover: hover) {
+    .row:hover {
+        background: var(--surface);
+    }
+}
+
+/* Desktop: contagem viva do feriado sob o mouse. Sobreposta à direita para não mexer na altura da linha. */
+.row-live {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem 0 1rem;
+    background: inherit;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.row-live:empty {
+    display: none;
+}
+
+.row:active {
+    background: var(--line);
 }
 
 .row-date {
     display: grid;
     justify-items: center;
     line-height: 1;
-    padding: 8px 0;
-    border-radius: 10px;
+    padding: 0.5rem 0;
+    border-radius: var(--raio);
 }
 
 .row-day {
-    font-size: 32px;
+    font-size: var(--t-xl);
     font-weight: 800;
     font-stretch: 62%;
     font-variant-numeric: tabular-nums;
 }
 
 .row-mon {
-    font-size: 13px;
+    font-size: var(--t-xs);
     color: var(--muted);
-    margin-top: 3px;
+    margin-top: 0.125rem;
 }
 
-.row.is-off .row-date {
-    box-shadow: inset 0 -4px 0 var(--folga);
+/* Feriado que não vira folga recua: o olho vai direto às folgas. */
+.row.is-weekend .row-name,
+.row.is-weekend .row-day {
+    color: var(--muted);
+}
+
+.row.is-weekend .row-name {
+    font-weight: 500;
 }
 
 /* Seleção: bloco da data em âmbar + fundo lavado, sem borda lateral. */
@@ -860,7 +945,7 @@ html.dark body.is-holiday {
 }
 
 .back {
-    margin: 18px 0 0;
+    margin: 1rem 0 0;
 }
 
 .back[hidden] {
@@ -868,10 +953,10 @@ html.dark body.is-holiday {
 }
 
 .back button {
-    min-height: 44px;
+    min-height: 2.75rem;
     background: none;
     border: 0;
-    padding: 8px 0;
+    padding: 0.5rem 0;
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -894,7 +979,8 @@ html.dark body.is-holiday {
 .row-info {
     display: block;
     color: var(--muted);
-    font-size: 15px;
+    font-size: var(--t-sm);
+    line-height: 1.35;
 }
 
 .row.is-weekend .row-info {
@@ -905,7 +991,6 @@ html.dark body.is-holiday {
 @media (max-width: 639px) {
     .strip-days {
         grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 6px;
     }
 
     .strip-days li:first-child,
@@ -914,15 +999,7 @@ html.dark body.is-holiday {
     }
 
     .strip-days li {
-        padding: 10px 0 12px;
-    }
-
-    .strip-days .wd {
-        font-size: 13px;
-    }
-
-    .strip-days .dn {
-        font-size: 26px;
+        padding: 0.75rem 0;
     }
 }
 
@@ -930,22 +1007,22 @@ html.dark body.is-holiday {
 @media (min-width: 960px) {
     .page {
         grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-        gap: 64px;
+        gap: 4rem;
         align-items: start;
-        padding-top: 16px;
+        padding-top: 1rem;
     }
 
     .focus {
         position: sticky;
-        top: 24px;
+        top: 1.5rem;
     }
 
     .count-num {
-        font-size: 168px;
+        font-size: 10.5rem;
     }
 
     .name {
-        font-size: 42px;
+        font-size: var(--t-3xl);
     }
 }
 
@@ -961,5 +1038,9 @@ html.dark body.is-holiday {
     .tool:active,
     .btn:active {
         transform: none;
+    }
+
+    .focus.is-troca :is(.kicker, .name, .date, .count, .exact, .today-note, .strip) {
+        animation: none;
     }
 }

@@ -16,7 +16,7 @@
     <title>@(ViewData["Title"] is string titulo && titulo.Length > 0 ? $"{titulo} | " : "")Qual o próximo feriado?</title>
     @{
         var urlBase = $"https://{Context.Request.Host}";
-        const string descricao = "Veja quantos dias faltam para o próximo feriado nacional e confira os próximos feriados do Brasil.";
+        const string descricao = "Quantos dias faltam para a sua próxima folga, quais feriados nacionais viram fim de semana prolongado e onde dá para emendar com ponte.";
     }
     <meta name="description" content="@descricao" />
     <meta property="og:type" content="website" />
@@ -57,21 +57,6 @@
     <header class="topbar">
         <a class="brand" href="/">Qual o próximo feriado?</a>
         <div class="tools">
-            <div class="tool-wrap">
-                <button class="tool tool-notify" id="pushToggle" type="button" aria-label="Lembretes de feriado" aria-pressed="false" title="Ativar notificações">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
-                    <span class="label" data-rotulo-off="Lembretes" data-rotulo-on="Lembretes ativos">Lembretes</span>
-                </button>
-
-                <div class="push-hint" id="pushHint" role="status" hidden>
-                    <button class="push-hint-close" id="pushHintClose" type="button" aria-label="Dispensar dica">&times;</button>
-                    <p class="push-hint-text">Receba lembretes dos próximos feriados.</p>
-                </div>
-            </div>
-
             <button class="tool" id="themeToggle" type="button" aria-label="Tema escuro" aria-pressed="false">
                 <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -84,7 +69,7 @@
         </div>
     </header>
 
-    <div class="ios-install-overlay" id="iosInstallOverlay" hidden aria-modal="true" role="dialog" aria-labelledby="iosInstallTitle">
+    <dialog class="ios-install-overlay" id="iosInstallOverlay" aria-labelledby="iosInstallTitle">
         <div class="ios-install-modal">
             <button class="ios-install-close" id="iosInstallClose" type="button" aria-label="Fechar">&times;</button>
             <h2 class="ios-install-title" id="iosInstallTitle">Instale o app primeiro</h2>
@@ -121,7 +106,7 @@
                 </li>
             </ol>
         </div>
-    </div>
+    </dialog>
 
     <main class="conteudo">
         @RenderBody()

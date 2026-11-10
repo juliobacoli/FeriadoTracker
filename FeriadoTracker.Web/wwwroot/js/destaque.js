@@ -31,11 +31,11 @@ export function setupDestaque({ section, proxima, countdown }) {
         if (!nova) return false;
 
         proxima = Number(nova.dataset.indice);
-        mostrar(proxima);
+        mostrar(proxima, true);
         return true;
     }
 
-    function mostrar(indice) {
+    function mostrar(indice, animar = false) {
         atual = indice;
         const f = linha(indice).dataset;
 
@@ -50,6 +50,14 @@ export function setupDestaque({ section, proxima, countdown }) {
         linhas.forEach(l => l.setAttribute('aria-pressed', l === linha(indice) ? 'true' : 'false'));
 
         countdown.definir(f, indice === proxima);
+
+        // Animação de entrada só para mouse/toque: no teclado a troca é repetida e a animação atrasa.
+        section.classList.remove('is-troca');
+        if (animar) {
+            // O reflow entre remover e adicionar a classe dispara a animação de novo.
+            void section.offsetWidth;
+            section.classList.add('is-troca');
+        }
     }
 
     /** Leva o foco ao nome; no celular, rola até o destaque, que fica acima da lista. */
@@ -61,16 +69,47 @@ export function setupDestaque({ section, proxima, countdown }) {
     }
 
     linhas.forEach(l => {
-        l.addEventListener('click', () => {
-            mostrar(Number(l.dataset.indice));
+        // detail é 0 quando o clique vem do teclado (Enter/Espaço).
+        l.addEventListener('click', e => {
+            mostrar(Number(l.dataset.indice), e.detail > 0);
             focarDestaque();
         });
     });
 
-    el.voltar.querySelector('button').addEventListener('click', () => {
-        mostrar(proxima);
+    el.voltar.querySelector('button').addEventListener('click', e => {
+        mostrar(proxima, e.detail > 0);
         focarDestaque();
     });
+
+    // Desktop: passar o mouse numa linha mostra a contagem viva daquele feriado, sem trocar o destaque.
+    if (window.matchMedia('(hover: hover)').matches) {
+        const vivo = document.createElement('span');
+        vivo.className = 'row-live';
+        vivo.setAttribute('aria-hidden', 'true');
+        const p2 = n => String(n).padStart(2, '0');
+        let timer = null;
+
+        function pintar(l) {
+            const [a, m, d] = l.dataset.inicioIso.split('-').map(Number);
+            const s = Math.floor((new Date(a, m - 1, d) - Date.now()) / 1000);
+            vivo.textContent = s > 0
+                ? `${Math.floor(s / 86400)}d ${p2(Math.floor(s % 86400 / 3600))}h ${p2(Math.floor(s % 3600 / 60))}min ${p2(s % 60)}s`
+                : '';
+        }
+
+        linhas.forEach(l => {
+            l.addEventListener('mouseenter', () => {
+                clearInterval(timer);
+                pintar(l);
+                l.appendChild(vivo);
+                timer = setInterval(() => pintar(l), 1000);
+            });
+            l.addEventListener('mouseleave', () => {
+                clearInterval(timer);
+                vivo.remove();
+            });
+        });
+    }
 
     countdown.aoPassar = avancar;
     countdown.definir(linha(proxima).dataset, true);

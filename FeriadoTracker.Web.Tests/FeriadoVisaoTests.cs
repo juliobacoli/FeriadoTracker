@@ -23,7 +23,8 @@ public class FeriadoVisaoTests
 
         Assert.Equal("Sexta-feira, 20 de novembro", v.DataTexto);
         Assert.Equal("Fim de semana de 3 dias.", v.Impacto);
-        Assert.Equal("Sexta-feira. Fim de semana de 3 dias", v.ImpactoCurto);
+        Assert.Equal("sexta · 3 dias de folga", v.ImpactoCurto);
+        Assert.False(v.FolgaLonga);
         Assert.Equal("Folga até domingo, 22 de novembro.", v.NotaNoDia);
 
         Assert.Equal(9, v.Faixa.Count);
@@ -40,8 +41,26 @@ public class FeriadoVisaoTests
         Assert.True(v.TemPonte);
         Assert.Equal("Com a ponte na sexta-feira, são 4 dias de folga.", v.Impacto);
         Assert.Equal("Quinta-feira, 27 de maio de 2027", v.DataTexto);
+        Assert.Equal("quinta · 4 dias com a ponte", v.ImpactoCurto);
         Assert.Equal("ponte", v.Faixa.Single(d => d.Iso == "2027-05-28").Classe);
         Assert.Contains("ponte possível", v.Faixa.Single(d => d.Iso == "2027-05-28").Rotulo);
+
+        // A barra tem os 4 dias do texto: quinta, ponte na sexta e o fim de semana emendado.
+        Assert.Equal(
+            ["", "", "off holiday", "ponte", "emenda", "emenda", "", "", ""],
+            v.Faixa.Select(d => d.Classe));
+        Assert.Contains("folga", v.Faixa.Single(d => d.Iso == "2027-05-29").Rotulo);
+    }
+
+    [Fact]
+    public void Terca_EmendaOFimDeSemanaAntesDaPonte()
+    {
+        var v = Visao(F("Finados", 2027, 11, 2));
+
+        Assert.Equal("2027-10-28", v.Faixa[0].Iso);
+        Assert.Equal(
+            ["", "", "emenda", "emenda", "ponte", "off holiday", "", "", ""],
+            v.Faixa.Select(d => d.Classe));
     }
 
     [Fact]
@@ -50,6 +69,7 @@ public class FeriadoVisaoTests
         var v = Visao(F("Proclamação da República", 2026, 11, 15));
 
         Assert.Equal("Cai num domingo. Não vira folga.", v.Impacto);
+        Assert.Equal("domingo · não vira folga", v.ImpactoCurto);
         Assert.Equal("Cai num domingo, então não vira folga extra.", v.NotaNoDia);
         Assert.Equal("weekend-only holiday", v.Faixa.Single(d => d.Iso == "2026-11-15").Classe);
         Assert.DoesNotContain(v.Faixa, d => d.Classe.Contains("off"));
@@ -63,6 +83,8 @@ public class FeriadoVisaoTests
         Assert.Equal("Segunda e terça, 8 e 9 de fevereiro de 2027", v.DataTexto);
         Assert.Equal("8–9", v.DiaLista);
         Assert.Equal("fev", v.MesLista);
+        Assert.Equal("segunda · 4 dias de folga", v.ImpactoCurto);
+        Assert.True(v.FolgaLonga);
         Assert.Equal(4, v.Faixa.Count(d => d.Classe.StartsWith("off")));
     }
 

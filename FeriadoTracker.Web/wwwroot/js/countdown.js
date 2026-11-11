@@ -165,7 +165,6 @@ export function createCountdown(section) {
         } else {
             el.exact.textContent = e.exact ?? '';
         }
-        el.exact.classList.toggle('is-clock', !!e.relogio);
         // Fica visível (com altura reservada no CSS) enquanto há contagem, para não empurrar a página.
         el.exact.hidden = !e.partes;
 

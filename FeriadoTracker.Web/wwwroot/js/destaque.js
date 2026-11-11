@@ -1,3 +1,5 @@
+import { rolarAte } from './rolagem.js';
+
 /**
  * Lista clicável: cada linha leva o feriado ao destaque e
  * "Voltar para a próxima folga" desfaz a seleção.
@@ -17,7 +19,6 @@ export function setupDestaque({ section, proxima, countdown }) {
     const linhas = [...document.querySelectorAll('.row[data-indice]')];
     const linha = indice => linhas.find(l => Number(l.dataset.indice) === indice);
     const empilhado = window.matchMedia('(max-width: 959px)');
-    const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     let atual = proxima;
 
@@ -63,7 +64,7 @@ export function setupDestaque({ section, proxima, countdown }) {
     /** Leva o foco ao nome; no celular, rola até o destaque, que fica acima da lista. */
     function focarDestaque() {
         if (empilhado.matches) {
-            section.scrollIntoView({ behavior: semMovimento.matches ? 'auto' : 'smooth', block: 'start' });
+            rolarAte(section);
         }
         el.nome.focus({ preventScroll: true });
     }

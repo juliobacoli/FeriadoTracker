@@ -1,9 +1,11 @@
 import { createCountdown } from './countdown.js';
 import { setupDestaque } from './destaque.js';
 import { setupPushButtons } from './push.js';
+import { iniciarRolagem } from './rolagem.js';
 import { setupShareButton } from './share.js';
 
 document.addEventListener('DOMContentLoaded', function () {
+    iniciarRolagem();
     setupPushButtons([document.getElementById('btnLembrete')]);
 
     const section = document.getElementById('destaque');

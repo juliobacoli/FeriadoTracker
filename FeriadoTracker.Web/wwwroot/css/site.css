@@ -73,6 +73,16 @@ html.dark {
     display: none !important;
 }
 
+/* Rolagem suave (Lenis): regras exigidas pela biblioteca. */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-stopped {
+    overflow: clip;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -120,8 +130,11 @@ a {
     border-radius: 4px;
 }
 
-/* Cabeçalho */
+/* Cabeçalho: fica fixo no topo ao rolar. */
 .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     width: 100%;
     max-width: 70rem;
     margin: 0 auto;
@@ -130,6 +143,10 @@ a {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
+    background: var(--paper);
+    /* O fundo vai de ponta a ponta da tela, embora o conteúdo siga a largura da página. */
+    box-shadow: 0 0 0 100vmax var(--paper);
+    clip-path: inset(0 -100vmax);
 }
 
 .brand {
@@ -216,7 +233,6 @@ html.dark .sun-icon {
     max-width: 70rem;
     margin: 0 auto;
     padding: 1.5rem 1rem 3rem;
-    border-top: 1px solid var(--line);
 }
 
 .credit {
@@ -230,17 +246,18 @@ html.dark .sun-icon {
     padding-right: 0.5rem;
 }
 
+/* Assinatura discreta: monograma em tom de fundo, sem bloco escuro. */
 .mono {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: var(--raio);
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--line);
+    color: var(--muted);
     display: grid;
     place-items: center;
     font-weight: 800;
     font-stretch: 70%;
-    font-size: var(--t-lg);
+    font-size: var(--t-md);
     letter-spacing: 0.02em;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -256,8 +273,9 @@ html.dark .sun-icon {
 }
 
 .credit-name {
-    font-size: var(--t-md);
+    font-size: var(--t-sm);
     font-weight: 600;
+    color: var(--muted);
 }
 
 @media (hover: hover) {
@@ -1017,9 +1035,10 @@ html.dark body.is-holiday {
         padding-top: 1rem;
     }
 
+    /* Abaixo do cabeçalho fixo (4.25rem de altura). */
     .focus {
         position: sticky;
-        top: 1.5rem;
+        top: 5.25rem;
     }
 
     .count-num {

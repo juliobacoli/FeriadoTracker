@@ -77,7 +77,7 @@ export function createCountdown(section) {
     let ultimaChave = '';
 
     /**
-     * @param feriado Item do JSON de feriados (FeriadoVisao).
+     * @param feriado Dados do feriado lidos dos data-* da linha da lista (dataset).
      * @param proxima Se é a próxima folga ou um feriado escolhido na lista.
      */
     function definir(feriado, proxima = true) {
@@ -195,12 +195,7 @@ export function createCountdown(section) {
         intervalo = setInterval(render, 1000);
     }
 
-    function stop() {
-        clearInterval(intervalo);
-        intervalo = null;
-    }
-
     /** aoPassar: chamado quando a próxima folga acabou; devolve true se trocou o alvo. */
-    const api = { definir, start, stop, render, aoPassar: null };
+    const api = { definir, start, aoPassar: null };
     return api;
 }

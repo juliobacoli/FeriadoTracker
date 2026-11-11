@@ -1,33 +1,11 @@
 using FeriadoTracker.Web.Data;
-using FeriadoTracker.Web.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FeriadoTracker.Web.Services;
 
 public class HolidayService(AppDbContext context, TimeProvider timeProvider) : IHolidayService
 {
-    public async Task<Feriado?> GetProximoFeriadoAsync()
-    {
-        var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
-        return await context.Feriados
-            .AsNoTracking()
-            .Where(f => f.Data >= hoje)
-            .OrderBy(f => f.Data)
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task<List<Feriado>> GetProximosFeriadosAsync()
-    {
-        var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
-
-        return await context.Feriados
-            .AsNoTracking()
-            .Where(f => f.Data >= hoje)
-            .OrderBy(f => f.Data)
-            .ToListAsync();
-    }
-
-    public async Task<List<FeriadoAnalisado>> GetProximosFeriadosAnalisadosAsync()
+    public async Task<List<FeriadoAnalisado>> GetProximosFeriadosAnalisadosAsync(CancellationToken ct = default)
     {
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
@@ -35,7 +13,7 @@ public class HolidayService(AppDbContext context, TimeProvider timeProvider) : I
         var feriados = await context.Feriados
             .AsNoTracking()
             .Where(f => f.Data >= hoje.AddDays(-7))
-            .ToListAsync();
+            .ToListAsync(ct);
 
         // Mantém o feriado enquanto a folga dele não acabou (sábado depois de um feriado na sexta).
         return FolgaCalculator.Analisar(feriados)

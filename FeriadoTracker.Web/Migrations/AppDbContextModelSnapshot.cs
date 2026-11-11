@@ -15,7 +15,28 @@ namespace FeriadoTracker.Web.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.15");
+
+            modelBuilder.Entity("FeriadoTracker.Web.Models.Avaliacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Comentario")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CriadoEmUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Estrelas")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Avaliacoes");
+                });
 
             modelBuilder.Entity("FeriadoTracker.Web.Models.Feriado", b =>
                 {

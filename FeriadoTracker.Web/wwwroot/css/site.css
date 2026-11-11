@@ -83,6 +83,11 @@ html.lenis body {
     overflow: clip;
 }
 
+/* Áreas que rolam por conta própria (o comentário da avaliação) não arrastam a página. */
+.lenis [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -96,7 +101,8 @@ body {
     line-height: 1.5;
 }
 
-button {
+button,
+textarea {
     font: inherit;
     color: inherit;
 }
@@ -1050,13 +1056,166 @@ html.dark body.is-holiday {
     }
 }
 
+/* Avaliação da tela */
+.avaliacao-card {
+    max-width: 26rem;
+    margin-top: 2.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--raio-g);
+}
+
+.avaliacao-titulo {
+    margin: 0;
+    font-size: var(--t-md);
+    font-weight: 700;
+    font-stretch: 85%;
+}
+
+.avaliacao-sub {
+    margin: 0.125rem 0 0;
+    font-size: var(--t-xs);
+    color: var(--muted);
+}
+
+.estrelas {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.75rem;
+}
+
+.estrela-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: var(--raio);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.estrela-btn svg {
+    width: 1.625rem;
+    height: 1.625rem;
+    stroke: var(--muted);
+    stroke-width: 1.75;
+    fill: transparent;
+    transition: fill 0.12s ease, stroke 0.12s ease;
+}
+
+.estrela-btn:active {
+    transform: scale(0.9);
+}
+
+/* Estrela acesa (prévia ou selecionada): âmbar da folga. */
+.estrela-btn.is-active svg,
+.estrela-btn.is-hover svg {
+    fill: var(--folga);
+    stroke: var(--folga-ink);
+}
+
+html.dark .estrela-btn.is-active svg,
+html.dark .estrela-btn.is-hover svg {
+    stroke: var(--folga);
+}
+
+@media (hover: hover) {
+    .estrela-btn:hover {
+        background: var(--folga-wash);
+    }
+}
+
+.nota-label {
+    margin-left: 0.5rem;
+    font-size: var(--t-xs);
+    font-weight: 600;
+    color: var(--muted);
+}
+
+@keyframes surgirSuave {
+    from {
+        opacity: 0;
+        transform: translateY(-0.25rem);
+    }
+}
+
+.avaliacao-corpo {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.75rem;
+    animation: surgirSuave 0.18s ease-out both;
+}
+
+.avaliacao-textarea {
+    width: 100%;
+    min-height: 4.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--raio);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: var(--t-sm);
+    line-height: 1.4;
+    resize: vertical;
+}
+
+.avaliacao-textarea::placeholder {
+    color: var(--muted);
+}
+
+.avaliacao-rodape {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.contador-chars {
+    font-size: var(--t-xs);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.avaliacao-pronto {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ok);
+    font-size: var(--t-sm);
+    font-weight: 600;
+    animation: surgirSuave 0.18s ease-out both;
+}
+
+.avaliacao-pronto:focus {
+    outline: none;
+}
+
+.avaliacao-pronto svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .tool,
     .btn,
     .mono,
     .row,
-    .toast {
+    .toast,
+    .estrela-btn,
+    .estrela-btn svg {
         transition: none;
+    }
+
+    .avaliacao-corpo,
+    .avaliacao-pronto {
+        animation: none;
     }
 
     .tool:active,

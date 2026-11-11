@@ -1,3 +1,4 @@
+import { setupAvaliacao } from './avaliacao.js';
 import { createCountdown } from './countdown.js';
 import { setupDestaque } from './destaque.js';
 import { setupPushButtons } from './push.js';
@@ -7,6 +8,7 @@ import { setupShareButton } from './share.js';
 document.addEventListener('DOMContentLoaded', function () {
     iniciarRolagem();
     setupPushButtons([document.getElementById('btnLembrete')]);
+    setupAvaliacao();
 
     const section = document.getElementById('destaque');
     if (!section) return;

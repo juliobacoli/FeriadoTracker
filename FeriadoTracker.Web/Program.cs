@@ -32,6 +32,15 @@ builder.Services.AddRateLimiter(options =>
         o.Window = TimeSpan.FromMinutes(1);
         o.QueueLimit = 0;
     });
+
+    // Limite global (a aplicação não lê cabeçalhos de proxy, então não dá para separar por visitante).
+    // Folgado de propósito: quem já avaliou não vê o formulário de novo, então o uso normal é de um envio por pessoa.
+    options.AddFixedWindowLimiter("avaliacao", o =>
+    {
+        o.PermitLimit = 20;
+        o.Window = TimeSpan.FromMinutes(1);
+        o.QueueLimit = 0;
+    });
 });
 
 var dbPath = builder.Configuration["DB_PATH"]

@@ -1,0 +1,35 @@
+@* Avaliação da tela (1 a 5 estrelas + comentário opcional).
+   Bloco independente: começa oculto e o avaliacao.js o revela se o visitante ainda não avaliou.
+   Pode ser movido para qualquer ponto da página sem mudar o resto. *@
+<section class="avaliacao-card" id="avaliacao" aria-labelledby="avalTitulo" hidden>
+    <div id="avalForm">
+        <h2 class="avaliacao-titulo" id="avalTitulo">O que achou desta tela?</h2>
+        <p class="avaliacao-sub">Sua nota ajuda a melhorar o FeriadoTracker</p>
+
+        <div class="estrelas" role="group" aria-label="Avaliação de 1 a 5 estrelas">
+            @for (var n = 1; n <= 5; n++)
+            {
+                <button type="button" class="estrela-btn" data-valor="@n" aria-label="@(n == 1 ? "1 estrela" : $"{n} estrelas")" aria-pressed="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </button>
+            }
+            <span class="nota-label" id="avalNota"></span>
+        </div>
+
+        @* Só abre depois de escolher uma estrela. O foco não vai para o campo: no celular, o teclado cobriria o botão. *@
+        <div class="avaliacao-corpo" id="avalCorpo" hidden>
+            <label class="sr-only" for="avalComentario">Comentário (opcional)</label>
+            <textarea class="avaliacao-textarea" id="avalComentario" maxlength="500" data-lenis-prevent
+                      placeholder="Quer deixar um comentário? (opcional)"></textarea>
+            <div class="avaliacao-rodape">
+                <span class="contador-chars" id="avalContador" aria-hidden="true">0 / 500</span>
+                <button type="button" class="btn btn-main" id="avalEnviar">Enviar avaliação</button>
+            </div>
+        </div>
+    </div>
+
+    <p class="avaliacao-pronto" id="avalPronto" tabindex="-1" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Obrigado! Sua avaliação foi registrada.</span>
+    </p>
+</section>

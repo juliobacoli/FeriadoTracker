@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
     public DbSet<Feriado> Feriados { get; set; }
     public DbSet<PushSubscription> PushSubscriptions { get; set; }
     public DbSet<NotificationLog> NotificationLogs { get; set; }
+    public DbSet<Avaliacao> Avaliacoes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

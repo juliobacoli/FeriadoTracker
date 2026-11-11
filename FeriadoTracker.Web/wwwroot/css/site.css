@@ -649,6 +649,11 @@ html.dark body.is-holiday {
     box-shadow: inset 0 -4px 0 var(--ink);
 }
 
+/* Sobre a barra âmbar o marcador usa a tinta da folga: no escuro, --ink é clara e sumia no âmbar. */
+.strip-days li.off.today {
+    box-shadow: inset 0 -4px 0 var(--folga-ink);
+}
+
 .impact {
     font-size: var(--t-lg);
     font-weight: 600;

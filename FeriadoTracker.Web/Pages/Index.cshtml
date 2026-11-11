@@ -71,12 +71,13 @@
                 <ul class="rows">
                     @foreach (var (f, i) in ano)
                     {
-                        var classe = f.Tipo == TipoFolga.FimDeSemana ? "is-weekend" : "is-off";
-                        if (f.FolgaLonga) classe += " is-long";
+                        var classe = f.Tipo == TipoFolga.FimDeSemana ? "row is-weekend"
+                            : f.FolgaLonga ? "row is-long"
+                            : "row";
 
                         <li>
                             @* Os data-* levam ao destaque tudo o que ele mostra deste feriado. *@
-                            <button type="button" class="row @classe" aria-pressed="@(i == Model.IndiceDestaque ? "true" : "false")"
+                            <button type="button" class="@classe" aria-pressed="@(i == Model.IndiceDestaque ? "true" : "false")"
                                     data-indice="@i"
                                     data-nome="@f.Nome"
                                     data-tipo="@f.Tipo"

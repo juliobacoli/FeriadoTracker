@@ -20,10 +20,11 @@ public class IndexModel(IHolidayService service, TimeProvider timeProvider) : Pa
 
     /// <summary>Dias completos até o destaque (como o relógio do JS conta), para a primeira pintura.</summary>
     public int DiasAteDestaque { get; private set; }
-    public async Task OnGetAsync()
+
+    public async Task OnGetAsync(CancellationToken ct)
     {
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
-        var analisados = await service.GetProximosFeriadosAnalisadosAsync();
+        var analisados = await service.GetProximosFeriadosAnalisadosAsync(ct);
 
         Feriados = analisados.Select(a => FeriadoVisaoBuilder.Criar(a, hoje)).ToList();
 

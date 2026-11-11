@@ -77,7 +77,7 @@ export function createCountdown(section) {
     let ultimaChave = '';
 
     /**
-     * @param feriado Item do JSON de feriados (FeriadoVisao).
+     * @param feriado Dados do feriado lidos dos data-* da linha da lista (dataset).
      * @param proxima Se é a próxima folga ou um feriado escolhido na lista.
      */
     function definir(feriado, proxima = true) {
@@ -165,7 +165,6 @@ export function createCountdown(section) {
         } else {
             el.exact.textContent = e.exact ?? '';
         }
-        el.exact.classList.toggle('is-clock', !!e.relogio);
         // Fica visível (com altura reservada no CSS) enquanto há contagem, para não empurrar a página.
         el.exact.hidden = !e.partes;
 
@@ -195,12 +194,7 @@ export function createCountdown(section) {
         intervalo = setInterval(render, 1000);
     }
 
-    function stop() {
-        clearInterval(intervalo);
-        intervalo = null;
-    }
-
     /** aoPassar: chamado quando a próxima folga acabou; devolve true se trocou o alvo. */
-    const api = { definir, start, stop, render, aoPassar: null };
+    const api = { definir, start, aoPassar: null };
     return api;
 }

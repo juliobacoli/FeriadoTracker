@@ -1,10 +1,6 @@
-using FeriadoTracker.Web.Models;
-
 namespace FeriadoTracker.Web.Services;
 
 public interface IHolidayService
 {
-    Task<Feriado?> GetProximoFeriadoAsync();
-    Task<List<Feriado>> GetProximosFeriadosAsync();
-    Task<List<FeriadoAnalisado>> GetProximosFeriadosAnalisadosAsync();
+    Task<List<FeriadoAnalisado>> GetProximosFeriadosAnalisadosAsync(CancellationToken ct = default);
 }

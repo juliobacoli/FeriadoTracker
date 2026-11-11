@@ -24,57 +24,9 @@ public class HolidayServiceTests
     }
 
     [Fact]
-    public async Task GetProximoFeriadoAsync_RetornaFeriadoMaisProximoNoFuturo()
+    public async Task GetProximosFeriadosAnalisadosAsync_OrdenaPorDataERemovePassados()
     {
-        await using var ctx = CreateInMemoryContext(nameof(GetProximoFeriadoAsync_RetornaFeriadoMaisProximoNoFuturo));
-        ctx.Feriados.AddRange(
-            new Feriado { Id = 1, Nome = "Passado", Data = new DateOnly(2026, 1, 1), Tipo = "Nacional" },
-            new Feriado { Id = 2, Nome = "Próximo", Data = new DateOnly(2026, 5, 10), Tipo = "Nacional" },
-            new Feriado { Id = 3, Nome = "Futuro distante", Data = new DateOnly(2026, 12, 25), Tipo = "Nacional" }
-        );
-        await ctx.SaveChangesAsync();
-
-        var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
-
-        var resultado = await service.GetProximoFeriadoAsync();
-
-        Assert.NotNull(resultado);
-        Assert.Equal("Próximo", resultado!.Nome);
-    }
-
-    [Fact]
-    public async Task GetProximoFeriadoAsync_IncluiFeriadoDeHoje()
-    {
-        await using var ctx = CreateInMemoryContext(nameof(GetProximoFeriadoAsync_IncluiFeriadoDeHoje));
-        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Hoje", Data = new DateOnly(2026, 5, 1), Tipo = "Nacional" });
-        await ctx.SaveChangesAsync();
-
-        var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
-
-        var resultado = await service.GetProximoFeriadoAsync();
-
-        Assert.NotNull(resultado);
-        Assert.Equal("Hoje", resultado!.Nome);
-    }
-
-    [Fact]
-    public async Task GetProximoFeriadoAsync_RetornaNullQuandoSemFeriadosFuturos()
-    {
-        await using var ctx = CreateInMemoryContext(nameof(GetProximoFeriadoAsync_RetornaNullQuandoSemFeriadosFuturos));
-        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Velho", Data = new DateOnly(2025, 1, 1), Tipo = "Nacional" });
-        await ctx.SaveChangesAsync();
-
-        var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
-
-        var resultado = await service.GetProximoFeriadoAsync();
-
-        Assert.Null(resultado);
-    }
-
-    [Fact]
-    public async Task GetProximosFeriadosAsync_OrdenaPorDataERemovePassados()
-    {
-        await using var ctx = CreateInMemoryContext(nameof(GetProximosFeriadosAsync_OrdenaPorDataERemovePassados));
+        await using var ctx = CreateInMemoryContext(nameof(GetProximosFeriadosAnalisadosAsync_OrdenaPorDataERemovePassados));
         ctx.Feriados.AddRange(
             new Feriado { Id = 1, Nome = "B", Data = new DateOnly(2026, 9, 7), Tipo = "Nacional" },
             new Feriado { Id = 2, Nome = "A", Data = new DateOnly(2026, 5, 10), Tipo = "Nacional" },
@@ -84,7 +36,7 @@ public class HolidayServiceTests
 
         var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
 
-        var resultado = await service.GetProximosFeriadosAsync();
+        var resultado = await service.GetProximosFeriadosAnalisadosAsync();
 
         Assert.Equal(2, resultado.Count);
         Assert.Equal("A", resultado[0].Nome);
@@ -92,36 +44,59 @@ public class HolidayServiceTests
     }
 
     [Fact]
-    public async Task GetProximosFeriadosAsync_RetornaListaVaziaQuandoSemFeriadosFuturos()
+    public async Task GetProximosFeriadosAnalisadosAsync_IncluiFeriadoDeHoje()
     {
-        await using var ctx = CreateInMemoryContext(nameof(GetProximosFeriadosAsync_RetornaListaVaziaQuandoSemFeriadosFuturos));
+        await using var ctx = CreateInMemoryContext(nameof(GetProximosFeriadosAnalisadosAsync_IncluiFeriadoDeHoje));
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Hoje", Data = new DateOnly(2026, 5, 1), Tipo = "Nacional" });
+        await ctx.SaveChangesAsync();
+
+        var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
+
+        var resultado = await service.GetProximosFeriadosAnalisadosAsync();
+
+        Assert.Equal("Hoje", Assert.Single(resultado).Nome);
+    }
+
+    [Fact]
+    public async Task GetProximosFeriadosAnalisadosAsync_RetornaListaVaziaQuandoSemFeriadosFuturos()
+    {
+        await using var ctx = CreateInMemoryContext(nameof(GetProximosFeriadosAnalisadosAsync_RetornaListaVaziaQuandoSemFeriadosFuturos));
         ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Velho", Data = new DateOnly(2024, 1, 1), Tipo = "Nacional" });
         await ctx.SaveChangesAsync();
 
         var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
 
-        var resultado = await service.GetProximosFeriadosAsync();
+        var resultado = await service.GetProximosFeriadosAnalisadosAsync();
 
         Assert.Empty(resultado);
     }
 
     [Fact]
-    public async Task GetProximoFeriadoAsync_RespeitaTimeZoneLocal()
+    public async Task GetProximosFeriadosAnalisadosAsync_RespeitaTimeZoneLocal()
     {
-        // BRT 23:30 do dia 01/05 = UTC 02:30 do dia 02/05.
-        // Sem TimeZone correto, .Date retornaria 02/05 e perderia o feriado de hoje.
-        await using var ctx = CreateInMemoryContext(nameof(GetProximoFeriadoAsync_RespeitaTimeZoneLocal));
-        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Trabalho", Data = new DateOnly(2026, 5, 1), Tipo = "Nacional" });
+        // BRT 23:30 do dia 21/04 = UTC 02:30 do dia 22/04.
+        // Feriado numa quarta: a folga acaba no próprio dia. Sem o fuso correto,
+        // "hoje" seria 22/04 e o feriado de hoje sumiria da lista.
+        await using var ctx = CreateInMemoryContext(nameof(GetProximosFeriadosAnalisadosAsync_RespeitaTimeZoneLocal));
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Tiradentes", Data = new DateOnly(2027, 4, 21), Tipo = "Nacional" });
         await ctx.SaveChangesAsync();
 
         var brt = TimeZoneInfo.CreateCustomTimeZone("BRT", TimeSpan.FromHours(-3), "BRT", "BRT");
-        var time = FakeTime(new DateTime(2026, 5, 2, 2, 30, 0), brt);
+        var time = FakeTime(new DateTime(2027, 4, 22, 2, 30, 0), brt);
 
-        var service = new HolidayService(ctx, time);
-        var resultado = await service.GetProximoFeriadoAsync();
+        var resultado = await new HolidayService(ctx, time).GetProximosFeriadosAnalisadosAsync();
 
-        Assert.NotNull(resultado);
-        Assert.Equal("Trabalho", resultado!.Nome);
+        Assert.Equal("Tiradentes", Assert.Single(resultado).Nome);
+    }
+
+    [Fact]
+    public async Task GetProximosFeriadosAnalisadosAsync_RespeitaCancelamento()
+    {
+        await using var ctx = CreateInMemoryContext(nameof(GetProximosFeriadosAnalisadosAsync_RespeitaCancelamento));
+        var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => service.GetProximosFeriadosAnalisadosAsync(new CancellationToken(canceled: true)));
     }
 
     [Fact]
@@ -130,22 +105,5 @@ public class HolidayServiceTests
         var provider = new BrazilTimeProvider();
 
         Assert.Equal(TimeSpan.FromHours(-3), provider.LocalTimeZone.BaseUtcOffset);
-    }
-
-    [Fact]
-    public async Task GetProximoFeriadoAsync_RetornaPrimeiroQuandoMultiplosNoMesmoDia()
-    {
-        await using var ctx = CreateInMemoryContext(nameof(GetProximoFeriadoAsync_RetornaPrimeiroQuandoMultiplosNoMesmoDia));
-        ctx.Feriados.AddRange(
-            new Feriado { Id = 3, Nome = "Carnaval segunda", Data = new DateOnly(2026, 2, 16), Tipo = "Nacional" },
-            new Feriado { Id = 4, Nome = "Carnaval terça", Data = new DateOnly(2026, 2, 17), Tipo = "Nacional" }
-        );
-        await ctx.SaveChangesAsync();
-
-        var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 2, 1)));
-        var resultado = await service.GetProximoFeriadoAsync();
-
-        Assert.NotNull(resultado);
-        Assert.Equal(new DateOnly(2026, 2, 16), resultado!.Data);
     }
 }

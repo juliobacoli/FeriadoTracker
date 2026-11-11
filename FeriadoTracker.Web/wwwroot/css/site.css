@@ -1,89 +1,1051 @@
-html {
-    font-size: 14px;
-    position: relative;
-    min-height: 100%;
+/*
+ * Archivo (Omnibus-Type, SIL Open Font License 1.1), subconjunto latin servido
+ * pelo próprio site: evita o CSS do Google Fonts bloqueando a renderização.
+ * Mesma URL do preload no _Layout (sem fingerprint) para não baixar duas vezes.
+ */
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 400 800;
+    font-stretch: 62% 125%;
+    font-display: swap;
+    src: url("/fonts/archivo-latin.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-@media (min-width: 768px) {
-    html {
-        font-size: 16px;
-    }
+/* Paleta 60-30-10: azul profundo + âmbar (exclusivo para folga). */
+:root {
+    --paper: #F3F5F9;
+    --surface: #FFFFFF;
+    --ink: #1B2A4A;
+    --muted: #56627A;
+    --line: #DCE1EA;
+    --folga: #F0A830;
+    --folga-ink: #1B2A4A;
+    --folga-wash: #FDF0D5;
+    --alerta: #B4363A;
+    --ok: #256B5B;
+    --ok-wash: #E0F0EB;
+    --toast-icon: #7FD4BE;
+    --toast-alerta: #F08A85;
+    --focus: #1B2A4A;
+    --overlay: rgba(15, 22, 38, 0.55);
+    --raio: 10px;
+    --raio-g: 16px;
+
+    /* Escala de fonte (7 passos). Espaçamentos seguem múltiplos de 0.25rem. */
+    --t-xs: 0.8125rem;
+    --t-sm: 0.9375rem;
+    --t-md: 1rem;
+    --t-lg: 1.125rem;
+    --t-xl: 1.5rem;
+    --t-2xl: 2rem;
+    --t-3xl: 2.625rem;
+    color-scheme: light;
+}
+
+html.dark {
+    --paper: #0F1626;
+    --surface: #182238;
+    --ink: #E4E9F2;
+    --muted: #9AA6BD;
+    --line: #26314A;
+    --folga: #E9B04A;
+    --folga-ink: #0F1626;
+    --folga-wash: #33291A;
+    --alerta: #F08A85;
+    --ok: #6CC9AE;
+    --ok-wash: #15302B;
+    --toast-icon: #256B5B;
+    --toast-alerta: #B4363A;
+    --focus: #E9B04A;
+    --overlay: rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+}
+
+/* Base */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Garante que o atributo hidden vença os display definidos abaixo. */
+[hidden] {
+    display: none !important;
 }
 
 body {
-    font-family: 'Work Sans', sans-serif;
     margin: 0;
-    padding: 0;
-    background: linear-gradient(135deg, var(--bg-gradient-start, #f5f7fa) 0%, var(--bg-gradient-end, #c3cfe2) 100%);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Archivo", system-ui, sans-serif;
+    font-size: var(--t-md);
+    line-height: 1.5;
 }
 
-.page-center {
-    min-height: calc(100vh - 1px);
+button {
+    font: inherit;
+    color: inherit;
+}
+
+a {
+    color: inherit;
+}
+
+@media (hover: hover) {
+    a:hover {
+        text-decoration-thickness: 2px;
+    }
+}
+
+/* Texto só para leitor de tela. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Cabeçalho */
+.topbar {
+    width: 100%;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.brand {
+    font-weight: 700;
+    font-stretch: 85%;
+    font-size: var(--t-lg);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+}
+
+@media (hover: hover) {
+    .brand:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+}
+
+.tools {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tool {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    padding: 0 0.75rem;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
+    gap: 0.5rem;
+    border: 0;
+    background: none;
+    border-radius: var(--raio);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
-.card {
-    background-color: var(--bg-card, #ffffff);
-    border-radius: 24px;
-    box-shadow: 0 18px 40px var(--shadow-box, rgba(15, 23, 42, 0.18));
-    padding: 2.5rem 2rem;
+.tool[hidden] {
+    display: none;
 }
 
-.metric-grid {
+.tool svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+}
+
+@media (hover: hover) {
+    .tool:hover {
+        background: var(--line);
+    }
+}
+
+.tool:active {
+    transform: scale(0.97);
+}
+
+.tool:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.sun-icon,
+html.dark .moon-icon {
+    display: none;
+}
+
+html.dark .sun-icon {
+    display: block;
+}
+
+/* Conteúdo e rodapé */
+.conteudo {
+    flex: 1;
+    width: 100%;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 0.5rem 1rem 3rem;
+}
+
+.foot {
+    width: 100%;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+    border-top: 1px solid var(--line);
+}
+
+.credit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--ink);
+    min-height: 2.75rem;
+    border-radius: var(--raio);
+    padding-right: 0.5rem;
+}
+
+.mono {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--raio);
+    background: var(--ink);
+    color: var(--paper);
     display: grid;
-    grid-template-columns: 1fr;
+    place-items: center;
+    font-weight: 800;
+    font-stretch: 70%;
+    font-size: var(--t-lg);
+    letter-spacing: 0.02em;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.credit-text {
+    display: grid;
+    line-height: 1.2;
+}
+
+.credit-label {
+    font-size: var(--t-xs);
+    color: var(--muted);
+}
+
+.credit-name {
+    font-size: var(--t-md);
+    font-weight: 600;
+}
+
+@media (hover: hover) {
+    .credit:hover .credit-name {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+}
+
+@media (hover: hover) {
+    .credit:hover .mono {
+        background: var(--folga);
+        color: var(--folga-ink);
+    }
+}
+
+/* Aviso no topo */
+.toast-container {
+    position: fixed;
+    top: 4.75rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    z-index: 2000;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 28.75rem;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.75rem 1rem;
+    border-radius: var(--raio);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+    font-weight: 500;
+    font-size: var(--t-sm);
+    line-height: 1.35;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+    color: var(--toast-icon);
+}
+
+.toast-error svg {
+    color: var(--toast-alerta);
+}
+
+/* Instalação no iPhone */
+.ios-install-overlay {
+    width: 100%;
+    max-width: 30rem;
+    margin: auto auto 0;
+    padding: 0;
+    border: 0;
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: var(--raio-g) var(--raio-g) 0 0;
+}
+
+.ios-install-overlay::backdrop {
+    background: var(--overlay);
+}
+
+.ios-install-modal {
+    position: relative;
+    padding: 1.5rem 1.5rem calc(2rem + env(safe-area-inset-bottom, 0));
+}
+
+.ios-install-close {
+    position: absolute;
+    top: 0.625rem;
+    right: 0.625rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    background: none;
+    border: 0;
+    border-radius: var(--raio);
+    cursor: pointer;
+    font-size: var(--t-xl);
+    line-height: 1;
+    color: var(--muted);
+}
+
+@media (hover: hover) {
+    .ios-install-close:hover {
+        color: var(--ink);
+    }
+}
+
+.ios-install-title {
+    font-size: var(--t-lg);
+    font-weight: 700;
+    font-stretch: 80%;
+    margin: 0 0 0.5rem;
+}
+
+.ios-install-subtitle {
+    font-size: var(--t-sm);
+    color: var(--muted);
+    margin: 0 0 1.25rem;
+}
+
+.ios-install-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
     gap: 1rem;
 }
 
-@media (min-width: 480px) {
-    .metric-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+.ios-install-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--t-sm);
+    line-height: 1.4;
 }
 
-@media (min-width: 1024px) {
-    .metric-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+.ios-install-step-icon {
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--raio);
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
 }
 
-.metric-box {
-    background-color: #ffffff;
-    border-radius: 16px;
-    padding: 1.25rem 0.75rem;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+.ios-install-step-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
-.metric-number {
-    font-size: 2.2rem;
-    font-weight: 800;
-    line-height: 1.1;
+/* Página de erro */
+.page-center {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 0;
 }
 
-.metric-label {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
+.card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--raio-g);
+    padding: 1.5rem;
 }
+
 .error-card {
     max-width: 36rem;
-    color: var(--text-primary, #111827);
 }
 
 .error-card h1 {
     margin-top: 0;
+    font-stretch: 80%;
 }
 
 .error-card a {
-    color: var(--accent-primary, #2563eb);
     font-weight: 600;
 }
 
 .error-card code {
     overflow-wrap: anywhere;
+}
+
+/* Modo âmbar: no dia da folga a tela inteira esquenta. */
+body.is-holiday {
+    --paper: #FDF0D5;
+    --line: #ECD8AD;
+}
+
+html.dark body.is-holiday {
+    --paper: #2A2216;
+    --surface: #352A1B;
+    --line: #4A3B25;
+}
+
+/* Index: destaque + lista */
+.page {
+    display: grid;
+    gap: 2.5rem;
+}
+
+.kicker {
+    font-size: var(--t-md);
+    color: var(--muted);
+    margin: 0 0 0.375rem;
+    font-weight: 500;
+}
+
+.name {
+    text-wrap: balance;
+    font-size: clamp(1.875rem, 7vw, 2.625rem);
+    font-weight: 700;
+    font-stretch: 80%;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0;
+}
+
+.date {
+    margin: 0.375rem 0 0;
+    font-size: var(--t-lg);
+}
+
+.count {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1.25rem;
+    margin: 1.5rem 0 0.25rem;
+}
+
+.count-part {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.375rem;
+}
+
+.count-num {
+    font-size: clamp(6.5rem, 30vw, 10.5rem);
+    font-weight: 800;
+    font-stretch: 62%;
+    line-height: 0.78;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+
+.count-unit {
+    font-size: var(--t-xl);
+    font-weight: 600;
+    font-stretch: 75%;
+}
+
+.count-word {
+    font-size: clamp(3.5rem, 14vw, 5rem);
+    font-weight: 800;
+    font-stretch: 62%;
+    line-height: 0.9;
+    color: var(--folga-ink);
+    background: var(--folga);
+    padding: 0.25rem 0.75rem 0;
+    border-radius: var(--raio);
+}
+
+/* Altura reservada para o relógio: a troca de estado não empurra a página. */
+.exact {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: var(--t-sm);
+    margin: 0.75rem 0 0;
+    min-height: 2.25rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Relógio: continuação do número grande, na mesma fonte condensada. */
+.clock {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.clock-part {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.clock-num {
+    font-size: var(--t-2xl);
+    font-weight: 700;
+    font-stretch: 68%;
+    line-height: 1;
+    color: var(--ink);
+}
+
+.clock-unit {
+    font-size: var(--t-md);
+    font-weight: 600;
+    font-stretch: 80%;
+}
+
+.today-note {
+    font-size: var(--t-lg);
+    font-weight: 600;
+    margin: 0.75rem 0 0;
+}
+
+.strip {
+    margin: 1.5rem 0 0;
+}
+
+/* Régua: dias comuns são só número; a folga é uma barra contínua. */
+.strip-days {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+}
+
+.strip-days li {
+    display: grid;
+    justify-items: center;
+    gap: 0.125rem;
+    padding: 0.5rem 0 0.75rem;
+}
+
+.strip-days .wd {
+    font-size: var(--t-xs);
+    color: var(--muted);
+}
+
+.strip-days .dn {
+    font-size: var(--t-xl);
+    font-weight: 700;
+    font-stretch: 70%;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.strip-days li.off {
+    background: var(--folga);
+    color: var(--folga-ink);
+}
+
+/* Fim de semana que a ponte liga à folga: entra na barra, em tom claro. */
+.strip-days li.emenda {
+    background: var(--folga-wash);
+}
+
+/* Canto arredondado só nas pontas do período (folga + ponte + emenda). */
+.strip-days li:is(.off, .ponte, .emenda):not(:is(.off, .ponte, .emenda) + li) {
+    border-top-left-radius: var(--raio);
+    border-bottom-left-radius: var(--raio);
+}
+
+.strip-days li:is(.off, .ponte, .emenda):not(:has(+ :is(.off, .ponte, .emenda))) {
+    border-top-right-radius: var(--raio);
+    border-bottom-right-radius: var(--raio);
+}
+
+.strip-days li.off .wd {
+    color: var(--folga-ink);
+}
+
+/* outline em vez de border: não muda a altura da barra. */
+.strip-days li.ponte {
+    background: repeating-linear-gradient(135deg, var(--folga-wash) 0 6px, transparent 6px 12px);
+    outline: 2px dashed var(--ink);
+    outline-offset: -2px;
+}
+
+.strip-days li.holiday .dn {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 3px;
+}
+
+.strip-days li.weekend-only {
+    outline: 2px solid var(--alerta);
+    outline-offset: -2px;
+    border-radius: var(--raio);
+}
+
+.strip-days li.weekend-only .dn {
+    color: var(--alerta);
+}
+
+.strip-days li.today {
+    box-shadow: inset 0 -4px 0 var(--ink);
+}
+
+/* Sobre a barra âmbar o marcador usa a tinta da folga: no escuro, --ink é clara e sumia no âmbar. */
+.strip-days li.off.today {
+    box-shadow: inset 0 -4px 0 var(--folga-ink);
+}
+
+.impact {
+    font-size: var(--t-lg);
+    font-weight: 600;
+    margin: 0.75rem 0 0;
+}
+
+.impact.is-long,
+.row.is-long .row-info {
+    color: var(--ok);
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem 1rem;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--muted);
+    font-size: var(--t-sm);
+}
+
+.legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.sw {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.sw-off {
+    background: var(--folga);
+}
+
+.sw-ponte {
+    border: 2px dashed var(--ink);
+    background: var(--folga-wash);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 1.5rem;
+    margin: 1.5rem 0 0;
+}
+
+.link-btn {
+    min-height: 2.75rem;
+    background: none;
+    border: 0;
+    padding: 0.5rem 0;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    .link-btn:hover {
+        text-decoration-thickness: 2px;
+    }
+}
+
+.link-btn:active,
+.back button:active {
+    transform: translateY(1px);
+}
+
+.link-btn.is-done {
+    color: var(--ok);
+    text-decoration: none;
+}
+
+.btn {
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border-radius: var(--raio);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn[hidden] {
+    display: none;
+}
+
+.btn svg {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+@media (hover: hover) {
+    .btn:hover {
+        border-color: var(--ink);
+    }
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn.is-done {
+    border-color: var(--ok);
+    background: var(--ok-wash);
+}
+
+.btn.is-done svg,
+.btn-main[aria-pressed="true"] svg {
+    color: var(--ok);
+}
+
+/* Botão principal neutro (o âmbar é só da folga); ativo, vira confirmação. */
+.btn-main {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+}
+
+@media (hover: hover) {
+    .btn-main:hover {
+        border-color: var(--ink);
+        opacity: 0.92;
+    }
+}
+
+.btn-main[aria-pressed="true"] {
+    background: var(--ok-wash);
+    color: var(--ink);
+    border-color: var(--ok);
+    opacity: 1;
+}
+
+.btn:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+/* Ícone trocado pela confirmação quando ativo/concluído. */
+.btn .icon-on,
+.btn[aria-pressed="true"] .icon-off,
+.btn.is-done .icon-off {
+    display: none;
+}
+
+.btn[aria-pressed="true"] .icon-on,
+.btn.is-done .icon-on {
+    display: block;
+}
+
+/* Troca de feriado no destaque: entrada curta para a mudança ser percebida. */
+@keyframes surgir {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+.focus.is-troca :is(.kicker, .name, .date, .count, .exact, .today-note, .strip) {
+    animation: surgir 0.18s ease-out both;
+}
+
+.list-title {
+    font-size: var(--t-xl);
+    font-weight: 700;
+    font-stretch: 80%;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.list-sub {
+    margin: 0.125rem 0 0;
+    color: var(--muted);
+    font-size: var(--t-sm);
+}
+
+.year {
+    font-size: var(--t-sm);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    line-height: 1;
+    margin: 1.5rem 0 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: center;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0.375rem 0.5rem 0.375rem 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    position: relative;
+}
+
+@media (hover: hover) {
+    .row:hover {
+        background: var(--surface);
+    }
+}
+
+/* Desktop: contagem viva do feriado sob o mouse. Sobreposta à direita para não mexer na altura da linha. */
+.row-live {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem 0 1rem;
+    background: inherit;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.row-live:empty {
+    display: none;
+}
+
+.row:active {
+    background: var(--line);
+}
+
+.row-date {
+    display: grid;
+    justify-items: center;
+    line-height: 1;
+    padding: 0.5rem 0;
+    border-radius: var(--raio);
+}
+
+.row-day {
+    font-size: var(--t-xl);
+    font-weight: 800;
+    font-stretch: 62%;
+    font-variant-numeric: tabular-nums;
+}
+
+.row-mon {
+    font-size: var(--t-xs);
+    color: var(--muted);
+    margin-top: 0.125rem;
+}
+
+/* Feriado que não vira folga recua: o olho vai direto às folgas. */
+.row.is-weekend .row-name,
+.row.is-weekend .row-day {
+    color: var(--muted);
+}
+
+.row.is-weekend .row-name {
+    font-weight: 500;
+}
+
+/* Seleção: bloco da data em âmbar + fundo lavado, sem borda lateral. */
+.row[aria-pressed="true"] {
+    background: var(--folga-wash);
+}
+
+.row[aria-pressed="true"] .row-date {
+    background: var(--folga);
+}
+
+.row[aria-pressed="true"] .row-day,
+.row[aria-pressed="true"] .row-mon {
+    color: var(--folga-ink);
+}
+
+.back {
+    margin: 1rem 0 0;
+}
+
+.back[hidden] {
+    display: none;
+}
+
+.back button {
+    min-height: 2.75rem;
+    background: none;
+    border: 0;
+    padding: 0.5rem 0;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.name:focus {
+    outline: none;
+}
+
+.name:focus-visible {
+    outline: 3px solid var(--focus);
+}
+
+.row-name {
+    display: block;
+    font-weight: 600;
+}
+
+.row-info {
+    display: block;
+    color: var(--muted);
+    font-size: var(--t-sm);
+    line-height: 1.35;
+}
+
+.row.is-weekend .row-info {
+    color: var(--alerta);
+}
+
+/* Celular: 7 dias na faixa. */
+@media (max-width: 639px) {
+    .strip-days {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .strip-days li:first-child,
+    .strip-days li:last-child {
+        display: none;
+    }
+
+    .strip-days li {
+        padding: 0.75rem 0;
+    }
+}
+
+/* Desktop: destaque e lista lado a lado. */
+@media (min-width: 960px) {
+    .page {
+        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+        gap: 4rem;
+        align-items: start;
+        padding-top: 1rem;
+    }
+
+    .focus {
+        position: sticky;
+        top: 1.5rem;
+    }
+
+    .count-num {
+        font-size: 10.5rem;
+    }
+
+    .name {
+        font-size: var(--t-3xl);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tool,
+    .btn,
+    .mono,
+    .row,
+    .toast {
+        transition: none;
+    }
+
+    .tool:active,
+    .btn:active {
+        transform: none;
+    }
+
+    .focus.is-troca :is(.kicker, .name, .date, .count, .exact, .today-note, .strip) {
+        animation: none;
+    }
 }

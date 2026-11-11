@@ -16,7 +16,7 @@
     <title>@(ViewData["Title"] is string titulo && titulo.Length > 0 ? $"{titulo} | " : "")Qual o próximo feriado?</title>
     @{
         var urlBase = $"https://{Context.Request.Host}";
-        const string descricao = "Veja quantos dias faltam para o próximo feriado nacional e confira os próximos feriados do Brasil.";
+        const string descricao = "Quantos dias faltam para a sua próxima folga, quais feriados nacionais viram fim de semana prolongado e onde dá para emendar com ponte.";
     }
     <meta name="description" content="@descricao" />
     <meta property="og:type" content="website" />
@@ -29,13 +29,11 @@
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
     <meta name="twitter:card" content="summary" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
     <link rel="apple-touch-icon" href="~/icon-192.png" />
     <link rel="manifest" href="~/manifest.json" />
-    <meta name="theme-color" content="#5271FF" />
+    <meta name="theme-color" content="#F3F5F9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -46,6 +44,7 @@
             try { tema = localStorage.getItem('theme'); } catch (e) { }
             if (tema === 'dark' || (tema === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0F1626');
             }
         })();
     </script>
@@ -55,19 +54,22 @@
 </head>
 
 <body>
-    <button class="push-toggle" id="pushToggle" type="button" aria-label="Ativar notificações" aria-pressed="false" title="Ativar notificações">
-        <svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-    </button>
+    <header class="topbar">
+        <a class="brand" href="/">Qual o próximo feriado?</a>
+        <div class="tools">
+            <button class="tool" id="themeToggle" type="button" aria-label="Tema escuro" aria-pressed="false">
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4.5"/>
+                    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+                </svg>
+            </button>
+        </div>
+    </header>
 
-    <div class="push-hint" id="pushHint" role="status" hidden>
-        <button class="push-hint-close" id="pushHintClose" type="button" aria-label="Dispensar dica">&times;</button>
-        <p class="push-hint-text">Receba lembretes dos próximos feriados.</p>
-    </div>
-
-    <div class="ios-install-overlay" id="iosInstallOverlay" hidden aria-modal="true" role="dialog" aria-labelledby="iosInstallTitle">
+    <dialog class="ios-install-overlay" id="iosInstallOverlay" aria-labelledby="iosInstallTitle">
         <div class="ios-install-modal">
             <button class="ios-install-close" id="iosInstallClose" type="button" aria-label="Fechar">&times;</button>
             <h2 class="ios-install-title" id="iosInstallTitle">Instale o app primeiro</h2>
@@ -104,45 +106,37 @@
                 </li>
             </ol>
         </div>
-    </div>
+    </dialog>
 
-    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
-        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-    </button>
+    <main class="conteudo">
+        @RenderBody()
+    </main>
 
-    <button class="confetti-toggle" id="confettiToggle" type="button" aria-label="Soltar confetes" title="Soltar confetes" hidden>
-        <span class="confetti-emoji" aria-hidden="true">🎉</span>
-    </button>
-
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <footer class="foot">
+        <a class="credit" href="https://juliobacoli.com.br/" target="_blank" rel="noopener noreferrer">
+            <span class="mono" aria-hidden="true">JB</span>
+            <span class="credit-text"><span class="credit-label">Feito por</span><span class="credit-name">Julio Bacoli</span></span>
+        </a>
+    </footer>
 
     <script nonce="@Context.Items["csp-nonce"]">
-        (function() {
-            const themeToggle = document.getElementById('themeToggle');
-            const htmlElement = document.documentElement;
+        (function () {
+            var botao = document.getElementById('themeToggle');
+            var raiz = document.documentElement;
+            var corBarra = document.querySelector('meta[name="theme-color"]');
 
-            themeToggle.addEventListener('click', function() {
-                htmlElement.classList.toggle('dark');
+            function aplicar(escuro) {
+                raiz.classList.toggle('dark', escuro);
+                botao.setAttribute('aria-pressed', escuro ? 'true' : 'false');
+                corBarra.setAttribute('content', escuro ? '#0F1626' : '#F3F5F9');
+            }
 
-                const isDark = htmlElement.classList.contains('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            aplicar(raiz.classList.contains('dark'));
+
+            botao.addEventListener('click', function () {
+                var escuro = !raiz.classList.contains('dark');
+                aplicar(escuro);
+                try { localStorage.setItem('theme', escuro ? 'dark' : 'light'); } catch (e) { }
             });
         })();
     </script>

@@ -13,4 +13,8 @@ public static class NotificationTemplates
         1 => $"Amanhã é {holidayName}!",
         _ => $"{holidayName} em {PtBrFormat.DiaEMes(date)}."
     };
+
+    /// <summary>Mesma mensagem, seguida do que o feriado vira: folga prolongada, ponte ou nada.</summary>
+    public static string Body(int daysUntil, FeriadoAnalisado feriado) =>
+        $"{Body(daysUntil, feriado.Nome, feriado.Inicio)} {FeriadoVisaoBuilder.Impacto(feriado)}";
 }

@@ -46,7 +46,20 @@ public class AppDbContext : DbContext
             new Feriado { Id = 11, Nome = "Finados", Data = new DateOnly(2026, 11, 02), Tipo = "Nacional" },
             new Feriado { Id = 12, Nome = "Proclamação da República", Data = new DateOnly(2026, 11, 15), Tipo = "Nacional" },
             new Feriado { Id = 13, Nome = "Dia Nacional da Consciência Negra", Data = new DateOnly(2026, 11, 20), Tipo = "Nacional" },
-            new Feriado { Id = 14, Nome = "Natal", Data = new DateOnly(2026, 12, 25), Tipo = "Nacional" }
+            new Feriado { Id = 14, Nome = "Natal", Data = new DateOnly(2026, 12, 25), Tipo = "Nacional" },
+            new Feriado { Id = 15, Nome = "Confraternização Universal", Data = new DateOnly(2027, 01, 01), Tipo = "Nacional" },
+            new Feriado { Id = 16, Nome = "Carnaval", Data = new DateOnly(2027, 02, 08), Tipo = "Nacional" },
+            new Feriado { Id = 17, Nome = "Carnaval", Data = new DateOnly(2027, 02, 09), Tipo = "Nacional" },
+            new Feriado { Id = 18, Nome = "Sexta-feira Santa", Data = new DateOnly(2027, 03, 26), Tipo = "Nacional" },
+            new Feriado { Id = 19, Nome = "Tiradentes", Data = new DateOnly(2027, 04, 21), Tipo = "Nacional" },
+            new Feriado { Id = 20, Nome = "Dia do Trabalho", Data = new DateOnly(2027, 05, 01), Tipo = "Nacional" },
+            new Feriado { Id = 21, Nome = "Corpus Christi", Data = new DateOnly(2027, 05, 27), Tipo = "Nacional" },
+            new Feriado { Id = 22, Nome = "Independência do Brasil", Data = new DateOnly(2027, 09, 07), Tipo = "Nacional" },
+            new Feriado { Id = 23, Nome = "Nossa Senhora Aparecida", Data = new DateOnly(2027, 10, 12), Tipo = "Nacional" },
+            new Feriado { Id = 24, Nome = "Finados", Data = new DateOnly(2027, 11, 02), Tipo = "Nacional" },
+            new Feriado { Id = 25, Nome = "Proclamação da República", Data = new DateOnly(2027, 11, 15), Tipo = "Nacional" },
+            new Feriado { Id = 26, Nome = "Dia Nacional da Consciência Negra", Data = new DateOnly(2027, 11, 20), Tipo = "Nacional" },
+            new Feriado { Id = 27, Nome = "Natal", Data = new DateOnly(2027, 12, 25), Tipo = "Nacional" }
         );
     }
 }

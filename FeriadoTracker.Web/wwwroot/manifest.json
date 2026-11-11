@@ -1,13 +1,13 @@
 {
-  "name": "Feriado Tracker",
+  "name": "FeriadoTracker",
   "short_name": "Feriados",
   "description": "Acompanhe os próximos feriados nacionais brasileiros e receba lembretes.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f1422",
-  "theme_color": "#5271FF",
+  "background_color": "#F3F5F9",
+  "theme_color": "#F3F5F9",
   "lang": "pt-BR",
   "dir": "ltr",
   "icons": [

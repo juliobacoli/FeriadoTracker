@@ -1,52 +1,27 @@
-import { startConfetti, attachConfettiButton } from './confetti.js';
 import { createCountdown } from './countdown.js';
-import { attachTimelineHandlers } from './timeline.js';
-import { setupPushButton } from './push.js';
+import { setupDestaque } from './destaque.js';
+import { setupPushButtons } from './push.js';
 import { setupShareButton } from './share.js';
 
 document.addEventListener('DOMContentLoaded', function () {
-    const pushBtn = document.getElementById('pushToggle');
-    if (pushBtn) setupPushButton(pushBtn);
+    setupPushButtons([document.getElementById('btnLembrete')]);
 
-    const wrapper = document.querySelector('.holiday-wrapper');
-    if (!wrapper) return;
+    const section = document.getElementById('destaque');
+    if (!section) return;
 
-    const elements = {
-        days: document.getElementById('days'),
-        hours: document.getElementById('hours'),
-        minutes: document.getElementById('minutes'),
-        seconds: document.getElementById('seconds'),
-        card: document.querySelector('.holiday-card'),
-        title: document.querySelector('.holiday-title'),
-        subtitle: document.querySelector('.holiday-subtitle'),
-        date: document.querySelector('.holiday-date')
-    };
-
-    const confettiBtn = document.getElementById('confettiToggle');
-    attachConfettiButton(confettiBtn);
-
-    const shareBtn = document.getElementById('btnShare');
-    if (shareBtn) setupShareButton(shareBtn, elements);
-
-    const countdown = createCountdown({
-        elements,
-        onZero() {
-            if (confettiBtn) confettiBtn.hidden = false;
-            startConfetti();
-        }
-    });
-
-    const timelineItems = document.querySelectorAll('.holiday-timeline-item');
-    attachTimelineHandlers({
-        items: timelineItems,
-        elements,
-        confettiBtn,
+    const countdown = createCountdown(section);
+    const destaque = setupDestaque({
+        section,
+        proxima: Number(section.dataset.proxima),
         countdown
     });
-
-    const initialDateString = wrapper.getAttribute('data-initial-date');
-    if (initialDateString) {
-        countdown.setDate(new Date(initialDateString));
-    }
     countdown.start();
+
+    const shareBtn = document.getElementById('btnShare');
+    if (shareBtn) {
+        setupShareButton(shareBtn, () => {
+            const f = destaque.atual();
+            return { nome: f.nome, inicio: f.inicioIso };
+        });
+    }
 });

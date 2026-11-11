@@ -1,112 +1,104 @@
 ﻿@page
 @using FeriadoTracker.Web.Services
-
 @model FeriadoTracker.Web.Pages.IndexModel
 
-<div class="page-wrapper page-center">
-    <div class="holiday-wrapper" data-initial-date="@(Model.ProximoFeriado is null ? "" : PtBrFormat.Iso(Model.ProximoFeriado.Data))">
-        <div class="holiday-card card">
-            <div class="holiday-header">
-                <div class="holiday-subtitle">PRÓXIMO FERIADO NACIONAL</div>
-                <h1 class="holiday-title">@Model.ProximoFeriado?.Nome</h1>
-
-                @if (Model.ProximoFeriado is not null)
-                {
-                    <p class="holiday-date">
-                        @PtBrFormat.DataPorExtenso(Model.ProximoFeriado.Data)
-                    </p>
-                }
-                else
-                {
-                    <p class="holiday-date">Nenhum feriado encontrado.</p>
-                }
-            </div>
-
-            <div class="countdown-grid metric-grid">
-                <div class="countdown-box metric-box">
-                    <div id="days" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Dias</div>
-                </div>
-                <div class="countdown-box metric-box">
-                    <div id="hours" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Horas</div>
-                </div>
-                <div class="countdown-box metric-box">
-                    <div id="minutes" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Minutos</div>
-                </div>
-                <div class="countdown-box metric-box">
-                    <div id="seconds" class="countdown-number metric-number">--</div>
-                    <div class="countdown-label metric-label">Segundos</div>
-                </div>
-            </div>
-            
-            <div class="share-wrapper">
-                <button id="btnShare" class="btn-share" hidden aria-label="Compartilhar feriado">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                    </svg>
-                    Compartilhar
-                </button>
-            </div>
-        </div>
-
-        @if (Model.ProximosFeriados is not null && Model.ProximosFeriados.Any())
+@{
+    // Faixa de dias em volta do feriado: usada no destaque e nos templates da lista.
+    void Faixa(FeriadoVisao feriado)
+    {
+        foreach (var dia in feriado.Faixa)
         {
-            <div class="holiday-timeline-wrapper card">
-                <h2 class="holiday-timeline-title">Linha do tempo dos próximos feriados</h2>
-
-                <div class="holiday-timeline">
-                    @foreach (var feriado in Model.ProximosFeriados)
-                    {
-                        var isNext = Model.ProximoFeriado is not null
-                        && feriado.Id == Model.ProximoFeriado.Id;
-
-                        <div class="holiday-timeline-item @(isNext ? "is-next is-selected" : "")"
-                             data-target-date="@PtBrFormat.Iso(feriado.Data)"
-                             data-target-name="@feriado.Nome"
-                             data-target-formatted="@PtBrFormat.DataPorExtenso(feriado.Data)">
-                            <div class="holiday-timeline-dot"></div>
-
-                            <div class="holiday-timeline-content">
-                                <span class="holiday-timeline-date">
-                                    @PtBrFormat.DataCurta(feriado.Data) - @PtBrFormat.DiaDaSemana(feriado.Data)
-                                </span>
-                                <span class="holiday-timeline-name">
-                                    @feriado.Nome
-                                </span>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
+            <li class="@dia.Classe" data-iso="@dia.Iso"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span><span class="sr-only">@dia.Rotulo</span></li>
         }
+    }
+}
 
-        <div class="creator-card">
-            <a href="https://juliobacoli.com.br/" target="_blank" rel="noopener noreferrer" class="creator-link">
-                <svg class="site-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M2 12h20" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
-                <span>Desenvolvido por <b>Julio Bacoli</b></span>
-            </a>
-        </div>
+<div class="page">
+    @if (Model.Destaque is { } d)
+    {
+        <section class="focus" id="destaque" aria-labelledby="focusName" data-proxima="@Model.IndiceDestaque">
+            <p class="kicker" id="focusKicker">Sua próxima folga</p>
+            <h1 class="name" id="focusName" tabindex="-1">@d.Nome</h1>
+            <p class="date" id="focusDate">@d.DataTexto</p>
 
-    </div>
+            <div class="count" id="focusCount">
+                <span class="count-part"><span class="count-num">@Model.DiasAteDestaque</span><span class="count-unit">@(Model.DiasAteDestaque == 1 ? "dia" : "dias")</span></span>
+            </div>
+            <p class="exact" id="focusExact" aria-hidden="true"></p>
+            <p class="today-note" id="focusNote" hidden></p>
+
+            <figure class="strip">
+                <ol class="strip-days" id="focusStrip" aria-label="Dias em volta do feriado">
+                    @{ Faixa(d); }
+                </ol>
+                <figcaption>
+                    <p class="impact @(d.Tipo == TipoFolga.Prolongado ? "is-long" : "")" id="focusImpact">@d.Impacto</p>
+                    @* A legenda só aparece quando há ponte: sozinha, "Folga" não explica nada. *@
+                    <ul class="legend" id="legendPonte" hidden="@(!d.TemPonte)">
+                        <li><span class="sw sw-off" aria-hidden="true"></span>Folga</li>
+                        <li><span class="sw sw-ponte" aria-hidden="true"></span>Ponte possível</li>
+                    </ul>
+                </figcaption>
+            </figure>
+
+            <div class="actions">
+                <button class="btn btn-main" id="btnLembrete" type="button" aria-pressed="false">
+                    <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span data-rotulo-off="Me avisar dos feriados" data-rotulo-on="Lembretes ativos">Me avisar dos feriados</span>
+                </button>
+                <button class="link-btn" id="btnShare" type="button" hidden><span>Compartilhar</span></button>
+            </div>
+
+            <p class="back" id="focusBack" hidden><button type="button">Voltar para a próxima folga</button></p>
+        </section>
+    }
+    else
+    {
+        <section class="focus">
+            <h1 class="name">Nenhum feriado encontrado.</h1>
+        </section>
+    }
+
+    @if (Model.Feriados.Count > 0)
+    {
+        <section aria-labelledby="listTitle">
+            <h2 class="list-title" id="listTitle">Feriados nacionais</h2>
+            <p class="list-sub">@Model.PeriodoLista</p>
+            @foreach (var ano in Model.Feriados.Select((f, i) => (f, i)).GroupBy(x => x.f.Ano))
+            {
+                <h3 class="year">@ano.Key</h3>
+                <ul class="rows">
+                    @foreach (var (f, i) in ano)
+                    {
+                        var classe = f.Tipo == TipoFolga.FimDeSemana ? "is-weekend" : "is-off";
+                        if (f.FolgaLonga) classe += " is-long";
+
+                        <li>
+                            @* Os data-* levam ao destaque tudo o que ele mostra deste feriado. *@
+                            <button type="button" class="row @classe" aria-pressed="@(i == Model.IndiceDestaque ? "true" : "false")"
+                                    data-indice="@i"
+                                    data-nome="@f.Nome"
+                                    data-tipo="@f.Tipo"
+                                    data-inicio-iso="@f.InicioIso"
+                                    data-fim-iso="@f.FimIso"
+                                    data-folga-fim-iso="@f.FolgaFimIso"
+                                    data-data-texto="@f.DataTexto"
+                                    data-impacto="@f.Impacto"
+                                    data-nota-no-dia="@f.NotaNoDia"
+                                    data-tem-ponte="@(f.TemPonte ? "true" : "false")">
+                                <span class="row-date"><span class="row-day">@f.DiaLista</span><span class="row-mon">@f.MesLista</span></span>
+                                <span><span class="row-name">@f.Nome</span><span class="row-info">@f.ImpactoCurto</span></span>
+                            </button>
+                            <template id="faixa-@i">@{ Faixa(f); }</template>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    }
 </div>
 
-
-@section Styles {
-    <link rel="stylesheet" href="~/css/holiday.css" asp-append-version="true" />
-}
-
 @section Scripts {
-    <script src="~/js/confetti-lib.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
     <script type="module" src="~/js/main.js" nonce="@HttpContext.Items["csp-nonce"]" asp-append-version="true"></script>
 }
-

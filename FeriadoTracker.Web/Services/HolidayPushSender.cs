@@ -21,7 +21,19 @@ public class HolidayPushSender(
         var today = DateOnly.FromDateTime(time.GetLocalNow().Date);
         var until = today.AddDays(settings.DaysAhead);
 
-        var feriados = await GetFeriadosAsync(today, until, ct);
+        var linhas = await GetFeriadosAsync(today, until, ct);
+
+        // Um aviso por feriado (Carnaval são duas linhas), já com a regra de folga e ponte.
+        var feriados = FolgaCalculator.Analisar(linhas)
+            .Where(a => a.Fim >= today && a.Inicio <= until)
+            .Select(a => new FeriadoParaAviso(
+                a,
+                linhas.Where(l => l.Nome == a.Nome && l.Data >= a.Inicio && l.Data <= a.Fim)
+                    .OrderBy(l => l.Data)
+                    .Select(l => l.Id)
+                    .ToList()))
+            .ToList();
+
         if (feriados.Count == 0)
         {
             logger.LogInformation("Nenhum feriado nos próximos {Days} dias.", settings.DaysAhead);
@@ -37,20 +49,21 @@ public class HolidayPushSender(
         var sent = 0;
         var skipped = 0;
 
-        foreach (var feriado in feriados)
+        foreach (var (feriado, ids) in feriados)
         {
             var payload = BuildPayload(feriado, today);
 
             foreach (var sub in subscriptions)
             {
-                if (alreadySent.Contains((sub.Id, feriado.Id)))
+                // Qualquer dia do feriado já avisado conta (logs antigos eram por linha).
+                if (ids.Any(id => alreadySent.Contains((sub.Id, id))))
                 {
                     skipped++;
                     continue;
                 }
 
                 var localNow = time.GetLocalNow();
-                var fimDoFeriado = new DateTimeOffset(feriado.Data.ToDateTime(new TimeOnly(23, 59, 59)), localNow.Offset);
+                var fimDoFeriado = new DateTimeOffset(feriado.Fim.ToDateTime(new TimeOnly(23, 59, 59)), localNow.Offset);
                 var ttlSeconds = (int)(fimDoFeriado - localNow).TotalSeconds;
                 if (ttlSeconds < 0) ttlSeconds = 0;
 
@@ -63,7 +76,7 @@ public class HolidayPushSender(
                         db.NotificationLogs.Add(new NotificationLog
                         {
                             SubscriptionId = sub.Id,
-                            FeriadoId = feriado.Id,
+                            FeriadoId = ids[0],
                             SentDate = today,
                             SentAtUtc = time.GetUtcNow().UtcDateTime
                         });
@@ -110,17 +123,21 @@ public class HolidayPushSender(
         return new SendSettings(daysAhead);
     }
 
+    private sealed record FeriadoParaAviso(FeriadoAnalisado Feriado, List<int> Ids);
+
+    // Uma semana de margem: feriados vizinhos estendem a folga e o Carnaval pode ter começado ontem.
     private Task<List<Feriado>> GetFeriadosAsync(DateOnly today, DateOnly until, CancellationToken ct) =>
         db.Feriados
-            .Where(f => f.Data >= today && f.Data <= until)
+            .AsNoTracking()
+            .Where(f => f.Data >= today.AddDays(-7) && f.Data <= until.AddDays(7))
             .ToListAsync(ct);
 
     private async Task<HashSet<(int SubscriptionId, int FeriadoId)>> GetAlreadySentAsync(
-        List<Feriado> feriados,
+        List<FeriadoParaAviso> feriados,
         List<PushSubscription> subscriptions,
         CancellationToken ct)
     {
-        var feriadoIds = feriados.Select(f => f.Id).ToList();
+        var feriadoIds = feriados.SelectMany(f => f.Ids).ToList();
         var subscriptionIds = subscriptions.Select(s => s.Id).ToList();
 
         var rows = await db.NotificationLogs
@@ -132,13 +149,13 @@ public class HolidayPushSender(
         return rows.Select(x => (x.SubscriptionId, x.FeriadoId)).ToHashSet();
     }
 
-    private static string BuildPayload(Feriado feriado, DateOnly today)
+    private static string BuildPayload(FeriadoAnalisado feriado, DateOnly today)
     {
-        var diffDays = feriado.Data.DayNumber - today.DayNumber;
+        var diffDays = feriado.Inicio.DayNumber - today.DayNumber;
         return JsonSerializer.Serialize(new
         {
             title = NotificationTemplates.Title,
-            body = NotificationTemplates.Body(diffDays, feriado.Nome, feriado.Data),
+            body = NotificationTemplates.Body(diffDays, feriado),
             url = NotificationTemplates.DefaultUrl
         });
     }

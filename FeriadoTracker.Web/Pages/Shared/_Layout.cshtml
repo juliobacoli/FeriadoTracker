@@ -19,6 +19,8 @@
         var titulo = ViewData["Title"] is string t && t.Length > 0 ? $"{t} | Qual o próximo feriado?" : "Qual o próximo feriado?";
         var descricao = ViewData["Description"] as string
             ?? "Quantos dias faltam para a sua próxima folga, quais feriados nacionais viram fim de semana prolongado e onde dá para emendar com ponte.";
+        // Legenda curta da prévia de link; a descrição longa fica para o Google.
+        var descricaoOg = ViewData["Description"] as string ?? "Quantos dias faltam para a sua próxima folga";
     }
     <title>@titulo</title>
     <meta name="description" content="@descricao" />
@@ -31,13 +33,13 @@
     <meta property="og:site_name" content="FeriadoTracker" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:title" content="@titulo" />
-    <meta property="og:description" content="@descricao" />
+    <meta property="og:description" content="@descricaoOg" />
     <meta property="og:url" content="@urlPagina" />
-    <meta property="og:image" content="@urlBase/og-image.png?v=1" />
+    <meta property="og:image" content="@urlBase/og-image.png?v=2" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Calendário com três dias seguidos destacados e o texto Qual o próximo feriado?" />
+    <meta property="og:image:alt" content="Ícone do app: calendário com três dias seguidos destacados em âmbar" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />

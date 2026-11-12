@@ -124,4 +124,17 @@ app.UseRateLimiter();
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
 app.MapControllers();
+
+// SEO: gerados por requisição para o endereço absoluto acompanhar o domínio em uso.
+app.MapGet("/robots.txt", (HttpContext contexto) => Results.Text(
+    $"User-agent: *\nAllow: /\n\nSitemap: https://{contexto.Request.Host}/sitemap.xml\n",
+    "text/plain"));
+
+app.MapGet("/sitemap.xml", (HttpContext contexto) => Results.Text(
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n" +
+    $"  <url><loc>https://{contexto.Request.Host}/</loc></url>\n" +
+    "</urlset>\n",
+    "application/xml"));
+
 app.Run();

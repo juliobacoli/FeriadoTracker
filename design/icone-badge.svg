@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="86 76 340 340">
+  <mask id="furos">
+    <rect x="86" y="76" width="340" height="340" fill="#fff"/>
+    <g fill="#000">
+      <rect x="131" y="222" width="52" height="44" rx="12"/><rect x="197" y="222" width="52" height="44" rx="12"/><rect x="263" y="222" width="52" height="44" rx="12"/><rect x="329" y="222" width="52" height="44" rx="12"/>
+      <rect x="131" y="280" width="52" height="44" rx="12"/>
+      <rect x="131" y="338" width="52" height="44" rx="12"/><rect x="197" y="338" width="52" height="44" rx="12"/><rect x="263" y="338" width="52" height="44" rx="12"/><rect x="329" y="338" width="52" height="44" rx="12"/>
+      <rect x="106" y="188" width="300" height="8"/>
+    </g>
+  </mask>
+  <g fill="#fff">
+    <rect x="172" y="92" width="24" height="60" rx="12"/>
+    <rect x="316" y="92" width="24" height="60" rx="12"/>
+    <rect x="106" y="124" width="300" height="288" rx="40" mask="url(#furos)"/>
+    <rect x="197" y="280" width="184" height="44" rx="12"/>
+  </g>
+</svg>

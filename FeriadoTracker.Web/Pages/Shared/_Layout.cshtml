@@ -22,6 +22,10 @@
     }
     <title>@titulo</title>
     <meta name="description" content="@descricao" />
+    @if (ViewData["NoIndex"] is true)
+    {
+        <meta name="robots" content="noindex" />
+    }
     <link rel="canonical" href="@urlPagina" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="FeriadoTracker" />

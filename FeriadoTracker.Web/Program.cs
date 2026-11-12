@@ -131,7 +131,7 @@ app.MapControllers();
 
 // SEO: o endereço absoluto vem de SITE_URL (ou do host da requisição quando não configurado).
 app.MapGet("/robots.txt", (HttpContext contexto) => Results.Text(
-    $"User-agent: *\nAllow: /\n\nSitemap: {contexto.Items["site-url"]}/sitemap.xml\n",
+    $"User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /health\n\nSitemap: {contexto.Items["site-url"]}/sitemap.xml\n",
     "text/plain"));
 
 app.MapGet("/sitemap.xml", (HttpContext contexto) => Results.Text(

@@ -15,7 +15,7 @@
     </script>
     <title>@(ViewData["Title"] is string titulo && titulo.Length > 0 ? $"{titulo} | " : "")Qual o próximo feriado?</title>
     @{
-        var urlBase = $"https://{Context.Request.Host}";
+        var urlBase = (string)Context.Items["site-url"]!;
         const string descricao = "Quantos dias faltam para a sua próxima folga, quais feriados nacionais viram fim de semana prolongado e onde dá para emendar com ponte.";
     }
     <meta name="description" content="@descricao" />

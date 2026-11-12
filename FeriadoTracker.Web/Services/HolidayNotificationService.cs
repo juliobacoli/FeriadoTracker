@@ -9,22 +9,34 @@ public class HolidayNotificationService(IServiceScopeFactory scopeFactory, TimeP
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        DateTimeOffset? ultimaExecucao = null;
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var nextRun = ComputeNextRun();
+
+            // ComputeNextRun inclui o instante exato das 8h. Se o serviço acordar nesse instante,
+            // ele devolveria o mesmo horário que acabou de rodar e reenviaria sem parar.
+            if (ultimaExecucao is { } ultima && nextRun <= ultima)
+            {
+                nextRun = ultima.AddDays(1);
+            }
+
             var delay = nextRun - time.GetLocalNow();
 
             if (delay > TimeSpan.Zero)
             {
                 try
                 {
-                    await Task.Delay(delay, stoppingToken);
+                    await Task.Delay(delay, time, stoppingToken);
                 }
                 catch (TaskCanceledException)
                 {
                     return;
                 }
             }
+
+            ultimaExecucao = nextRun;
 
             try
             {

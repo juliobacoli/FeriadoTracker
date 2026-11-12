@@ -106,4 +106,40 @@ public class HolidayServiceTests
 
         Assert.Equal(TimeSpan.FromHours(-3), provider.LocalTimeZone.BaseUtcOffset);
     }
+
+    [Fact]
+    public void BrazilTimeProvider_GetLocalNow_EstaTresHorasAtrasDoUtc()
+    {
+        var provider = new BrazilTimeProvider();
+
+        var local = provider.GetLocalNow();
+
+        Assert.Equal(TimeSpan.FromHours(-3), local.Offset);
+        Assert.Equal(provider.GetUtcNow().UtcDateTime, local.UtcDateTime, TimeSpan.FromSeconds(5));
+    }
+
+    // O serviço de notificações passou a usar Task.Delay(delay, time, ct). Em produção "time" é o
+    // BrazilTimeProvider: estes testes garantem que a espera e o cancelamento seguem funcionando com ele.
+    [Fact]
+    public async Task BrazilTimeProvider_TaskDelay_CompletaAposAEspera()
+    {
+        var provider = new BrazilTimeProvider();
+        var inicio = provider.GetTimestamp();
+
+        await Task.Delay(TimeSpan.FromMilliseconds(100), provider, CancellationToken.None);
+
+        Assert.True(provider.GetElapsedTime(inicio) >= TimeSpan.FromMilliseconds(90));
+    }
+
+    [Fact]
+    public async Task BrazilTimeProvider_TaskDelay_CancelaComTaskCanceledException()
+    {
+        var provider = new BrazilTimeProvider();
+        using var cts = new CancellationTokenSource();
+
+        var espera = Task.Delay(TimeSpan.FromHours(1), provider, cts.Token);
+        cts.Cancel();
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => espera);
+    }
 }

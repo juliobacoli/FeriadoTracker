@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.DataProtection;
@@ -142,3 +143,7 @@ app.MapGet("/sitemap.xml", (HttpContext contexto) => Results.Text(
     "application/xml"));
 
 app.Run();
+
+// Marca a classe Program (gerada pelas instruções de nível superior) para ficar fora da cobertura.
+[ExcludeFromCodeCoverage]
+partial class Program;

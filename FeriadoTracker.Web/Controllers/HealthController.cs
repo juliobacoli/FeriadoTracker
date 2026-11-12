@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace FeriadoTracker.Web.Controllers;
 
+[ExcludeFromCodeCoverage]
 [ApiController]
 [Route("health")]
 public class HealthController(HealthCheckService healthCheckService) : ControllerBase

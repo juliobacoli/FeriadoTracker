@@ -106,4 +106,15 @@ public class HolidayServiceTests
 
         Assert.Equal(TimeSpan.FromHours(-3), provider.LocalTimeZone.BaseUtcOffset);
     }
+
+    [Fact]
+    public void BrazilTimeProvider_GetLocalNow_EstaTresHorasAtrasDoUtc()
+    {
+        var provider = new BrazilTimeProvider();
+
+        var local = provider.GetLocalNow();
+
+        Assert.Equal(TimeSpan.FromHours(-3), local.Offset);
+        Assert.Equal(provider.GetUtcNow().UtcDateTime, local.UtcDateTime, TimeSpan.FromSeconds(5));
+    }
 }

@@ -147,17 +147,19 @@ public class HolidayNotificationServiceTests
         public int Disposed;
         public readonly List<CancellationToken> Tokens = [];
         public Exception? Throw;
+        public TaskCompletionSource? Bloqueio; // quando definido, o envio só termina depois que o teste liberar
     }
 
     // Registrado como scoped: o contêiner descarta (Dispose) a instância ao fechar o escopo.
     private sealed class FakeSender(SenderState state) : IHolidayPushSender, IDisposable
     {
-        public Task<PushSendResult> SendDailyAsync(CancellationToken cancellationToken = default)
+        public async Task<PushSendResult> SendDailyAsync(CancellationToken cancellationToken = default)
         {
             lock (state.Tokens) state.Tokens.Add(cancellationToken);
             Interlocked.Increment(ref state.Calls);
             if (state.Throw is { } erro) throw erro;
-            return Task.FromResult(new PushSendResult(1, 0, 0));
+            if (state.Bloqueio is { } bloqueio) await bloqueio.Task;
+            return new PushSendResult(1, 0, 0);
         }
 
         public void Dispose() => Interlocked.Increment(ref state.Disposed);
@@ -304,6 +306,76 @@ public class HolidayNotificationServiceTests
         await service.StopAsync(CancellationToken.None);
 
         Assert.Equal(2, state.Calls);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_TerminaDepoisDoEnvio_QuandoParadoDuranteOEnvio()
+    {
+        var tempo = TempoAs0759();
+        var state = new SenderState { Bloqueio = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously) };
+        var service = CreateServiceComSender(tempo, state, NullLogger<HolidayNotificationService>.Instance);
+
+        await service.StartAsync(CancellationToken.None);
+        await tempo.EsperarServicoAguardarAsync();
+        tempo.Avancar(TimeSpan.FromSeconds(61));
+        await EsperarAsync(() => Volatile.Read(ref state.Calls) >= 1, "envio em andamento");
+
+        var parada = service.StopAsync(CancellationToken.None); // pedem para parar com o envio ainda rodando
+        state.Bloqueio.SetResult();                              // o envio termina
+        await parada.WaitAsync(Limite);
+
+        Assert.True(service.ExecuteTask!.IsCompletedSuccessfully);
+        Assert.Equal(1, state.Calls); // terminou o envio e não começou outro
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_EnviaUmaVezSo_QuandoAcordaExatamenteAs8h()
+    {
+        var tempo = TempoAs0759();
+        var state = new SenderState();
+        var service = CreateServiceComSender(tempo, state, NullLogger<HolidayNotificationService>.Instance);
+
+        await service.StartAsync(CancellationToken.None);
+        await tempo.EsperarServicoAguardarAsync();
+        try
+        {
+            // 07:59 + 60 s = exatamente 08:00:00,000. Em Task.Run para que, se o laço
+            // descontrolar, o teste falhe por tempo em vez de travar.
+            var avanco = Task.Run(() => tempo.Avancar(TimeSpan.FromSeconds(60)));
+            await avanco.WaitAsync(Limite);
+
+            await tempo.EsperarServicoAguardarAsync(); // enviou e agendou o dia seguinte
+            await Task.Delay(100);
+
+            Assert.Equal(1, state.Calls);
+        }
+        finally
+        {
+            await service.StopAsync(CancellationToken.None);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_EnviaNaHoraEUmaVezSo_QuandoIniciaExatamenteAs8h()
+    {
+        var tempo = new TempoObservavel(new FakeTimeProvider(new DateTimeOffset(2026, 5, 1, 8, 0, 0, TimeSpan.Zero)));
+        var state = new SenderState();
+        var service = CreateServiceComSender(tempo, state, NullLogger<HolidayNotificationService>.Instance);
+
+        try
+        {
+            // Sem espera: envia na hora. Em Task.Run para que um laço descontrolado não trave o teste.
+            await Task.Run(() => service.StartAsync(CancellationToken.None)).WaitAsync(Limite);
+
+            await tempo.EsperarServicoAguardarAsync(); // agendou o dia seguinte
+            await Task.Delay(100);
+
+            Assert.Equal(1, state.Calls);
+        }
+        finally
+        {
+            await service.StopAsync(CancellationToken.None);
+        }
     }
 
     [Fact]

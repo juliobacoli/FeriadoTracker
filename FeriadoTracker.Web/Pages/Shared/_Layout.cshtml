@@ -13,19 +13,22 @@
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "uyihmukn30");
     </script>
-    <title>@(ViewData["Title"] is string titulo && titulo.Length > 0 ? $"{titulo} | " : "")Qual o próximo feriado?</title>
     @{
         var urlBase = (string)Context.Items["site-url"]!;
-        const string descricao = "Quantos dias faltam para a sua próxima folga, quais feriados nacionais viram fim de semana prolongado e onde dá para emendar com ponte.";
+        var urlPagina = $"{urlBase}{Context.Request.Path}";
+        var titulo = ViewData["Title"] is string t && t.Length > 0 ? $"{t} | Qual o próximo feriado?" : "Qual o próximo feriado?";
+        var descricao = ViewData["Description"] as string
+            ?? "Quantos dias faltam para a sua próxima folga, quais feriados nacionais viram fim de semana prolongado e onde dá para emendar com ponte.";
     }
+    <title>@titulo</title>
     <meta name="description" content="@descricao" />
-    <link rel="canonical" href="@urlBase@Context.Request.Path" />
+    <link rel="canonical" href="@urlPagina" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="FeriadoTracker" />
     <meta property="og:locale" content="pt_BR" />
-    <meta property="og:title" content="Qual o próximo feriado?" />
+    <meta property="og:title" content="@titulo" />
     <meta property="og:description" content="@descricao" />
-    <meta property="og:url" content="@urlBase/" />
+    <meta property="og:url" content="@urlPagina" />
     <meta property="og:image" content="@urlBase/icon-512.png" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />

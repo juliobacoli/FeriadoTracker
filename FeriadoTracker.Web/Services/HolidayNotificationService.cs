@@ -18,7 +18,7 @@ public class HolidayNotificationService(IServiceScopeFactory scopeFactory, TimeP
             {
                 try
                 {
-                    await Task.Delay(delay, stoppingToken);
+                    await Task.Delay(delay, time, stoppingToken);
                 }
                 catch (TaskCanceledException)
                 {

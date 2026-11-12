@@ -1,9 +1,11 @@
 #if DEBUG
+using System.Diagnostics.CodeAnalysis;
 using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FeriadoTracker.Web.Controllers;
 
+[ExcludeFromCodeCoverage]
 [ApiController]
 [Route("api/dev/push")]
 public class DevPushController(IHolidayPushSender sender) : ControllerBase

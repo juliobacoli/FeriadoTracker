@@ -24,6 +24,7 @@ public class IndexModel(IHolidayService service, TimeProvider timeProvider) : Pa
     public async Task OnGetAsync(CancellationToken ct)
     {
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
+        ViewData["Title"] = $"Feriados prolongados de {hoje.Year}";
         var analisados = await service.GetProximosFeriadosAnalisadosAsync(ct);
 
         Feriados = analisados.Select(a => FeriadoVisaoBuilder.Criar(a, hoje)).ToList();

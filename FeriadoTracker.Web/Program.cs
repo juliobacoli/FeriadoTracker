@@ -84,6 +84,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Endereço público do site (canonical, Open Graph, sitemap). Sem SITE_URL, usa o host da requisição.
+var siteUrl = app.Configuration["SITE_URL"]?.Trim().TrimEnd('/');
+
 // Headers de segurança
 app.Use(async (context, next) =>
 {
@@ -91,6 +94,7 @@ app.Use(async (context, next) =>
     System.Security.Cryptography.RandomNumberGenerator.Fill(nonceBytes);
     var nonce = Convert.ToBase64String(nonceBytes);
     context.Items["csp-nonce"] = nonce;
+    context.Items["site-url"] = string.IsNullOrEmpty(siteUrl) ? $"https://{context.Request.Host}" : siteUrl;
 
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
@@ -124,4 +128,17 @@ app.UseRateLimiter();
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
 app.MapControllers();
+
+// SEO: o endereço absoluto vem de SITE_URL (ou do host da requisição quando não configurado).
+app.MapGet("/robots.txt", (HttpContext contexto) => Results.Text(
+    $"User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /health\n\nSitemap: {contexto.Items["site-url"]}/sitemap.xml\n",
+    "text/plain"));
+
+app.MapGet("/sitemap.xml", (HttpContext contexto) => Results.Text(
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n" +
+    $"  <url><loc>{contexto.Items["site-url"]}/</loc></url>\n" +
+    "</urlset>\n",
+    "application/xml"));
+
 app.Run();

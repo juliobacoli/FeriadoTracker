@@ -40,6 +40,7 @@ A aplicação lê configuração de `appsettings.json` e do arquivo `.env` (em `
 | `WebPush__DaysAhead` | não | `5` | Janela em dias antes do feriado para notificar. |
 | `DB_PATH` | não | `<ContentRoot>/Data/feriados.db` | Caminho do arquivo SQLite. Em hosts efêmeros, aponte para um volume persistente. |
 | `DATA_PROTECTION_KEYS_PATH` | não | `<ContentRoot>/Data/keys` | Diretório onde as chaves do ASP.NET DataProtection serão persistidas. |
+| `SITE_URL` | não | `https://<host da requisição>` | Endereço público do site, sem barra final (ex.: `https://exemplo.com.br`). Usado em canonical, Open Graph, `robots.txt` e `sitemap.xml`. |
 
 ### Como rodar
 ```bash

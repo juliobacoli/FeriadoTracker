@@ -104,6 +104,22 @@ public class FeriadoVisaoTests
         Assert.Equal("Dia Nacional da Consciência Negra", analisados[0].Nome);
     }
 
+    [Theory]
+    [InlineData(null, "Nacional", false)]
+    [InlineData(32, "ES", true)]
+    [InlineData(3550308, "Municipal", true)]
+    [InlineData(29, "Regional", true)]
+    public void Selo_PorCodigoLocal(int? codigo, string selo, bool regional)
+    {
+        var analisado = FolgaCalculator.Analisar([new Feriado { Nome = "X", Data = new DateOnly(2027, 4, 21) }])[0]
+            with { CodigoLocal = codigo };
+
+        var v = FeriadoVisaoBuilder.Criar(analisado, new DateOnly(2027, 1, 1));
+
+        Assert.Equal(selo, v.Selo);
+        Assert.Equal(regional, v.Regional);
+    }
+
     [Fact]
     public void Quarta_FolgaIsoladaNoMeioDaSemana()
     {

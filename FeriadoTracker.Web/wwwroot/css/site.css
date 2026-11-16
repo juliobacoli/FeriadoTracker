@@ -150,9 +150,9 @@ a {
     justify-content: space-between;
     gap: 0.75rem;
     background: var(--paper);
-    /* O fundo vai de ponta a ponta da tela, embora o conteúdo siga a largura da página. */
-    box-shadow: 0 0 0 100vmax var(--paper);
-    clip-path: inset(0 -100vmax);
+    /* O fundo vai de ponta a ponta da tela, embora o conteúdo siga a largura da página.
+       border-image com outset não gera rolagem nem recorta o painel de locais que abre abaixo. */
+    border-image: linear-gradient(var(--paper), var(--paper)) fill 0 / 0 / 0 100vmax;
 }
 
 .brand {
@@ -1202,7 +1202,127 @@ html.dark .estrela-btn.is-hover svg {
     flex: none;
 }
 
+/* Topo, ao lado do tema: só indica os estados e cidades marcados.
+   A escolha é feita nas pílulas abaixo do lembrete. */
+.tools {
+    align-items: center;
+}
+
+.locais-indicador {
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    border: 2px solid var(--folga);
+    border-radius: var(--raio);
+    background: var(--surface);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pilulas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.pilula {
+    min-width: 4rem;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Selo do feriado na lista: âmbar no estadual/municipal, neutro no nacional. */
+.row:has(.selo) {
+    grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+}
+
+.selo {
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    background: var(--line);
+    font-size: var(--t-xs);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.selo.is-regional {
+    background: var(--folga-wash);
+    color: var(--ink);
+}
+
+/* Abaixo do lembrete: linha que abre as pílulas (mesma lista do topo). */
+.locais {
+    display: grid;
+    gap: 0.625rem;
+    margin: 0.75rem 0 0;
+    max-width: 26rem;
+}
+
+.locais[hidden],
+.pilulas[hidden] {
+    display: none;
+}
+
+.locais-toggle {
+    min-height: 3rem;
+    padding: 0 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--raio);
+    background: var(--surface);
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.locais-toggle svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+    transition: transform 0.15s ease;
+}
+
+.locais-toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+.pilula[aria-pressed="true"] {
+    border-color: var(--folga);
+    background: var(--folga);
+    color: var(--folga-ink);
+}
+
+.locais-status {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--t-xs);
+}
+
+@media (max-width: 479px) {
+    .brand {
+        font-size: var(--t-md);
+        max-width: 8rem;
+        line-height: 1.2;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .locais-toggle svg {
+        transition: none;
+    }
+
     .tool,
     .btn,
     .mono,

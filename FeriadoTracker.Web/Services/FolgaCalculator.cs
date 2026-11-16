@@ -18,6 +18,7 @@ public enum TipoFolga
 /// <param name="Fim">Último dia do feriado (difere de Inicio no Carnaval).</param>
 /// <param name="FolgaInicio">Início da sequência contínua de dias de folga que contém o feriado.</param>
 /// <param name="FolgaFim">Fim dessa sequência.</param>
+/// <param name="CodigoLocal">Código IBGE do município ou do estado do feriado; nulo nos nacionais.</param>
 /// <param name="DiasDeFolga">Tamanho da sequência; 0 quando o feriado cai no fim de semana.</param>
 /// <param name="Ponte">Dia útil que, emendado, liga a folga ao fim de semana.</param>
 /// <param name="DiasComPonte">Tamanho da folga contando a ponte; igual a DiasDeFolga sem ponte.</param>
@@ -30,7 +31,8 @@ public sealed record FeriadoAnalisado(
     DateOnly FolgaFim,
     int DiasDeFolga,
     DateOnly? Ponte,
-    int DiasComPonte);
+    int DiasComPonte,
+    int? CodigoLocal = null);
 
 /// <summary>
 /// Regra de folga e ponte. Dia de folga = sábado, domingo ou feriado.
@@ -59,7 +61,10 @@ public static class FolgaCalculator
                 fim = ordenados[i].Data;
             }
 
-            resultado.Add(Analisar(ordenados[i].Nome, inicio, fim, diasFeriado));
+            resultado.Add(Analisar(ordenados[i].Nome, inicio, fim, diasFeriado) with
+            {
+                CodigoLocal = ordenados[i].CodigoMunicipio ?? ordenados[i].CodigoUf
+            });
         }
 
         return resultado;

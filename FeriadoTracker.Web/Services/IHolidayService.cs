@@ -2,5 +2,7 @@ namespace FeriadoTracker.Web.Services;
 
 public interface IHolidayService
 {
-    Task<List<FeriadoAnalisado>> GetProximosFeriadosAnalisadosAsync(CancellationToken ct = default);
+    /// <param name="locais">Estados e cidades marcados; vazio ou nulo = só nacionais.</param>
+    Task<List<FeriadoAnalisado>> GetProximosFeriadosAnalisadosAsync(
+        IReadOnlyCollection<LocalLiberado>? locais = null, CancellationToken ct = default);
 }

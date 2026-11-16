@@ -21,11 +21,29 @@ public class IndexModel(IHolidayService service, TimeProvider timeProvider) : Pa
     /// <summary>Dias completos até o destaque (como o relógio do JS conta), para a primeira pintura.</summary>
     public int DiasAteDestaque { get; private set; }
 
+    /// <summary>Códigos IBGE vindos de ?local=32&amp;local=26; os fora da lista liberada são ignorados.</summary>
+    [BindProperty(SupportsGet = true, Name = "local")]
+    public int[] CodigosLocais { get; set; } = [];
+
+    /// <summary>Estados e cidades marcados; vazio = só nacionais.</summary>
+    public List<LocalLiberado> Locais { get; private set; } = [];
+
+    /// <summary>Título da lista: "Feriados nacionais", "Feriados no Espírito Santo" ou "... e de várias localidades".</summary>
+    public string TituloLista => Locais.Count switch
+    {
+        0 => "Feriados nacionais",
+        1 => $"Feriados {Locais[0].Local}",
+        _ => "Feriados nacionais e de várias localidades"
+    };
+
     public async Task OnGetAsync(CancellationToken ct)
     {
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
-        ViewData["Title"] = $"Feriados prolongados de {hoje.Year}";
-        var analisados = await service.GetProximosFeriadosAnalisadosAsync(ct);
+        Locais = LocaisLiberados.Filtrar(CodigosLocais);
+        ViewData["Title"] = Locais.Count == 1
+            ? $"Feriados {Locais[0].Local} em {hoje.Year}"
+            : $"Feriados prolongados de {hoje.Year}";
+        var analisados = await service.GetProximosFeriadosAnalisadosAsync(Locais, ct);
 
         Feriados = analisados.Select(a => FeriadoVisaoBuilder.Criar(a, hoje)).ToList();
 

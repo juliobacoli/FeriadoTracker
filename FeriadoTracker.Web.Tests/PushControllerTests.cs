@@ -285,4 +285,74 @@ public class PushControllerTests
             () => controller.Subscribe(new PushSubscriptionDto("https://push/a", "p", "a"), CancellationToken.None));
         Assert.Equal(2, interceptor.Tentativas);
     }
+
+    private static async Task<AppDbContext> ContextoComInscricao(string nome, params int[] codigos)
+    {
+        var ctx = CreateContext(nome);
+        var sub = new PushSubscription { Id = 1, Endpoint = "https://push/a", P256dh = "p", Auth = "a" };
+        sub.Locais.AddRange(codigos.Select(c => new PushSubscriptionLocal { Codigo = c }));
+        ctx.PushSubscriptions.Add(sub);
+        await ctx.SaveChangesAsync();
+        ctx.ChangeTracker.Clear();
+        return ctx;
+    }
+
+    [Fact]
+    public async Task AtualizarLocais_TrocaAListaInteira()
+    {
+        await using var ctx = await ContextoComInscricao(nameof(AtualizarLocais_TrocaAListaInteira), 32, 15, 26);
+        var controller = new PushController(ctx, Time(), BuildConfig());
+
+        var result = await controller.AtualizarLocais(new PushLocaisDto("https://push/a", [26, 3550308]), CancellationToken.None);
+
+        Assert.IsType<OkObjectResult>(result);
+        var codigos = await ctx.PushSubscriptionLocais.Select(l => l.Codigo).OrderBy(c => c).ToListAsync();
+        Assert.Equal([26, 3550308], codigos);
+    }
+
+    [Fact]
+    public async Task AtualizarLocais_ListaVaziaDeixaSoNacionais()
+    {
+        await using var ctx = await ContextoComInscricao(nameof(AtualizarLocais_ListaVaziaDeixaSoNacionais), 32);
+        var controller = new PushController(ctx, Time(), BuildConfig());
+
+        await controller.AtualizarLocais(new PushLocaisDto("https://push/a", []), CancellationToken.None);
+
+        Assert.Empty(await ctx.PushSubscriptionLocais.ToListAsync());
+        Assert.Equal(1, await ctx.PushSubscriptions.CountAsync());
+    }
+
+    [Fact]
+    public async Task AtualizarLocais_RecusaLocalNaoLiberado()
+    {
+        await using var ctx = await ContextoComInscricao(nameof(AtualizarLocais_RecusaLocalNaoLiberado), 32);
+        var controller = new PushController(ctx, Time(), BuildConfig());
+
+        var result = await controller.AtualizarLocais(new PushLocaisDto("https://push/a", [32, 29]), CancellationToken.None);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(32, Assert.Single(await ctx.PushSubscriptionLocais.ToListAsync()).Codigo);
+    }
+
+    [Fact]
+    public async Task AtualizarLocais_RetornaNotFoundSemInscricao()
+    {
+        await using var ctx = CreateContext(nameof(AtualizarLocais_RetornaNotFoundSemInscricao));
+        var controller = new PushController(ctx, Time(), BuildConfig());
+
+        var result = await controller.AtualizarLocais(new PushLocaisDto("https://push/x", [32]), CancellationToken.None);
+
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task AtualizarLocais_RetornaBadRequestSemEndpoint()
+    {
+        await using var ctx = CreateContext(nameof(AtualizarLocais_RetornaBadRequestSemEndpoint));
+        var controller = new PushController(ctx, Time(), BuildConfig());
+
+        var result = await controller.AtualizarLocais(new PushLocaisDto(" ", [32]), CancellationToken.None);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
 }

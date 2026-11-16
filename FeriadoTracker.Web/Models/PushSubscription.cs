@@ -19,4 +19,6 @@ public class PushSubscription
     public string Auth { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
+
+    public List<PushSubscriptionLocal> Locais { get; set; } = [];
 }

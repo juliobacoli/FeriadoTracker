@@ -371,4 +371,114 @@ public class HolidayPushSenderTests
     }
 
     #endregion
+
+    #region Estaduais
+
+    [Fact]
+    public async Task SendDailyAsync_EstadualSoChegaParaQuemMarcouAUf()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_EstadualSoChegaParaQuemMarcouAUf));
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Nossa Senhora da Penha", Data = new DateOnly(2027, 4, 5), Tipo = "Estadual", CodigoUf = 32, Uf = "ES" });
+        var comEs = MakeSub(1, "https://push/es");
+        comEs.Locais.Add(new PushSubscriptionLocal { Codigo = 32 });
+        ctx.PushSubscriptions.AddRange(comEs, MakeSub(2, "https://push/nacional"));
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 4, 3)));
+
+        var result = await sender.SendDailyAsync();
+
+        Assert.Equal(1, result.Sent);
+        var call = Assert.Single(client.Calls);
+        Assert.Equal("https://push/es", call.Endpoint);
+        using var json = System.Text.Json.JsonDocument.Parse(call.Payload);
+        Assert.Equal("Feriado no Espírito Santo se aproxima!", json.RootElement.GetProperty("title").GetString());
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_NacionalContinuaIgualParaQuemNaoMarcouOEstadoVizinho()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_NacionalContinuaIgualParaQuemNaoMarcouOEstadoVizinho));
+        // Segunda estadual (ES) e terça nacional: para o ES vira folga longa; para os outros, a terça pede ponte.
+        ctx.Feriados.AddRange(
+            new Feriado { Id = 1, Nome = "Estadual", Data = new DateOnly(2027, 4, 5), Tipo = "Estadual", CodigoUf = 32, Uf = "ES" },
+            new Feriado { Id = 2, Nome = "Nacional", Data = new DateOnly(2027, 4, 6), Tipo = "Nacional" });
+        var comEs = MakeSub(1, "https://push/es");
+        comEs.Locais.Add(new PushSubscriptionLocal { Codigo = 32 });
+        ctx.PushSubscriptions.AddRange(comEs, MakeSub(2, "https://push/nacional"));
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 4, 3)));
+
+        await sender.SendDailyAsync();
+
+        var nacionalSemEs = Assert.Single(client.Calls, c => c.Endpoint == "https://push/nacional");
+        var nacionalComEs = Assert.Single(client.Calls, c => c.Endpoint == "https://push/es" && c.Payload.Contains("Nacional"));
+        Assert.Equal(nacionalSemEs.Payload, nacionalComEs.Payload);
+        Assert.Equal(3, client.Calls.Count);
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_MunicipalNaoChegaParaQuemMarcouOEstado()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_MunicipalNaoChegaParaQuemMarcouOEstado));
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Aniversário de São Paulo", Data = new DateOnly(2027, 1, 25), Tipo = "Municipal", CodigoUf = 35, Uf = "SP", CodigoMunicipio = 3550308, Municipio = "São Paulo" });
+        var sub = MakeSub(1, "https://push/sp");
+        sub.Locais.Add(new PushSubscriptionLocal { Codigo = 35 });
+        ctx.PushSubscriptions.Add(sub);
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 1, 23)));
+
+        await sender.SendDailyAsync();
+
+        Assert.Empty(client.Calls);
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_MunicipalChegaParaQuemMarcouACidade()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_MunicipalChegaParaQuemMarcouACidade));
+        ctx.Feriados.AddRange(
+            new Feriado { Id = 1, Nome = "Aniversário de São Paulo", Data = new DateOnly(2027, 1, 25), Tipo = "Municipal", CodigoUf = 35, Uf = "SP", CodigoMunicipio = 3550308, Municipio = "São Paulo" },
+            new Feriado { Id = 2, Nome = "Revolução Constitucionalista", Data = new DateOnly(2027, 7, 9), Tipo = "Estadual", CodigoUf = 35, Uf = "SP" });
+        var cidade = MakeSub(1, "https://push/capital");
+        cidade.Locais.Add(new PushSubscriptionLocal { Codigo = 3550308 });
+        ctx.PushSubscriptions.Add(cidade);
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 1, 23)));
+
+        await sender.SendDailyAsync();
+
+        var call = Assert.Single(client.Calls);
+        using var json = System.Text.Json.JsonDocument.Parse(call.Payload);
+        Assert.Equal("Feriado na cidade de São Paulo se aproxima!", json.RootElement.GetProperty("title").GetString());
+    }
+
+    [Fact]
+    public async Task SendDailyAsync_EstadualNaoRepeteQuandoJaTemLog()
+    {
+        await using var ctx = CreateContext(nameof(SendDailyAsync_EstadualNaoRepeteQuandoJaTemLog));
+        ctx.Feriados.Add(new Feriado { Id = 1, Nome = "Dia de Santa Catarina", Data = new DateOnly(2027, 8, 15), Tipo = "Estadual", CodigoUf = 42, Uf = "SC" });
+        var sub = MakeSub(1, "https://push/sc");
+        sub.Locais.Add(new PushSubscriptionLocal { Codigo = 42 });
+        ctx.PushSubscriptions.Add(sub);
+        ctx.NotificationLogs.Add(new NotificationLog { SubscriptionId = 1, FeriadoId = 1, SentDate = new DateOnly(2027, 8, 13) });
+        await ctx.SaveChangesAsync();
+
+        var client = new FakePushClient();
+        var sender = BuildSender(ctx, client, FakeTime(new DateTime(2027, 8, 14)));
+
+        var result = await sender.SendDailyAsync();
+
+        Assert.Equal(1, result.Skipped);
+        Assert.Empty(client.Calls);
+    }
+
+    #endregion
 }

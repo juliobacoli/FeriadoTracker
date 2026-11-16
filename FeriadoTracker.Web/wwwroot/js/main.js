@@ -7,7 +7,8 @@ import { setupShareButton } from './share.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     iniciarRolagem();
-    setupPushButtons([document.getElementById('btnLembrete')]);
+    setupPushButtons([document.getElementById('btnLembrete')])
+        .catch(err => console.error('Falha ao configurar lembrete', err));
     setupAvaliacao();
 
     const section = document.getElementById('destaque');

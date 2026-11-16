@@ -76,7 +76,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
 }
 
 if (!app.Environment.IsDevelopment())
@@ -142,7 +142,7 @@ app.MapGet("/sitemap.xml", (HttpContext contexto) => Results.Text(
     "</urlset>\n",
     "application/xml"));
 
-app.Run();
+await app.RunAsync();
 
 // Marca a classe Program (gerada pelas instruções de nível superior) para ficar fora da cobertura.
 [ExcludeFromCodeCoverage]

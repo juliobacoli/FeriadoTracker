@@ -24,15 +24,31 @@ public class HolidayPushSender(
         var linhas = await GetFeriadosAsync(today, until, ct);
 
         // Um aviso por feriado (Carnaval são duas linhas), já com a regra de folga e ponte.
-        var feriados = FolgaCalculator.Analisar(linhas)
-            .Where(a => a.Fim >= today && a.Inicio <= until)
-            .Select(a => new FeriadoParaAviso(
-                a,
-                linhas.Where(l => l.Nome == a.Nome && l.Data >= a.Inicio && l.Data <= a.Fim)
-                    .OrderBy(l => l.Data)
-                    .Select(l => l.Id)
-                    .ToList()))
+        var feriados = MontarAvisos(linhas, linhas, today, until, local: null);
+
+        var subscriptions = await db.PushSubscriptions.Include(s => s.Locais).ToListAsync(ct);
+        if (subscriptions.Count == 0) return new PushSendResult(0, 0, 0);
+
+        // Estaduais e municipais: só dos locais marcados por algum aparelho. A folga conta os vizinhos
+        // (nacionais e, na cidade, os do estado), mas o cálculo fica separado por local
+        // para não mudar o aviso nacional de quem não marcou aquele local.
+        var locaisMarcados = subscriptions
+            .SelectMany(s => s.Locais)
+            .Select(l => LocaisLiberados.Buscar(l.Codigo))
+            .OfType<LocalLiberado>()
+            .Distinct()
             .ToList();
+
+        if (locaisMarcados.Count > 0)
+        {
+            var regionais = await GetRegionaisAsync(locaisMarcados.Select(l => l.CodigoUf).Distinct().ToList(), today, until, ct);
+            foreach (var local in locaisMarcados)
+            {
+                var alvo = regionais.Where(local.Inclui).ToList();
+                var vizinhos = regionais.Where(f => f.CodigoUf == local.CodigoUf && f.CodigoMunicipio == null);
+                feriados.AddRange(MontarAvisos(linhas.Concat(vizinhos).Union(alvo).ToList(), alvo, today, until, local));
+            }
+        }
 
         if (feriados.Count == 0)
         {
@@ -40,20 +56,17 @@ public class HolidayPushSender(
             return new PushSendResult(0, 0, 0);
         }
 
-        var subscriptions = await db.PushSubscriptions.ToListAsync(ct);
-        if (subscriptions.Count == 0) return new PushSendResult(0, 0, 0);
-
         var alreadySent = await GetAlreadySentAsync(feriados, subscriptions, ct);
 
         var toRemove = new List<PushSubscription>();
         var sent = 0;
         var skipped = 0;
 
-        foreach (var (feriado, ids) in feriados)
+        foreach (var (feriado, ids, local) in feriados)
         {
-            var payload = BuildPayload(feriado, today);
+            var payload = BuildPayload(feriado, today, local);
 
-            foreach (var sub in subscriptions)
+            foreach (var sub in subscriptions.Where(s => local is null || s.Locais.Exists(l => l.Codigo == local.Codigo)))
             {
                 // Qualquer dia do feriado já avisado conta (logs antigos eram por linha).
                 if (ids.Any(id => alreadySent.Contains((sub.Id, id))))
@@ -123,13 +136,40 @@ public class HolidayPushSender(
         return new SendSettings(daysAhead);
     }
 
-    private sealed record FeriadoParaAviso(FeriadoAnalisado Feriado, List<int> Ids);
+    /// <param name="Local">Nulo nos nacionais; nos estaduais e municipais, o local de quem recebe.</param>
+    private sealed record FeriadoParaAviso(FeriadoAnalisado Feriado, List<int> Ids, LocalLiberado? Local);
+
+    /// <summary>
+    /// Analisa <paramref name="todas"/> (o alvo mais os vizinhos que estendem a folga)
+    /// e devolve um aviso por feriado de <paramref name="alvo"/> dentro da janela.
+    /// </summary>
+    private static List<FeriadoParaAviso> MontarAvisos(
+        List<Feriado> todas, List<Feriado> alvo, DateOnly today, DateOnly until, LocalLiberado? local) =>
+        FolgaCalculator.Analisar(todas)
+            .Where(a => a.Fim >= today && a.Inicio <= until)
+            .Select(a => new FeriadoParaAviso(
+                a,
+                alvo.Where(l => l.Nome == a.Nome && l.Data >= a.Inicio && l.Data <= a.Fim)
+                    .OrderBy(l => l.Data)
+                    .Select(l => l.Id)
+                    .ToList(),
+                local))
+            .Where(f => f.Ids.Count > 0)
+            .ToList();
 
     // Uma semana de margem: feriados vizinhos estendem a folga e o Carnaval pode ter começado ontem.
     private Task<List<Feriado>> GetFeriadosAsync(DateOnly today, DateOnly until, CancellationToken ct) =>
         db.Feriados
             .AsNoTracking()
-            .Where(f => f.Data >= today.AddDays(-7) && f.Data <= until.AddDays(7))
+            .Where(f => f.CodigoUf == null && f.Data >= today.AddDays(-7) && f.Data <= until.AddDays(7))
+            .ToListAsync(ct);
+
+    private Task<List<Feriado>> GetRegionaisAsync(
+        List<int> codigosUf, DateOnly today, DateOnly until, CancellationToken ct) =>
+        db.Feriados
+            .AsNoTracking()
+            .Where(f => f.CodigoUf != null && codigosUf.Contains(f.CodigoUf.Value)
+                && f.Data >= today.AddDays(-7) && f.Data <= until.AddDays(7))
             .ToListAsync(ct);
 
     private async Task<HashSet<(int SubscriptionId, int FeriadoId)>> GetAlreadySentAsync(
@@ -149,12 +189,12 @@ public class HolidayPushSender(
         return rows.Select(x => (x.SubscriptionId, x.FeriadoId)).ToHashSet();
     }
 
-    private static string BuildPayload(FeriadoAnalisado feriado, DateOnly today)
+    private static string BuildPayload(FeriadoAnalisado feriado, DateOnly today, LocalLiberado? local)
     {
         var diffDays = feriado.Inicio.DayNumber - today.DayNumber;
         return JsonSerializer.Serialize(new
         {
-            title = NotificationTemplates.Title,
+            title = local is null ? NotificationTemplates.Title : NotificationTemplates.TitleRegional(local.Local),
             body = NotificationTemplates.Body(diffDays, feriado),
             url = NotificationTemplates.DefaultUrl
         });

@@ -17,7 +17,7 @@
     @if (Model.Destaque is { } d)
     {
         <section class="focus" id="destaque" aria-labelledby="focusName" data-proxima="@Model.IndiceDestaque">
-            <p class="kicker" id="focusKicker">Sua próxima folga</p>
+            <p class="kicker" id="focusKicker">Sua próxima folga@(Model.Locais.Count == 1 ? $" {Model.Locais[0].Local}" : "")</p>
             <h1 class="name" id="focusName" tabindex="-1">@d.Nome</h1>
             <p class="date" id="focusDate">@d.DataTexto</p>
 
@@ -50,6 +50,21 @@
                 <button class="link-btn" id="btnShare" type="button" hidden><span>Compartilhar</span></button>
             </div>
 
+            @* Abaixo do lembrete, só com o aviso ativo. Mesma lista do topo: vale para a lista de feriados e para o push. *@
+            <div class="locais" id="locaisPush" hidden>
+                <button class="locais-toggle" id="locaisToggle" type="button" aria-expanded="false" aria-controls="locaisPilulas">
+                    <span>Estados e cidades: @(Model.Locais.Count == 0 ? "só nacionais" : string.Join(", ", Model.Locais.Select(l => l.Rotulo)))</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="pilulas" id="locaisPilulas" role="group" aria-label="Estados e cidades com aviso" hidden>
+                    @foreach (var l in LocaisLiberados.Todos)
+                    {
+                        <button class="pilula" type="button" aria-pressed="@(Model.Locais.Contains(l) ? "true" : "false")" data-codigo="@l.Codigo"
+                                aria-label="@(l.EhMunicipio ? l.Nome : $"{l.Rotulo}, {l.Nome}")" title="@l.Nome">@l.Rotulo</button>
+                    }
+                </div>
+            </div>
+
             <p class="back" id="focusBack" hidden><button type="button">Voltar para a próxima folga</button></p>
         </section>
     }
@@ -63,7 +78,7 @@
     @if (Model.Feriados.Count > 0)
     {
         <section aria-labelledby="listTitle">
-            <h2 class="list-title" id="listTitle">Feriados nacionais</h2>
+            <h2 class="list-title" id="listTitle">@Model.TituloLista</h2>
             <p class="list-sub">@Model.PeriodoLista</p>
             @foreach (var ano in Model.Feriados.Select((f, i) => (f, i)).GroupBy(x => x.f.Ano))
             {
@@ -90,6 +105,10 @@
                                     data-tem-ponte="@(f.TemPonte ? "true" : "false")">
                                 <span class="row-date"><span class="row-day">@f.DiaLista</span><span class="row-mon">@f.MesLista</span></span>
                                 <span><span class="row-name">@f.Nome</span><span class="row-info">@f.ImpactoCurto</span></span>
+                                @if (Model.Locais.Count > 0)
+                                {
+                                    <span class="selo @(f.Regional ? "is-regional" : "")">@f.Selo</span>
+                                }
                             </button>
                             <template id="faixa-@i">@{ Faixa(f); }</template>
                         </li>

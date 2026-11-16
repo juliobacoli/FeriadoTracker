@@ -8,6 +8,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     public DbSet<Feriado> Feriados { get; set; }
     public DbSet<PushSubscription> PushSubscriptions { get; set; }
+    public DbSet<PushSubscriptionLocal> PushSubscriptionLocais { get; set; }
     public DbSet<NotificationLog> NotificationLogs { get; set; }
     public DbSet<Avaliacao> Avaliacoes { get; set; }
 
@@ -16,6 +17,15 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<PushSubscription>()
             .HasIndex(p => p.Endpoint)
             .IsUnique();
+
+        modelBuilder.Entity<PushSubscriptionLocal>()
+            .HasKey(l => new { l.SubscriptionId, l.Codigo });
+
+        modelBuilder.Entity<PushSubscription>()
+            .HasMany(p => p.Locais)
+            .WithOne()
+            .HasForeignKey(u => u.SubscriptionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<NotificationLog>()
             .HasIndex(n => new { n.SubscriptionId, n.FeriadoId })
@@ -60,7 +70,22 @@ public class AppDbContext : DbContext
             new Feriado { Id = 24, Nome = "Finados", Data = new DateOnly(2027, 11, 02), Tipo = "Nacional" },
             new Feriado { Id = 25, Nome = "Proclamação da República", Data = new DateOnly(2027, 11, 15), Tipo = "Nacional" },
             new Feriado { Id = 26, Nome = "Dia Nacional da Consciência Negra", Data = new DateOnly(2027, 11, 20), Tipo = "Nacional" },
-            new Feriado { Id = 27, Nome = "Natal", Data = new DateOnly(2027, 12, 25), Tipo = "Nacional" }
+            new Feriado { Id = 27, Nome = "Natal", Data = new DateOnly(2027, 12, 25), Tipo = "Nacional" },
+
+            // Estaduais de 2027: só os confirmados em lei ou decreto estadual. Os outros estados entram em levas.
+            // CodigoUf = código IBGE do estado (chave); Uf = sigla, só para exibição.
+            // Móvel: segunda-feira, 8 dias depois do domingo de Páscoa (28/03/2027).
+            new Feriado { Id = 28, Nome = "Nossa Senhora da Penha", Data = new DateOnly(2027, 04, 05), Tipo = "Estadual", CodigoUf = 32, Uf = "ES" },
+            new Feriado { Id = 29, Nome = "Adesão do Pará à Independência", Data = new DateOnly(2027, 08, 15), Tipo = "Estadual", CodigoUf = 15, Uf = "PA" },
+            new Feriado { Id = 30, Nome = "Revolução Pernambucana", Data = new DateOnly(2027, 03, 06), Tipo = "Estadual", CodigoUf = 26, Uf = "PE" },
+            // 11/08 cai numa quarta em 2027; a lei estadual transfere a comemoração para o domingo seguinte.
+            new Feriado { Id = 31, Nome = "Dia de Santa Catarina", Data = new DateOnly(2027, 08, 15), Tipo = "Estadual", CodigoUf = 42, Uf = "SC" },
+            // Lei estadual 9.497/1997.
+            new Feriado { Id = 32, Nome = "Revolução Constitucionalista", Data = new DateOnly(2027, 07, 09), Tipo = "Estadual", CodigoUf = 35, Uf = "SP" },
+
+            // Municipais: valem só na cidade indicada, nunca no estado inteiro. Fonte: feriados-brasil (municipal, codigo_ibge).
+            // Lei Municipal 14.485/2007.
+            new Feriado { Id = 33, Nome = "Aniversário de São Paulo", Data = new DateOnly(2027, 01, 25), Tipo = "Municipal", CodigoUf = 35, Uf = "SP", CodigoMunicipio = 3550308, Municipio = "São Paulo" }
         );
     }
 }

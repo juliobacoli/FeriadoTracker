@@ -20,7 +20,9 @@ public sealed record FeriadoVisao(
     bool FolgaLonga,
     string DiaLista,
     string MesLista,
-    IReadOnlyList<DiaFaixa> Faixa);
+    IReadOnlyList<DiaFaixa> Faixa,
+    string Selo,
+    bool Regional);
 
 public static class FeriadoVisaoBuilder
 {
@@ -46,8 +48,17 @@ public static class FeriadoVisaoBuilder
             a.DiasDeFolga >= 4,
             a.Fim > a.Inicio ? $"{a.Inicio.Day}–{a.Fim.Day}" : a.Inicio.Day.ToString(),
             PtBrFormat.MesCurto(a.Inicio),
-            Faixa(a));
+            Faixa(a),
+            Selo(a),
+            a.CodigoLocal is not null);
     }
+
+    /// <summary>"Nacional", a sigla do estado ou "Municipal".</summary>
+    private static string Selo(FeriadoAnalisado a) => a.CodigoLocal switch
+    {
+        null => "Nacional",
+        int codigo => LocaisLiberados.Buscar(codigo)?.Selo ?? "Regional"
+    };
 
     private static string DataTexto(FeriadoAnalisado a)
     {

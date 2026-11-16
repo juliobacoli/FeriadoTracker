@@ -10,7 +10,7 @@ namespace FeriadoTracker.Web.Dtos;
 /// </summary>
 public class AvaliacaoDto
 {
-    public int Estrelas { get; set; }
+    public required int Estrelas { get; set; }
 
     [ValidateNever]
     public string? Comentario { get; set; }

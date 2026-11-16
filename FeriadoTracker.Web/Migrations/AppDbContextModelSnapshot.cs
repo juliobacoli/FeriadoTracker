@@ -44,7 +44,17 @@ namespace FeriadoTracker.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("CodigoMunicipio")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CodigoUf")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateOnly>("Data")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Municipio")
+                        .HasMaxLength(60)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Nome")
@@ -55,6 +65,10 @@ namespace FeriadoTracker.Web.Migrations
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Uf")
+                        .HasMaxLength(2)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -250,6 +264,62 @@ namespace FeriadoTracker.Web.Migrations
                             Data = new DateOnly(2027, 12, 25),
                             Nome = "Natal",
                             Tipo = "Nacional"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            CodigoUf = 32,
+                            Data = new DateOnly(2027, 4, 5),
+                            Nome = "Nossa Senhora da Penha",
+                            Tipo = "Estadual",
+                            Uf = "ES"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            CodigoUf = 15,
+                            Data = new DateOnly(2027, 8, 15),
+                            Nome = "Adesão do Pará à Independência",
+                            Tipo = "Estadual",
+                            Uf = "PA"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            CodigoUf = 26,
+                            Data = new DateOnly(2027, 3, 6),
+                            Nome = "Revolução Pernambucana",
+                            Tipo = "Estadual",
+                            Uf = "PE"
+                        },
+                        new
+                        {
+                            Id = 31,
+                            CodigoUf = 42,
+                            Data = new DateOnly(2027, 8, 15),
+                            Nome = "Dia de Santa Catarina",
+                            Tipo = "Estadual",
+                            Uf = "SC"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            CodigoUf = 35,
+                            Data = new DateOnly(2027, 7, 9),
+                            Nome = "Revolução Constitucionalista",
+                            Tipo = "Estadual",
+                            Uf = "SP"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            CodigoMunicipio = 3550308,
+                            CodigoUf = 35,
+                            Data = new DateOnly(2027, 1, 25),
+                            Municipio = "São Paulo",
+                            Nome = "Aniversário de São Paulo",
+                            Tipo = "Municipal",
+                            Uf = "SP"
                         });
                 });
 
@@ -313,6 +383,19 @@ namespace FeriadoTracker.Web.Migrations
                     b.ToTable("PushSubscriptions");
                 });
 
+            modelBuilder.Entity("FeriadoTracker.Web.Models.PushSubscriptionLocal", b =>
+                {
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Codigo")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("SubscriptionId", "Codigo");
+
+                    b.ToTable("PushSubscriptionLocais");
+                });
+
             modelBuilder.Entity("FeriadoTracker.Web.Models.NotificationLog", b =>
                 {
                     b.HasOne("FeriadoTracker.Web.Models.Feriado", "Feriado")
@@ -330,6 +413,20 @@ namespace FeriadoTracker.Web.Migrations
                     b.Navigation("Feriado");
 
                     b.Navigation("Subscription");
+                });
+
+            modelBuilder.Entity("FeriadoTracker.Web.Models.PushSubscriptionLocal", b =>
+                {
+                    b.HasOne("FeriadoTracker.Web.Models.PushSubscription", null)
+                        .WithMany("Locais")
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FeriadoTracker.Web.Models.PushSubscription", b =>
+                {
+                    b.Navigation("Locais");
                 });
 #pragma warning restore 612, 618
         }

@@ -23,6 +23,60 @@ public class HolidayServiceTests
         return provider;
     }
 
+    private static async Task<HolidayService> ServicoComRegionais(string nome)
+    {
+        var ctx = CreateInMemoryContext(nome);
+        ctx.Feriados.AddRange(
+            new Feriado { Id = 1, Nome = "Nacional", Data = new DateOnly(2027, 4, 21), Tipo = "Nacional" },
+            new Feriado { Id = 2, Nome = "Penha", Data = new DateOnly(2027, 4, 5), Tipo = "Estadual", CodigoUf = 32, Uf = "ES" },
+            new Feriado { Id = 3, Nome = "Revolução", Data = new DateOnly(2027, 7, 9), Tipo = "Estadual", CodigoUf = 35, Uf = "SP" },
+            new Feriado { Id = 4, Nome = "Aniversário SP", Data = new DateOnly(2027, 1, 25), Tipo = "Municipal", CodigoUf = 35, Uf = "SP", CodigoMunicipio = 3550308, Municipio = "São Paulo" });
+        await ctx.SaveChangesAsync();
+        return new HolidayService(ctx, FakeTime(new DateTime(2027, 1, 1)));
+    }
+
+    [Fact]
+    public async Task SemLocal_SoNacionais()
+    {
+        var service = await ServicoComRegionais(nameof(SemLocal_SoNacionais));
+
+        var resultado = await service.GetProximosFeriadosAnalisadosAsync();
+
+        Assert.Equal(["Nacional"], resultado.Select(r => r.Nome));
+    }
+
+    [Fact]
+    public async Task ComEstado_NacionaisEEstaduaisDele_SemOutrosEstadosNemMunicipais()
+    {
+        var service = await ServicoComRegionais(nameof(ComEstado_NacionaisEEstaduaisDele_SemOutrosEstadosNemMunicipais));
+
+        var resultado = await service.GetProximosFeriadosAnalisadosAsync(LocaisLiberados.Filtrar([35]));
+
+        Assert.Equal(["Nacional", "Revolução"], resultado.Select(r => r.Nome));
+        Assert.Equal(35, resultado[1].CodigoLocal);
+    }
+
+    [Fact]
+    public async Task ComCidade_SoNacionaisEMunicipaisDela()
+    {
+        var service = await ServicoComRegionais(nameof(ComCidade_SoNacionaisEMunicipaisDela));
+
+        var resultado = await service.GetProximosFeriadosAnalisadosAsync(LocaisLiberados.Filtrar([3550308]));
+
+        Assert.Equal(["Aniversário SP", "Nacional"], resultado.Select(r => r.Nome));
+        Assert.Equal(3550308, resultado[0].CodigoLocal);
+    }
+
+    [Fact]
+    public async Task ComVariosLocais_JuntaTodos()
+    {
+        var service = await ServicoComRegionais(nameof(ComVariosLocais_JuntaTodos));
+
+        var resultado = await service.GetProximosFeriadosAnalisadosAsync(LocaisLiberados.Filtrar([32, 35, 3550308]));
+
+        Assert.Equal(["Aniversário SP", "Penha", "Nacional", "Revolução"], resultado.Select(r => r.Nome));
+    }
+
     [Fact]
     public async Task GetProximosFeriadosAnalisadosAsync_OrdenaPorDataERemovePassados()
     {
@@ -96,7 +150,7 @@ public class HolidayServiceTests
         var service = new HolidayService(ctx, FakeTime(new DateTime(2026, 5, 1)));
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => service.GetProximosFeriadosAnalisadosAsync(new CancellationToken(canceled: true)));
+            () => service.GetProximosFeriadosAnalisadosAsync(ct: new CancellationToken(canceled: true)));
     }
 
     [Fact]

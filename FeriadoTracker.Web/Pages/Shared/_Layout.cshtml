@@ -62,13 +62,22 @@
     </script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-    @RenderSection("Styles", required: false)
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
     <header class="topbar">
         <a class="brand" href="/">Qual o próximo feriado?</a>
         <div class="tools">
+            @{
+                var locaisAtuais = FeriadoTracker.Web.Services.LocaisLiberados.Filtrar(
+                    Context.Request.Query["local"].Select(v => int.TryParse(v, out var c) ? c : 0));
+            }
+            @* Só indica o que está marcado; a escolha é feita nas pílulas abaixo do lembrete. *@
+            <span class="locais-indicador" id="locaisResumo"
+                  aria-label="Estados e cidades: @(locaisAtuais.Count == 0 ? "só nacionais" : string.Join(", ", locaisAtuais.Select(l => l.Nome)))"
+                  data-codigos="@string.Join(",", FeriadoTracker.Web.Services.LocaisLiberados.Todos.Select(l => l.Codigo))"
+                  data-rotulos="@string.Join("|", FeriadoTracker.Web.Services.LocaisLiberados.Todos.Select(l => l.Rotulo))">@FeriadoTracker.Web.Services.LocaisLiberados.Resumo(locaisAtuais)</span>
             <button class="tool" id="themeToggle" type="button" aria-label="Tema escuro" aria-pressed="false">
                 <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -150,6 +159,33 @@
                 aplicar(escuro);
                 try { localStorage.setItem('theme', escuro ? 'dark' : 'light'); } catch (e) { }
             });
+        })();
+
+        // Estados e cidades marcados: lembrados no aparelho e levados para a página inicial.
+        (function () {
+            var resumo = document.getElementById('locaisResumo');
+            var validos = resumo.dataset.codigos.split(',');
+            var rotulos = resumo.dataset.rotulos.split('|');
+            var naUrl = new URLSearchParams(location.search).getAll('local')
+                .filter(function (c) { return validos.indexOf(c) >= 0; });
+
+            if (new URLSearchParams(location.search).has('local')) {
+                try { localStorage.setItem('locais', JSON.stringify(naUrl)); } catch (e) { }
+                return;
+            }
+
+            var salvos = [];
+            try {
+                var v = JSON.parse(localStorage.getItem('locais'));
+                if (Array.isArray(v)) salvos = v.filter(function (c) { return validos.indexOf(c) >= 0; });
+            } catch (e) { }
+            if (salvos.length === 0) return;
+
+            if (location.pathname === '/') {
+                location.replace('/?' + salvos.map(function (c) { return 'local=' + encodeURIComponent(c); }).join('&'));
+                return;
+            }
+            resumo.textContent = salvos.length === 1 ? rotulos[validos.indexOf(salvos[0])] : 'Várias localidades';
         })();
     </script>
 

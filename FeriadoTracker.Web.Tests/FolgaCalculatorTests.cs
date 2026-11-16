@@ -164,6 +164,29 @@ public class FolgaCalculatorTests
     {
         await using var ctx = await ContextoComSeed(nameof(Servico_Tem13FeriadosEm2027));
 
-        Assert.Equal(13, await ctx.Feriados.CountAsync(f => f.Data.Year == 2027));
+        Assert.Equal(13, await ctx.Feriados.CountAsync(f => f.Data.Year == 2027 && f.CodigoUf == null));
+    }
+
+    [Fact]
+    public async Task Servico_Tem5EstaduaisE1MunicipalEm2027_ForaDaListaNacional()
+    {
+        await using var ctx = await ContextoComSeed(nameof(Servico_Tem5EstaduaisE1MunicipalEm2027_ForaDaListaNacional));
+
+        Assert.Equal(5, await ctx.Feriados.CountAsync(f => f.Data.Year == 2027 && f.CodigoUf != null && f.CodigoMunicipio == null));
+        Assert.Equal(1, await ctx.Feriados.CountAsync(f => f.Data.Year == 2027 && f.CodigoMunicipio != null));
+
+        var analisados = await ServicoEm(ctx, new DateTime(2027, 4, 1)).GetProximosFeriadosAnalisadosAsync();
+
+        Assert.DoesNotContain(analisados, a => a.Nome == "Nossa Senhora da Penha");
+    }
+
+    [Fact]
+    public async Task Seed_SoTemRegionaisDeLocaisLiberados()
+    {
+        await using var ctx = await ContextoComSeed(nameof(Seed_SoTemRegionaisDeLocaisLiberados));
+
+        var regionais = await ctx.Feriados.Where(f => f.CodigoUf != null).ToListAsync();
+
+        Assert.All(regionais, f => Assert.Contains(LocaisLiberados.Todos, l => l.Inclui(f)));
     }
 }

@@ -3,6 +3,7 @@ import { showToast } from './toast.js';
 const VAPID_ENDPOINT = '/api/push/vapid-public-key';
 const SUBSCRIBE_ENDPOINT = '/api/push/subscribe';
 const UNSUBSCRIBE_ENDPOINT = '/api/push/unsubscribe';
+const LOCAIS_ENDPOINT = '/api/push/locais';
 
 function getAntiforgeryToken() {
     return document.querySelector('meta[name="request-verification-token"]')?.content ?? '';
@@ -117,6 +118,86 @@ async function unsubscribe() {
     await sub.unsubscribe();
 }
 
+function postJson(url, method, body) {
+    return fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getAntiforgeryToken() },
+        body: JSON.stringify(body)
+    });
+}
+
+const CHAVE_SINCRONIZADOS = 'locaisPush';
+
+/**
+ * Pílulas abaixo do lembrete: mesma lista do topo. Cada toque marca na hora, guarda no
+ * aparelho e envia ao push, sem recarregar (as pílulas seguem abertas para marcar várias).
+ * A lista de feriados é recarregada ao fechar as pílulas.
+ */
+function setupPilulas() {
+    const toggle = document.getElementById('locaisToggle');
+    const grupo = document.getElementById('locaisPilulas');
+    if (!toggle || !grupo) return;
+
+    const pilulas = [...grupo.querySelectorAll('.pilula')];
+    const resumoLinha = toggle.querySelector('span');
+    const resumoTopo = document.getElementById('locaisResumo');
+    let pendente = false;
+
+    const marcadas = () => pilulas.filter(p => p.getAttribute('aria-pressed') === 'true');
+    const urlDe = codigos => codigos.length ? '/?' + codigos.map(c => 'local=' + encodeURIComponent(c)).join('&') : '/';
+
+    toggle.addEventListener('click', () => {
+        const abrir = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+        grupo.hidden = !abrir;
+        if (!abrir && pendente) location.assign(urlDe(marcadas().map(p => p.dataset.codigo)));
+    });
+
+    pilulas.forEach(p => p.addEventListener('click', () => {
+        p.setAttribute('aria-pressed', p.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+
+        const m = marcadas();
+        const codigos = m.map(b => b.dataset.codigo);
+        const rotulos = m.map(b => b.textContent.trim());
+        try { localStorage.setItem('locais', JSON.stringify(codigos)); } catch { }
+        history.replaceState(null, '', urlDe(codigos));
+
+        if (resumoLinha) resumoLinha.textContent = `Estados e cidades: ${rotulos.length ? rotulos.join(', ') : 'só nacionais'}`;
+        if (resumoTopo) resumoTopo.textContent = rotulos.length === 0 ? 'Só nacionais' : rotulos.length === 1 ? rotulos[0] : 'Várias localidades';
+
+        pendente = true;
+        sincronizarLocais().catch(err => {
+            console.error('Falha ao salvar locais', err);
+            showToast('Não foi possível salvar. Tente novamente.', 'error');
+        });
+    }));
+}
+
+/** Estados e cidades marcados nas pílulas abaixo do lembrete (vêm da página). */
+function locaisMarcados() {
+    return [...document.querySelectorAll('#locaisPilulas .pilula[aria-pressed="true"]')]
+        .map(p => Number(p.dataset.codigo))
+        .sort((a, b) => a - b);
+}
+
+/**
+ * Leva ao servidor a lista do topo quando ela mudou desde o último envio deste aparelho.
+ * forcar: envia mesmo sem mudança (logo depois de ativar o lembrete).
+ */
+async function sincronizarLocais(forcar = false) {
+    const codigos = locaisMarcados();
+    const chave = JSON.stringify(codigos);
+    let ultimo = null;
+    try { ultimo = localStorage.getItem(CHAVE_SINCRONIZADOS); } catch { }
+    if (!forcar && ultimo === chave) return;
+
+    const sub = await getCurrentSubscription();
+    if (!sub) return;
+    const res = await postJson(LOCAIS_ENDPOINT, 'PUT', { endpoint: sub.endpoint, locais: codigos });
+    if (!res.ok) throw new Error('Falha ao salvar locais');
+    try { localStorage.setItem(CHAVE_SINCRONIZADOS, chave); } catch { }
+}
+
 /** Atualiza rótulo, ícone (via aria-pressed) e title de cada botão de lembrete. */
 function renderEstado(buttons, active) {
     buttons.forEach(button => {
@@ -132,6 +213,9 @@ function renderEstado(buttons, active) {
  * Todos compartilham o mesmo estado de inscrição.
  */
 export async function setupPushButtons(buttons) {
+    // Pílulas abaixo do lembrete: só aparecem com o aviso ativo (ver refresh).
+    setupPilulas();
+
     buttons = buttons.filter(Boolean);
     if (buttons.length === 0) return;
 
@@ -154,8 +238,15 @@ export async function setupPushButtons(buttons) {
         return;
     }
 
+
     async function refresh() {
-        renderEstado(buttons, !!(await getCurrentSubscription()));
+        const ativo = !!(await getCurrentSubscription());
+        renderEstado(buttons, ativo);
+        const locaisPush = document.getElementById('locaisPush');
+        if (locaisPush) locaisPush.hidden = !ativo;
+        if (ativo) {
+            await sincronizarLocais().catch(err => console.error('Falha ao sincronizar locais', err));
+        }
     }
 
     async function alternar() {
@@ -164,9 +255,11 @@ export async function setupPushButtons(buttons) {
             const sub = await getCurrentSubscription();
             if (sub) {
                 await unsubscribe();
+                try { localStorage.removeItem(CHAVE_SINCRONIZADOS); } catch { }
                 showToast('Lembretes desativados.', 'info');
             } else {
                 await subscribe();
+                await sincronizarLocais(true);
                 showToast('Lembretes ativados. Você recebe um aviso alguns dias antes de cada feriado.', 'success');
             }
             await refresh();

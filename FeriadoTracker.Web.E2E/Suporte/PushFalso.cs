@@ -17,9 +17,9 @@ public static class PushFalso
     /// <param name="respostaPermissao">O que requestPermission devolve.</param>
     /// <param name="locaisSincronizados">Valor inicial de localStorage.locaisPush (ex.: "[]"); null não grava.</param>
     public static Task InstalarAsync(IPage page, bool inscrito, string permissao = "granted",
-        string respostaPermissao = "granted", string? locaisSincronizados = "[]")
+        string respostaPermissao = "granted", string? locaisSincronizados = "[]", string endpoint = Endpoint)
     {
-        var cfg = JsonSerializer.Serialize(new { inscrito, permissao, respostaPermissao, locaisSincronizados, endpoint = Endpoint });
+        var cfg = JsonSerializer.Serialize(new { inscrito, permissao, respostaPermissao, locaisSincronizados, endpoint });
         return page.AddInitScriptAsync($"({Script})({cfg});");
     }
 

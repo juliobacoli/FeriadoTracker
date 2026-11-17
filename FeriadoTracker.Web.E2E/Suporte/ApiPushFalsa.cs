@@ -6,7 +6,7 @@ namespace FeriadoTracker.Web.E2E.Suporte;
 
 /// <summary>
 /// Responde /api/push/* no lugar do servidor e guarda cada chamada, na ordem.
-/// Isola o front: o rate limit do servidor é global e travaria testes seguidos.
+/// Isola o front: todos os testes saem do mesmo IP e esgotariam a cota do servidor.
 /// </summary>
 public sealed class ApiPushFalsa
 {
@@ -35,6 +35,15 @@ public sealed class ApiPushFalsa
     /// <summary>Faz o caminho (ex.: "/api/push/subscribe") responder com este status.</summary>
     public void Responder(string caminho, int status) => _status[caminho] = status;
 
+    /// <summary>Respostas uma a uma, na ordem; depois que acabam, volta ao status normal do caminho.</summary>
+    public void ResponderEmSequencia(string caminho, params int[] statusEmOrdem) =>
+        _sequencias[caminho] = new Queue<int>(statusEmOrdem);
+
+    /// <summary>Segundos enviados no Retry-After das respostas 429.</summary>
+    public int RetryAfterSegundos { get; set; } = 1;
+
+    private readonly Dictionary<string, Queue<int>> _sequencias = [];
+
     /// <summary>Segura a resposta do caminho por este tempo.</summary>
     public void Atrasar(string caminho, int ms) => _atrasoMs[caminho] = ms;
 
@@ -51,10 +60,17 @@ public sealed class ApiPushFalsa
 
             if (api._atrasoMs.TryGetValue(caminho, out var atraso)) await Task.Delay(atraso);
 
-            var status = api._status.GetValueOrDefault(caminho, 200);
+            int status;
+            lock (api._sequencias)
+                status = api._sequencias.TryGetValue(caminho, out var fila) && fila.Count > 0
+                    ? fila.Dequeue()
+                    : api._status.GetValueOrDefault(caminho, 200);
             var json = caminho.EndsWith("vapid-public-key") ? JsonSerializer.Serialize(new { publicKey = ChaveVapid }) : "{}";
+            var cabecalhos = status == 429
+                ? new Dictionary<string, string> { ["Retry-After"] = api.RetryAfterSegundos.ToString() }
+                : new Dictionary<string, string>();
             chamada.Fim = api._relogio.ElapsedMilliseconds;
-            await route.FulfillAsync(new() { Status = status, ContentType = "application/json", Body = json });
+            await route.FulfillAsync(new() { Status = status, ContentType = "application/json", Body = json, Headers = cabecalhos });
         });
         return api;
     }

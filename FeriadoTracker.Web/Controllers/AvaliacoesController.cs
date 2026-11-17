@@ -1,6 +1,7 @@
 using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Dtos;
 using FeriadoTracker.Web.Models;
+using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Text;
@@ -9,7 +10,7 @@ namespace FeriadoTracker.Web.Controllers;
 
 [ApiController]
 [Route("api/avaliacoes")]
-[EnableRateLimiting("avaliacao")]
+[EnableRateLimiting(LimitesDeUso.Avaliacao)]
 public class AvaliacoesController(AppDbContext db, TimeProvider time) : ControllerBase
 {
     public const int ComentarioMaximo = 500;

@@ -154,6 +154,13 @@ function setupPilulas() {
         clearTimeout(timer);
         timer = null;
         fila = fila.then(() => sincronizarLocais()).catch(err => {
+            if (err.message === 'rate-limited') {
+                // A lista já está no aparelho: tenta de novo sozinho quando o servidor liberar,
+                // a não ser que um toque novo já tenha agendado outro envio.
+                showToast('Muitas alterações seguidas. Vamos salvar em instantes.', 'info');
+                if (!timer) timer = setTimeout(enviar, err.esperaMs);
+                return;
+            }
             console.error('Falha ao salvar locais', err);
             showToast('Não foi possível salvar. Tente novamente.', 'error');
         });
@@ -209,6 +216,13 @@ async function sincronizarLocais(forcar = false) {
     const sub = await getCurrentSubscription();
     if (!sub) return;
     const res = await postJson(LOCAIS_ENDPOINT, 'PUT', { endpoint: sub.endpoint, locais: codigos });
+    if (res.status === 429) {
+        // Retry-After vem em segundos; sem ele (ou com valor estranho), espera 10 s. Nunca mais de 1 min.
+        const segundos = Number(res.headers.get('Retry-After'));
+        const erro = new Error('rate-limited');
+        erro.esperaMs = Math.min(60, segundos > 0 ? segundos : 10) * 1000;
+        throw erro;
+    }
     if (!res.ok) throw new Error('Falha ao salvar locais');
     try { localStorage.setItem(CHAVE_SINCRONIZADOS, chave); } catch { }
 }

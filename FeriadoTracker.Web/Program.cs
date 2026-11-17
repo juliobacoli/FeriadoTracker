@@ -2,9 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using FeriadoTracker.Web.Data;
 using FeriadoTracker.Web.Services;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.RateLimiting;
 
 if (args.Length > 0 && args[0] == "generate-vapid-keys")
 {
@@ -24,25 +22,7 @@ builder.Services.AddAntiforgery();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>();
 
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddFixedWindowLimiter("push", o =>
-    {
-        o.PermitLimit = 10;
-        o.Window = TimeSpan.FromMinutes(1);
-        o.QueueLimit = 0;
-    });
-
-    // Limite global (a aplicação não lê cabeçalhos de proxy, então não dá para separar por visitante).
-    // Folgado de propósito: quem já avaliou não vê o formulário de novo, então o uso normal é de um envio por pessoa.
-    options.AddFixedWindowLimiter("avaliacao", o =>
-    {
-        o.PermitLimit = 20;
-        o.Window = TimeSpan.FromMinutes(1);
-        o.QueueLimit = 0;
-    });
-});
+builder.Services.AddLimitesDeUso(builder.Configuration);
 
 var dbPath = builder.Configuration["DB_PATH"]
     ?? Path.Combine(builder.Environment.ContentRootPath, "Data", "feriados.db");
@@ -78,6 +58,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
 }
+
+// Primeiro de tudo: troca o IP do proxy pelo do visitante (ver LimitesDeUso), antes dos limites lerem o IP.
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {

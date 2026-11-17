@@ -377,3 +377,6 @@ FodyWeavers.xsd
 # Testes E2E: a regra *.e2e acima casa com a pasta do projeto (core.ignorecase no Windows)
 !FeriadoTracker.Web.E2E/
 FeriadoTracker.Web.E2E/TestResults/
+
+# Análise local do SonarQube (dotnet-sonarscanner)
+.sonarqube/

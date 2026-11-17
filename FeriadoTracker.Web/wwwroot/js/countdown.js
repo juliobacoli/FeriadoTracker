@@ -55,6 +55,8 @@ export function createCountdown(section) {
         note: section.querySelector('#focusNote')
     };
     const tituloOriginal = document.title;
+    // Texto do servidor: com uma localidade marcada, já vem com ela ("Sua próxima folga no Espírito Santo").
+    const kickerProxima = el.kicker.textContent.trim() || 'Sua próxima folga';
 
     // Relógio da linha de baixo: montado uma vez; a cada segundo só os números mudam.
     const relogio = { raiz: document.createDocumentFragment(), numeros: [] };
@@ -136,7 +138,8 @@ export function createCountdown(section) {
             const noFeriado = agora < alvo.fimFeriado;
             const ultimoDia = iso(agora) === alvo.folgaFimIso && !alvo.fimDeSemana;
             return {
-                chave: noFeriado ? 'hoje' : 'folga',
+                // O último dia tem chave própria: com a página aberta na virada, a nota troca para "Aproveite o dia.".
+                chave: noFeriado ? 'hoje' : ultimoDia ? 'folga-ultimo' : 'folga',
                 emFolga: true,
                 etiqueta: noFeriado ? 'Hoje é feriado' : 'Você está de folga',
                 nota: ultimoDia ? 'Aproveite o dia.' : alvo.nota,
@@ -181,7 +184,7 @@ export function createCountdown(section) {
             el.note.hidden = !e.nota;
 
             el.kicker.textContent = !alvo.proxima ? 'Feriado escolhido'
-                : e.emFolga ? 'Sua folga começou' : 'Sua próxima folga';
+                : e.emFolga ? 'Sua folga começou' : kickerProxima;
             document.body.classList.toggle('is-holiday', !!e.emFolga);
             document.title = e.titulo;
             marcarHoje(agora);

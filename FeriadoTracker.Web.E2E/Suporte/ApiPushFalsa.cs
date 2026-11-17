@@ -6,7 +6,7 @@ namespace FeriadoTracker.Web.E2E.Suporte;
 
 /// <summary>
 /// Responde /api/push/* no lugar do servidor e guarda cada chamada, na ordem.
-/// Isola o front: o rate limit do servidor é global e travaria testes seguidos.
+/// Isola o front: todos os testes saem do mesmo IP e esgotariam a cota do servidor.
 /// </summary>
 public sealed class ApiPushFalsa
 {

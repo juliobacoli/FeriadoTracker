@@ -38,6 +38,6 @@ internal sealed class SiteDeTeste(IReadOnlyDictionary<string, string>? configura
     {
         await base.DisposeAsync();
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-        try { Directory.Delete(_pastaDados, recursive: true); } catch (IOException) { }
+        try { Directory.Delete(_pastaDados, recursive: true); } catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }
 }

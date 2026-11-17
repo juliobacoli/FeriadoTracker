@@ -37,31 +37,73 @@ public class PilulasTests(AppFixture app) : E2ETest(app)
         Assert.Equal(PushFalso.Endpoint, put.Corpo!.Value.GetProperty("endpoint").GetString());
     }
 
-    [Fact(DisplayName = "1.2 Fechar as pílulas antes de 800 ms envia o PUT antes do reload")]
-    public async Task FecharAntesDoDebounceEnviaAntesDoReload()
+    [Fact(DisplayName = "1.2 Fechar as pílulas antes de 800 ms envia o PUT na hora e troca a lista, sem recarregar")]
+    public async Task FecharAntesDoDebounceEnviaNaHora()
     {
         var api = await AbrirInscritoAsync();
-        var ordem = new List<string>();
-        Page.Request += (_, r) =>
-        {
-            lock (ordem)
-            {
-                if (r.Method == "PUT" && r.Url.EndsWith("/api/push/locais")) ordem.Add("PUT");
-                else if (r.IsNavigationRequest) ordem.Add("reload");
-            }
-        };
+        var navegacoes = 0;
+        Page.Request += (_, r) => { if (r.IsNavigationRequest) Interlocked.Increment(ref navegacoes); };
 
         await Toggle.ClickAsync();
+        var fechou = DateTime.UtcNow;
         await Pilula("ES").ClickAsync();
-        // A URL já é /?local=32 antes do reload (replaceState): espera a navegação em si.
-        var reload = Page.WaitForRequestAsync(r => r.IsNavigationRequest);
         await Toggle.ClickAsync(); // fecha logo em seguida, bem antes dos 800 ms
-        Assert.EndsWith("/?local=32", (await reload).Url);
-        await Page.WaitForLoadStateAsync();
-        await Expect(Toggle).ToBeVisibleAsync();
+
+        await api.EsperarAsync(a => a.Puts.Count == 1, 600);
+        Assert.True(DateTime.UtcNow - fechou < TimeSpan.FromMilliseconds(800), "O PUT esperou o debounce em vez de sair ao fechar.");
+        await Expect(Page.Locator("#listTitle")).ToHaveTextAsync("Feriados no Espírito Santo");
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
 
         Assert.Equal([32], ApiPushFalsa.Locais(Assert.Single(api.Puts)));
-        lock (ordem) Assert.Equal(["PUT", "reload"], ordem.Take(2));
+        Assert.Equal(0, navegacoes);
+    }
+
+    [Fact(DisplayName = "1.11 Marcar e desmarcar troca a lista e o destaque na hora, sem recarregar")]
+    public async Task ListaAcompanhaAsPilulas()
+    {
+        await AbrirInscritoAsync();
+        var navegacoes = 0;
+        Page.Request += (_, r) => { if (r.IsNavigationRequest) Interlocked.Increment(ref navegacoes); };
+        await Expect(Page.Locator("#listTitle")).ToHaveTextAsync("Feriados nacionais");
+        await Toggle.ClickAsync();
+
+        await Pilula("SP").ClickAsync();
+
+        await Expect(Page.Locator("#listTitle")).ToHaveTextAsync("Feriados no estado de São Paulo");
+        await Expect(Page.Locator("#focusKicker")).ToHaveTextAsync("Sua próxima folga no estado de São Paulo");
+        await Expect(Page.Locator("#lista .selo").First).ToBeVisibleAsync();
+        await Expect(Page.Locator("#locaisPilulas")).ToBeVisibleAsync(); // as pílulas continuam abertas
+
+        // As linhas novas respondem ao clique: o destaque é religado à lista nova.
+        var linha = Page.Locator("#lista .row[data-indice]:not(.is-weekend)").Last;
+        var nome = await linha.GetAttributeAsync("data-nome");
+        await linha.ClickAsync();
+        await Expect(Page.Locator("#focusName")).ToHaveTextAsync(nome!);
+
+        await Pilula("SP").ClickAsync();
+
+        await Expect(Page.Locator("#listTitle")).ToHaveTextAsync("Feriados nacionais");
+        await Expect(Page.Locator("#focusKicker")).ToHaveTextAsync("Sua próxima folga");
+        await Expect(Page.Locator("#lista .selo")).ToHaveCountAsync(0);
+        await Expect(Page.Locator("#focusBack")).ToBeHiddenAsync();
+        Assert.Equal(0, navegacoes);
+    }
+
+    [Fact(DisplayName = "1.12 Se a lista não puder ser trocada, fechar as pílulas recarrega a página")]
+    public async Task ListaComFalhaRecarregaAoFechar()
+    {
+        await AbrirInscritoAsync();
+        await Page.RouteAsync(url => url.Contains("handler=Lista"), r => r.FulfillAsync(new() { Status = 500 }));
+        await Toggle.ClickAsync();
+
+        var pedidoLista = Page.WaitForResponseAsync(r => r.Url.Contains("handler=Lista"));
+        await Pilula("PE").ClickAsync();
+        await pedidoLista;
+
+        var reload = Page.WaitForRequestAsync(r => r.IsNavigationRequest);
+        await Toggle.ClickAsync();
+        Assert.EndsWith("/?local=26", (await reload).Url);
+        await Expect(Page.Locator("#listTitle")).ToHaveTextAsync("Feriados em Pernambuco");
     }
 
     [Fact(DisplayName = "1.3 Cada toque marca na hora: pílula, URL, resumos e localStorage")]

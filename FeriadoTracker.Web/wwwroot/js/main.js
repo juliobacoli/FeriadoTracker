@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
         countdown
     });
     countdown.start();
+    document.addEventListener('lista-atualizada', e => destaque.recarregar(e.detail.proxima, e.detail.kicker));
 
     const shareBtn = document.getElementById('btnShare');
     if (shareBtn) {

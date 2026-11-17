@@ -1,3 +1,4 @@
+import { atualizarLista } from './lista.js';
 import { showToast } from './toast.js';
 
 const VAPID_ENDPOINT = '/api/push/vapid-public-key';
@@ -167,13 +168,33 @@ function setupPilulas() {
         return fila;
     };
 
+    // A lista acompanha as pílulas sem recarregar; se a troca falhar, recarrega ao fechar.
+    let timerLista = null;
+    let listaFalhou = false;
+    let ultimaLista = Promise.resolve();
+    const trocarLista = () => {
+        clearTimeout(timerLista);
+        timerLista = null;
+        ultimaLista = atualizarLista(marcadas().map(p => p.dataset.codigo)).then(
+            () => { listaFalhou = false; },
+            err => {
+                console.error('Falha ao atualizar a lista', err);
+                listaFalhou = true;
+            });
+        return ultimaLista;
+    };
+
     toggle.addEventListener('click', () => {
         const abrir = toggle.getAttribute('aria-expanded') !== 'true';
         toggle.setAttribute('aria-expanded', abrir ? 'true' : 'false');
         grupo.hidden = !abrir;
         if (!abrir && pendente) {
+            pendente = false;
+            if (timer) enviar();
             const destino = urlDe(marcadas().map(p => p.dataset.codigo));
-            (timer ? enviar() : fila).finally(() => location.assign(destino));
+            (timerLista ? trocarLista() : ultimaLista).then(() => {
+                if (listaFalhou) fila.finally(() => location.assign(destino));
+            });
         }
     });
 
@@ -192,6 +213,9 @@ function setupPilulas() {
         pendente = true;
         clearTimeout(timer);
         timer = setTimeout(enviar, 800);
+        // A lista troca mais rápido que o envio: é o que a pessoa está olhando.
+        clearTimeout(timerLista);
+        timerLista = setTimeout(trocarLista, 400);
     }));
 }
 

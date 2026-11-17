@@ -56,7 +56,8 @@ export function createCountdown(section) {
     };
     const tituloOriginal = document.title;
     // Texto do servidor: com uma localidade marcada, já vem com ela ("Sua próxima folga no Espírito Santo").
-    const kickerProxima = el.kicker.textContent.trim() || 'Sua próxima folga';
+    // Muda quando as pílulas trocam a lista (api.kickerProxima).
+    const kickerInicial = el.kicker.textContent.trim() || 'Sua próxima folga';
 
     // Relógio da linha de baixo: montado uma vez; a cada segundo só os números mudam.
     const relogio = { raiz: document.createDocumentFragment(), numeros: [] };
@@ -184,7 +185,7 @@ export function createCountdown(section) {
             el.note.hidden = !e.nota;
 
             el.kicker.textContent = !alvo.proxima ? 'Feriado escolhido'
-                : e.emFolga ? 'Sua folga começou' : kickerProxima;
+                : e.emFolga ? 'Sua folga começou' : api.kickerProxima;
             document.body.classList.toggle('is-holiday', !!e.emFolga);
             document.title = e.titulo;
             marcarHoje(agora);
@@ -197,7 +198,10 @@ export function createCountdown(section) {
         intervalo = setInterval(render, 1000);
     }
 
-    /** aoPassar: chamado quando a próxima folga acabou; devolve true se trocou o alvo. */
-    const api = { definir, start, aoPassar: null };
+    /**
+     * aoPassar: chamado quando a próxima folga acabou; devolve true se trocou o alvo.
+     * kickerProxima: texto acima do nome quando o destaque é a próxima folga.
+     */
+    const api = { definir, start, aoPassar: null, kickerProxima: kickerInicial };
     return api;
 }

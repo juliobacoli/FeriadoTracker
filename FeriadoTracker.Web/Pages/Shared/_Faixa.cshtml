@@ -1,0 +1,6 @@
+@model FeriadoTracker.Web.Services.FeriadoVisao
+@* Faixa de dias em volta do feriado: usada no destaque e nos templates da lista. *@
+@foreach (var dia in Model.Faixa)
+{
+    <li class="@dia.Classe" data-iso="@dia.Iso"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span><span class="sr-only">@dia.Rotulo</span></li>
+}

@@ -129,9 +129,10 @@ function postJson(url, method, body) {
 const CHAVE_SINCRONIZADOS = 'locaisPush';
 
 /**
- * Pílulas abaixo do lembrete: mesma lista do topo. Cada toque marca na hora, guarda no
- * aparelho e envia ao push, sem recarregar (as pílulas seguem abertas para marcar várias).
- * A lista de feriados é recarregada ao fechar as pílulas.
+ * Pílulas abaixo do lembrete: mesma lista do topo. Cada toque marca na hora e guarda no
+ * aparelho, sem recarregar (as pílulas seguem abertas para marcar várias). O push recebe
+ * a lista 800 ms depois do último toque, num único envio. Ao fechar as pílulas, o envio
+ * pendente sai na hora e a lista de feriados é recarregada.
  */
 function setupPilulas() {
     const toggle = document.getElementById('locaisToggle');
@@ -142,15 +143,31 @@ function setupPilulas() {
     const resumoLinha = toggle.querySelector('span');
     const resumoTopo = document.getElementById('locaisResumo');
     let pendente = false;
+    let timer = null;
+    // Um envio por vez: toques seguidos viram um único PUT, sem pedidos em paralelo.
+    let fila = Promise.resolve();
 
     const marcadas = () => pilulas.filter(p => p.getAttribute('aria-pressed') === 'true');
     const urlDe = codigos => codigos.length ? '/?' + codigos.map(c => 'local=' + encodeURIComponent(c)).join('&') : '/';
+
+    const enviar = () => {
+        clearTimeout(timer);
+        timer = null;
+        fila = fila.then(() => sincronizarLocais()).catch(err => {
+            console.error('Falha ao salvar locais', err);
+            showToast('Não foi possível salvar. Tente novamente.', 'error');
+        });
+        return fila;
+    };
 
     toggle.addEventListener('click', () => {
         const abrir = toggle.getAttribute('aria-expanded') !== 'true';
         toggle.setAttribute('aria-expanded', abrir ? 'true' : 'false');
         grupo.hidden = !abrir;
-        if (!abrir && pendente) location.assign(urlDe(marcadas().map(p => p.dataset.codigo)));
+        if (!abrir && pendente) {
+            const destino = urlDe(marcadas().map(p => p.dataset.codigo));
+            (timer ? enviar() : fila).finally(() => location.assign(destino));
+        }
     });
 
     pilulas.forEach(p => p.addEventListener('click', () => {
@@ -166,10 +183,8 @@ function setupPilulas() {
         if (resumoTopo) resumoTopo.textContent = rotulos.length === 0 ? 'Só nacionais' : rotulos.length === 1 ? rotulos[0] : 'Várias localidades';
 
         pendente = true;
-        sincronizarLocais().catch(err => {
-            console.error('Falha ao salvar locais', err);
-            showToast('Não foi possível salvar. Tente novamente.', 'error');
-        });
+        clearTimeout(timer);
+        timer = setTimeout(enviar, 800);
     }));
 }
 

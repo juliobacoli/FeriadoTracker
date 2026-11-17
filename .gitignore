@@ -373,3 +373,7 @@ FodyWeavers.xsd
 
 # DataProtection keys (geradas localmente)
 **/Data/keys/
+
+# Testes E2E: a regra *.e2e acima casa com a pasta do projeto (core.ignorecase no Windows)
+!FeriadoTracker.Web.E2E/
+FeriadoTracker.Web.E2E/TestResults/

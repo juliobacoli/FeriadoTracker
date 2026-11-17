@@ -10,7 +10,7 @@ namespace FeriadoTracker.Web.Controllers;
 
 [ApiController]
 [Route("api/push")]
-[EnableRateLimiting("push")]
+[EnableRateLimiting(LimitesDeUso.Push)]
 public class PushController(AppDbContext db, TimeProvider time, IConfiguration config) : ControllerBase
 {
     [HttpGet("vapid-public-key")]
@@ -73,6 +73,8 @@ public class PushController(AppDbContext db, TimeProvider time, IConfiguration c
     /// <summary>Troca a lista inteira de estados e cidades do aparelho. Lista vazia = só nacionais.</summary>
     [HttpPut("locais")]
     [ValidateAntiForgeryToken]
+    // Cota própria e mais folgada: cada toque nas pílulas pode virar um PUT.
+    [EnableRateLimiting(LimitesDeUso.Locais)]
     public async Task<IActionResult> AtualizarLocais([FromBody] PushLocaisDto dto, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(dto.Endpoint) || dto.Locais is null)

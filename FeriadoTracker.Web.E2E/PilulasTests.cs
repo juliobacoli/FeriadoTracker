@@ -142,6 +142,24 @@ public class PilulasTests(AppFixture app) : E2ETest(app)
         await Expect(Page.Locator(".toast-error")).ToHaveTextAsync("Não foi possível salvar. Tente novamente.");
     }
 
+    [Fact(DisplayName = "1.10 PUT recusado por limite (429): avisa e tenta de novo sozinho após o Retry-After")]
+    public async Task LimiteTentaDeNovo()
+    {
+        var api = await AbrirInscritoAsync();
+        api.ResponderEmSequencia("/api/push/locais", 429);
+        api.RetryAfterSegundos = 1;
+        await Toggle.ClickAsync();
+
+        await Pilula("PE").ClickAsync();
+
+        await Expect(Page.Locator(".toast-info")).ToHaveTextAsync("Muitas alterações seguidas. Vamos salvar em instantes.");
+        await api.EsperarAsync(a => a.Puts.Count == 2, 5000);
+        Assert.Equal([26], ApiPushFalsa.Locais(api.Puts[1]));
+        Assert.True(api.Puts[1].Inicio - api.Puts[0].Fim >= 900, "A nova tentativa saiu antes do Retry-After.");
+        await Expect(Page.Locator(".toast-error")).ToHaveCountAsync(0);
+        await Page.WaitForFunctionAsync("() => localStorage.getItem('locaisPush') === '[26]'");
+    }
+
     [Fact(DisplayName = "1.6 Ao carregar com lista diferente da sincronizada, envia o PUT")]
     public async Task CarregarComListaNovaSincroniza()
     {

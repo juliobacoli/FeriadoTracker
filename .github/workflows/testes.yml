@@ -1,0 +1,76 @@
+name: Testes
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: testes-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  unidade:
+    name: Unidade
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Testes de unidade
+        run: dotnet test FeriadoTracker.Web.Tests --logger "trx;LogFileName=unidade.trx"
+
+      - name: Resultado
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unidade
+          path: FeriadoTracker.Web.Tests/TestResults/
+          retention-days: 7
+
+  e2e:
+    name: E2E (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        run: dotnet build FeriadoTracker.Web.E2E
+
+      - name: Instala o navegador
+        run: pwsh FeriadoTracker.Web.E2E/bin/Debug/net10.0/playwright.ps1 install --with-deps ${{ matrix.browser }}
+
+      # O teste de carga fica de fora: sem CARGA_URL ele é ignorado, e aqui não há site para medir.
+      - name: Testes E2E
+        run: dotnet test FeriadoTracker.Web.E2E --no-build --filter "Categoria!=Carga"
+
+      # Print, trace e vídeo de cada teste que falhou (ver E2ETest).
+      - name: Artefatos das falhas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ matrix.browser }}
+          path: FeriadoTracker.Web.E2E/TestResults/
+          retention-days: 7

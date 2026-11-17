@@ -1,0 +1,79 @@
+name: Sonar
+
+# Análise no SonarQube Cloud a cada merge no master e em cada PR (o resultado aparece no próprio PR).
+# Precisa do segredo SONAR_TOKEN no repositório; sem ele (ex.: PR vindo de fork) a análise é pulada.
+on:
+  push:
+    branches: [master]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: sonar-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  SONAR_ORGANIZATION: juliobacoli
+  SONAR_PROJECT_KEY: juliobacoli_FeriadoTracker
+
+jobs:
+  sonar:
+    name: Análise
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Sem SONAR_TOKEN, nada a fazer
+        if: env.SONAR_TOKEN == ''
+        run: echo "::notice::Segredo SONAR_TOKEN ausente; análise pulada."
+
+      - uses: actions/checkout@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          fetch-depth: 0 # histórico completo: o Sonar usa o blame para saber o que é código novo
+
+      - uses: actions/setup-java@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - uses: actions/setup-dotnet@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Instala o scanner
+        if: env.SONAR_TOKEN != ''
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Início da análise
+        if: env.SONAR_TOKEN != ''
+        run: >
+          dotnet sonarscanner begin
+          /k:"${{ env.SONAR_PROJECT_KEY }}"
+          /o:"${{ env.SONAR_ORGANIZATION }}"
+          /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.token="${{ env.SONAR_TOKEN }}"
+          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+      - name: Build
+        if: env.SONAR_TOKEN != ''
+        run: dotnet build FeriadoTracker.sln --no-incremental
+
+      # Cobertura vem dos testes de unidade; os E2E rodam no workflow Testes.
+      - name: Testes de unidade com cobertura
+        if: env.SONAR_TOKEN != ''
+        run: dotnet test FeriadoTracker.Web.Tests --no-build --collect "XPlat Code Coverage;Format=opencover"
+
+      - name: Fim da análise
+        if: env.SONAR_TOKEN != ''
+        run: dotnet sonarscanner end /d:sonar.token="${{ env.SONAR_TOKEN }}"

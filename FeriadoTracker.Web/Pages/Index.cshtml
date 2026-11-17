@@ -2,22 +2,11 @@
 @using FeriadoTracker.Web.Services
 @model FeriadoTracker.Web.Pages.IndexModel
 
-@{
-    // Faixa de dias em volta do feriado: usada no destaque e nos templates da lista.
-    void Faixa(FeriadoVisao feriado)
-    {
-        foreach (var dia in feriado.Faixa)
-        {
-            <li class="@dia.Classe" data-iso="@dia.Iso"><span class="wd" aria-hidden="true">@dia.DiaSemana</span><span class="dn" aria-hidden="true">@dia.Dia</span><span class="sr-only">@dia.Rotulo</span></li>
-        }
-    }
-}
-
 <div class="page">
     @if (Model.Destaque is { } d)
     {
         <section class="focus" id="destaque" aria-labelledby="focusName" data-proxima="@Model.IndiceDestaque">
-            <p class="kicker" id="focusKicker">Sua próxima folga@(Model.Locais.Count == 1 ? $" {Model.Locais[0].Local}" : "")</p>
+            <p class="kicker" id="focusKicker">@Model.KickerProxima</p>
             <h1 class="name" id="focusName" tabindex="-1">@d.Nome</h1>
             <p class="date" id="focusDate">@d.DataTexto</p>
 
@@ -29,7 +18,7 @@
 
             <figure class="strip">
                 <ol class="strip-days" id="focusStrip" aria-label="Dias em volta do feriado">
-                    @{ Faixa(d); }
+                    <partial name="_Faixa" model="d" />
                 </ol>
                 <figcaption>
                     <p class="impact @(d.Tipo == TipoFolga.Prolongado ? "is-long" : "")" id="focusImpact">@d.Impacto</p>
@@ -75,48 +64,7 @@
         </section>
     }
 
-    @if (Model.Feriados.Count > 0)
-    {
-        <section aria-labelledby="listTitle">
-            <h2 class="list-title" id="listTitle">@Model.TituloLista</h2>
-            <p class="list-sub">@Model.PeriodoLista</p>
-            @foreach (var ano in Model.Feriados.Select((f, i) => (f, i)).GroupBy(x => x.f.Ano))
-            {
-                <h3 class="year">@ano.Key</h3>
-                <ul class="rows">
-                    @foreach (var (f, i) in ano)
-                    {
-                        var classe = f.Tipo == TipoFolga.FimDeSemana ? "row is-weekend"
-                            : f.FolgaLonga ? "row is-long"
-                            : "row";
-
-                        <li>
-                            @* Os data-* levam ao destaque tudo o que ele mostra deste feriado. *@
-                            <button type="button" class="@classe" aria-pressed="@(i == Model.IndiceDestaque ? "true" : "false")"
-                                    data-indice="@i"
-                                    data-nome="@f.Nome"
-                                    data-tipo="@f.Tipo"
-                                    data-inicio-iso="@f.InicioIso"
-                                    data-fim-iso="@f.FimIso"
-                                    data-folga-fim-iso="@f.FolgaFimIso"
-                                    data-data-texto="@f.DataTexto"
-                                    data-impacto="@f.Impacto"
-                                    data-nota-no-dia="@f.NotaNoDia"
-                                    data-tem-ponte="@(f.TemPonte ? "true" : "false")">
-                                <span class="row-date"><span class="row-day">@f.DiaLista</span><span class="row-mon">@f.MesLista</span></span>
-                                <span><span class="row-name">@f.Nome</span><span class="row-info">@f.ImpactoCurto</span></span>
-                                @if (Model.Locais.Count > 0)
-                                {
-                                    <span class="selo @(f.Regional ? "is-regional" : "")">@f.Selo</span>
-                                }
-                            </button>
-                            <template id="faixa-@i">@{ Faixa(f); }</template>
-                        </li>
-                    }
-                </ul>
-            }
-        </section>
-    }
+    <partial name="_ListaFeriados" model="Model" />
 </div>
 
 <partial name="_Avaliacao" />

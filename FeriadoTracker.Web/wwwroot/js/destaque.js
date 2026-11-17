@@ -16,7 +16,8 @@ export function setupDestaque({ section, proxima, countdown }) {
         legendaPonte: section.querySelector('#legendPonte'),
         voltar: section.querySelector('#focusBack')
     };
-    const linhas = [...document.querySelectorAll('.row[data-indice]')];
+    // Muda quando as pílulas trocam a lista (recarregar).
+    let linhas = [];
     const linha = indice => linhas.find(l => Number(l.dataset.indice) === indice);
     const empilhado = window.matchMedia('(max-width: 959px)');
 
@@ -69,51 +70,67 @@ export function setupDestaque({ section, proxima, countdown }) {
         el.nome.focus({ preventScroll: true });
     }
 
-    linhas.forEach(l => {
-        // detail é 0 quando o clique vem do teclado (Enter/Espaço).
-        l.addEventListener('click', e => {
-            mostrar(Number(l.dataset.indice), e.detail > 0);
-            focarDestaque();
-        });
-    });
-
     el.voltar.querySelector('button').addEventListener('click', e => {
         mostrar(proxima, e.detail > 0);
         focarDestaque();
     });
 
     // Desktop: passar o mouse numa linha mostra a contagem viva daquele feriado, sem trocar o destaque.
-    if (window.matchMedia('(hover: hover)').matches) {
-        const vivo = document.createElement('span');
-        vivo.className = 'row-live';
-        vivo.setAttribute('aria-hidden', 'true');
-        const p2 = n => String(n).padStart(2, '0');
-        let timer = null;
+    const comHover = window.matchMedia('(hover: hover)').matches;
+    const vivo = document.createElement('span');
+    vivo.className = 'row-live';
+    vivo.setAttribute('aria-hidden', 'true');
+    const p2 = n => String(n).padStart(2, '0');
+    let timerVivo = null;
 
-        function pintar(l) {
-            const [a, m, d] = l.dataset.inicioIso.split('-').map(Number);
-            const s = Math.floor((new Date(a, m - 1, d) - Date.now()) / 1000);
-            vivo.textContent = s > 0
-                ? `${Math.floor(s / 86400)}d ${p2(Math.floor(s % 86400 / 3600))}h ${p2(Math.floor(s % 3600 / 60))}min ${p2(s % 60)}s`
-                : '';
-        }
+    function pintar(l) {
+        const [a, m, d] = l.dataset.inicioIso.split('-').map(Number);
+        const s = Math.floor((new Date(a, m - 1, d) - Date.now()) / 1000);
+        vivo.textContent = s > 0
+            ? `${Math.floor(s / 86400)}d ${p2(Math.floor(s % 86400 / 3600))}h ${p2(Math.floor(s % 3600 / 60))}min ${p2(s % 60)}s`
+            : '';
+    }
 
+    function pararVivo() {
+        clearInterval(timerVivo);
+        vivo.remove();
+    }
+
+    /** Liga as linhas da lista atual; as antigas saem do DOM junto com os seus eventos. */
+    function ligarLinhas() {
+        linhas = [...document.querySelectorAll('.row[data-indice]')];
         linhas.forEach(l => {
+            // detail é 0 quando o clique vem do teclado (Enter/Espaço).
+            l.addEventListener('click', e => {
+                mostrar(Number(l.dataset.indice), e.detail > 0);
+                focarDestaque();
+            });
+            if (!comHover) return;
             l.addEventListener('mouseenter', () => {
-                clearInterval(timer);
+                clearInterval(timerVivo);
                 pintar(l);
                 l.appendChild(vivo);
-                timer = setInterval(() => pintar(l), 1000);
+                timerVivo = setInterval(() => pintar(l), 1000);
             });
-            l.addEventListener('mouseleave', () => {
-                clearInterval(timer);
-                vivo.remove();
-            });
+            l.addEventListener('mouseleave', pararVivo);
         });
     }
 
+    /** Nova lista (pílulas): o destaque volta para a próxima folga dela, sem tirar o foco das pílulas. */
+    function recarregar(novaProxima, kicker) {
+        pararVivo();
+        const nomeAntes = linha(atual)?.dataset.nome;
+        ligarLinhas();
+        if (!linha(novaProxima)) return;
+
+        proxima = novaProxima;
+        countdown.kickerProxima = kicker;
+        mostrar(proxima, linha(proxima).dataset.nome !== nomeAntes);
+    }
+
+    ligarLinhas();
     countdown.aoPassar = avancar;
     countdown.definir(linha(proxima).dataset, true);
 
-    return { atual: () => linha(atual).dataset };
+    return { atual: () => linha(atual).dataset, recarregar };
 }

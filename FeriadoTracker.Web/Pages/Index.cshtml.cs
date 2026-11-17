@@ -36,6 +36,16 @@ public class IndexModel(IHolidayService service, TimeProvider timeProvider) : Pa
         _ => "Feriados nacionais e de várias localidades"
     };
 
+    /// <summary>Texto acima do nome do destaque: "Sua próxima folga" ou "Sua próxima folga no Espírito Santo".</summary>
+    public string KickerProxima => Locais.Count == 1 ? $"Sua próxima folga {Locais[0].Local}" : "Sua próxima folga";
+
+    /// <summary>Só a lista (_ListaFeriados), para as pílulas trocarem os locais sem recarregar a página.</summary>
+    public async Task<PartialViewResult> OnGetListaAsync(CancellationToken ct)
+    {
+        await OnGetAsync(ct);
+        return Partial("_ListaFeriados", this);
+    }
+
     public async Task OnGetAsync(CancellationToken ct)
     {
         var hoje = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);

@@ -10,11 +10,14 @@ namespace FeriadoTracker.Web.E2E;
 /// </summary>
 public abstract class E2ETest(AppFixture app) : IAsyncLifetime
 {
-    internal static readonly string PastaRaiz = Path.Combine(
+    /// <summary>TestResults dentro da pasta do projeto: e2e/ (prints, vídeos, traces) e carga/ (relatórios do NBomber).</summary>
+    internal static readonly string PastaResultados = Path.Combine(
         typeof(E2ETest).Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyMetadataAttribute), false)
             .Cast<System.Reflection.AssemblyMetadataAttribute>()
             .First(a => a.Key == "PastaDoProjeto").Value!,
-        "TestResults", "e2e");
+        "TestResults");
+
+    internal static readonly string PastaRaiz = Path.Combine(PastaResultados, "e2e");
     private readonly string _pastaVideoTemp = Path.Combine(Path.GetTempPath(), "feriadotracker-e2e-video-" + Guid.NewGuid().ToString("N"));
 
     protected AppFixture App { get; } = app;
